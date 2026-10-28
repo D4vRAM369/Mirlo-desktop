@@ -1,3 +1,7 @@
+<p align="center">
+  <img src="app-icon.png" width="128" height="128" alt="Icono de XVault: un cajón de fichero azul con un post en modo oscuro y un mirlo posado encima">
+</p>
+
 # XVault
 
 Bóveda local para posts de X (Twitter). Pegas el enlace de un post y XVault guarda en tu disco el texto, el autor, la fecha y todos sus archivos: fotos a resolución original, vídeos, GIF (como MP4) y documentos enlazados (PDF, DOCX…).

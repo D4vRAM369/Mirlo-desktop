@@ -129,3 +129,12 @@ Resuelto con FxTwitter como fuente extra solo del texto (Decisión 6). Si FxTwit
 
 - **Causa:** el vigilante de `tauri dev` recompiló en los segundos entre el cambio de `externalBin` y la descarga del binario con el nombre nuevo: `resource path binaries/xvault-yt-dlp-… doesn't exist`.
 - **Solución:** ninguna en el código; volver a lanzar `npm run tauri dev` cuando el binario ya está.
+
+## Error: icono pixelado en la barra de tareas (Linux)
+
+- **Síntoma:** el icono nuevo se veía pixelado en el dock y la barra de tareas.
+- **Diagnóstico:** `xprop -id <ventana> _NET_WM_ICON` mostraba un icono de 32×32: el dock lo ampliaba a 48–64 px.
+- **Causa:** Tauri usa como icono de ventana el **primer PNG** de `bundle.icon`, y la lista (copiada de ThreadsVault) empezaba por `icons/32x32.png`.
+- **Primer intento fallido:** poner primero `icons/icon.png` (512×512). La ventana se quedó **sin icono**: en X11 el icono viaja como píxeles sin comprimir (512×512×4 = 1 MB) y GTK lo descarta sin avisar.
+- **Solución:** primero `icons/128x128@2x.png` (256×256, 256 KB). Verificado con `xprop`: 256×256.
+- **Lección:** el icono de ventana debe ser grande, pero no tanto que no quepa en una propiedad de X11; 256 px es el punto dulce.
