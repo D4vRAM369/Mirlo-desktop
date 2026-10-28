@@ -19,4 +19,4 @@ Decisión 9 en `02_ARQUITECTURA.md`: CSS propio, fuente local, alt text con migr
 
 ## 4. Siguiente
 
-Fase 5: empaquetado con yt-dlp como sidecar y `docs/BACKPORT-THREADSVAULT.md`.
+Fase 5: empaquetado con yt-dlp como sidecar y plan para llevar el extractor a ThreadsVault.

@@ -4,8 +4,8 @@
 
 ## 1. Resumen para situarse
 
-- **Qué se ha construido:** paquetes instalables (.deb, .rpm, AppImage) con yt-dlp dentro, workflows de CI y release, README y el plan para llevar las mejoras a ThreadsVault.
-- **Dónde está:** `scripts/fetch-yt-dlp.mjs`, `src-tauri/tauri.conf.json` (`externalBin`), `.github/workflows/`, `README.md`, `docs/BACKPORT-THREADSVAULT.md`.
+- **Qué se ha construido:** paquetes instalables (.deb, .rpm, AppImage) con yt-dlp dentro, workflows de CI y release, README y el plan (local) para llevar las mejoras a ThreadsVault.
+- **Dónde está:** `scripts/fetch-yt-dlp.mjs`, `src-tauri/tauri.conf.json` (`externalBin`), `.github/workflows/`, `README.md`.
 - **Estado final:** 32 tests y 6 pruebas en vivo en verde (incluida la del respaldo de vídeo con yt-dlp, pendiente desde la fase 2), clippy, svelte-check y actionlint sin avisos, `npm run tauri build` genera los 3 paquetes.
 
 ## 2. Flujo del empaquetado

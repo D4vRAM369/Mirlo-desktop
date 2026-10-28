@@ -40,7 +40,7 @@ El panel del navegador integrado es estrecho, así que se usan capturas headless
 cd src-tauri && cargo test live_save -- --ignored     # guarda 5 posts reales en target/test-tmp/live
 ```
 
-Después: servidor estático con CORS sobre `target/test-tmp/live` (`scripts/review-server.py`, puerto 4318, config `vault-files` en `.claude/launch.json`), un `_mock.js` que simula `window.__TAURI_INTERNALS__` y `target/test-tmp/review.html?row=1&theme=dark&lightbox=1`, capturado con:
+Después: servidor estático con CORS sobre `target/test-tmp/live` (`python3 -I scripts/review-server.py 4318 src-tauri/target/test-tmp/live`), un `_mock.js` que simula `window.__TAURI_INTERNALS__` y `target/test-tmp/review.html?row=1&theme=dark&lightbox=1`, capturado con:
 
 ```bash
 chromium --headless=new --window-size=1280,840 --virtual-time-budget=6000 --screenshot=out.png "http://localhost:1420/src-tauri/target/test-tmp/review.html?row=1"
@@ -64,3 +64,20 @@ Antes de subir cambios a los workflows:
 ```bash
 actionlint             # revisa .github/workflows/*.yml (instalado con: go install github.com/rhysd/actionlint/cmd/actionlint@v1.7.12)
 ```
+
+
+## Quitar datos personales del historial de Git
+
+Solo si es imprescindible (reescribe todos los commits; cualquier clon anterior queda desincronizado).
+
+```bash
+uv tool install git-filter-repo==2.47.0
+git clone --mirror . /ruta/temporal/copia.git          # copia de seguridad ANTES de nada
+# reglas: un texto por línea, "literal:" o "regex:", con ==> para el reemplazo
+git filter-repo --force --replace-text reglas.txt
+git log --all -S "texto-a-quitar" --oneline             # debe salir vacío
+git remote add origin https://github.com/<usuario>/<repo>.git   # filter-repo quita el remoto a propósito
+git push --force-with-lease=master:<commit-que-tenía-GitHub> origin master
+```
+
+`--force-with-lease` solo sobrescribe si GitHub sigue en el commit que conoces: evita pisar cambios ajenos.

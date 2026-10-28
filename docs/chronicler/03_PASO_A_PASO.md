@@ -151,4 +151,23 @@ npm run tauri dev               # pega un enlace de X con Ctrl+V en la ventana
 2. `externalBin` en `tauri.conf.json` y el script en `beforeDevCommand` y `beforeBuildCommand`.
 3. Test en vivo `live_ytdlp_fallback_downloads_video`: la rama de respaldo de vídeo, sin probar desde la fase 2, descarga un MP4 válido con su SHA-256 y sin dejar el temporal.
 4. `npm run tauri build` → paquetes en `src-tauri/target/release/bundle/`.
-5. `docs/BACKPORT-THREADSVAULT.md` y `README.md`.
+5. Plan para llevar el extractor a ThreadsVault (documento de trabajo local, no versionado) y `README.md`.
+
+
+## Paso 8: interfaz en dos idiomas (2026-10-29)
+
+1. Inventario: ~55 textos en Svelte y ~35 mensajes en Rust.
+2. Tests primero: `errors_are_codes_not_sentences` (x_url) y `markdown_follows_the_app_language` (vault); los tests de descarga pasan a esperar `http: 404 Not Found` y `too_big: 1`.
+3. `src-tauri/src/error.rs` con `fail` / `fail_with`; todos los `Err("frase")` pasan a códigos.
+4. `src/lib/i18n.svelte.ts`: diccionarios, `t()`, `tn()` (plurales), `errorParts()`, `formatDate()`, `formatSize()`, `withKeys()`.
+5. `App.svelte` y `Gallery.svelte` sin textos fijos; botón de idioma junto al de tema.
+6. `scripts/check-i18n.mjs` en `npm run check`; probado con un código inventado (falla con salida 1).
+7. Revisión con capturas en es/en, claro/oscuro, visor y post con error.
+
+## Paso 9: preparar la release y limpiar el historial (2026-10-29)
+
+1. `CHANGELOG.md` bilingüe; texto de la Release con aviso de instaladores sin firmar.
+2. Prueba del `.deb` sin instalarlo: `dpkg-deb -x` a una carpeta temporal y ejecutar `usr/bin/mirlo` → ventana, icono 256 px (`xprop`), `mirlo-yt-dlp --version`.
+3. Etiqueta `v0.1.0` subida → se decidió añadir funciones antes → `gh run cancel`, borrar la etiqueta en GitHub (`git push origin :refs/tags/v0.1.0`) y en local.
+4. Limpieza de datos personales: primero los archivos actuales, después el historial con `git filter-repo` (ver `07_COMANDOS_Y_MANUAL.md`).
+5. `docs/ROADMAP.md` (público) y documentos de trabajo locales, no versionados, para retomar en otra sesión.

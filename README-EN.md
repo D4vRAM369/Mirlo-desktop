@@ -73,3 +73,5 @@ npm run tauri build                             # .deb, .rpm and AppImage packag
 ```
 
 The development notes in `docs/chronicler/` (decisions, errors and fixes, step by step) are in Spanish.
+
+What comes next (Spanish): [`docs/ROADMAP.md`](docs/ROADMAP.md). Changes per version: [`CHANGELOG.md`](CHANGELOG.md).

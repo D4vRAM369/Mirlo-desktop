@@ -4,3 +4,10 @@ src-tauri/target/
 src-tauri/gen/
 .omc/
 src-tauri/binaries/
+
+# Documentos de trabajo personales (no son para publicar)
+PROMPT.md
+docs/SPEC.md
+docs/HANDOFF.md
+docs/BACKPORT-THREADSVAULT.md
+.claude/

@@ -2,9 +2,9 @@
 
 Formato: [Keep a Changelog](https://keepachangelog.com/es-ES/1.1.0/) · Versiones: [SemVer](https://semver.org/lang/es/).
 
-## [0.1.0] — 2026-10-29
+## [0.1.0] — sin publicar · *unreleased*
 
-Primera versión pública. · *First public release.*
+Primera versión pública (en preparación: falta organizar y exportar/importar, ver `docs/ROADMAP.md`). · *First public release (in progress).*
 
 ### Español
 

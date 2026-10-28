@@ -138,3 +138,17 @@ Resuelto con FxTwitter como fuente extra solo del texto (Decisión 6). Si FxTwit
 - **Primer intento fallido:** poner primero `icons/icon.png` (512×512). La ventana se quedó **sin icono**: en X11 el icono viaja como píxeles sin comprimir (512×512×4 = 1 MB) y GTK lo descarta sin avisar.
 - **Solución:** primero `icons/128x128@2x.png` (256×256, 256 KB). Verificado con `xprop`: 256×256.
 - **Lección:** el icono de ventana debe ser grande, pero no tanto que no quepa en una propiedad de X11; 256 px es el punto dulce.
+
+## Error: datos personales en archivos versionados y en el historial
+
+- **Síntoma:** al revisar antes de publicar, aparecían el nombre del autor (3 documentos), una ruta de `/home` (en el prompt inicial del proyecto) y una ruta de una carpeta temporal con el usuario del sistema (en un `.claude/launch.json` antiguo).
+- **Causa:** documentación escrita "para mí" y una configuración que apuntaba a una carpeta fuera del repo.
+- **Solución:** corregir los archivos y **además** reescribir el historial: borrar algo en un commit nuevo no lo quita de los commits anteriores.
+- **Verificación:** recorrer todos los commits con `git grep` (0 resultados) y comprobar que el árbol actual es idéntico al de antes de reescribir.
+- **Lección:** revisar qué se versiona **antes** del primer push; una vez subido, quitarlo exige reescribir el historial.
+
+## Error: etiqueta de versión creada antes de tiempo
+
+- **Síntoma:** se subió `v0.1.0` y empezó la compilación de la release; justo después se decidió añadir funciones a esa versión.
+- **Solución:** cancelar el workflow (`gh run cancel <id>`), borrar la etiqueta en GitHub y en local. No llegó a crearse el borrador.
+- **Lección:** cerrar el alcance de la versión antes de etiquetar; una etiqueta es la foto final.
