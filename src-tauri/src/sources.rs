@@ -1,6 +1,7 @@
 //! Cadena de fuentes: syndication → yt-dlp → oEmbed.
 //! Cada una devuelve JSON que interpreta `parser`; aquí solo hay red y procesos.
 
+use crate::error::fail_with;
 use crate::parser::{self, ParseError, Post};
 use serde::Serialize;
 use std::path::PathBuf;
@@ -25,7 +26,7 @@ pub async fn extract(id: &str) -> Result<Extracted, String> {
         .user_agent(UA)
         .timeout(Duration::from_secs(20))
         .build()
-        .map_err(|e| e.to_string())?;
+        .map_err(|e| fail_with("internal", e))?;
     let mut tried = Vec::new();
 
     match get(&client, &syndication_url(id)).await {
@@ -67,7 +68,9 @@ pub async fn extract(id: &str) -> Result<Extracted, String> {
         Err(e) => tried.push(format!("oEmbed: {e}")),
     }
 
-    Err(format!("No se pudo leer el post. Puede estar borrado o ser privado. ({})", tried.join("; ")))
+    // syndication y oEmbed sin red a la vez: el problema es la conexión, no el post
+    let offline = tried.iter().filter(|t| t.starts_with("syndication: network") || t.starts_with("oEmbed: network")).count() == 2;
+    Err(fail_with(if offline { "offline" } else { "post_unavailable" }, tried.join(" · ")))
 }
 
 /// Token del embed oficial: (id / 1e15) · π en base 36 sin ceros ni punto.
@@ -96,15 +99,12 @@ fn syndication_url(id: &str) -> String {
 }
 
 async fn get(client: &reqwest::Client, url: &str) -> Result<String, String> {
-    let res = client.get(url).send().await.map_err(|e| format!("sin conexión ({e})"))?;
+    let res = client.get(url).send().await.map_err(|e| fail_with("network", e))?;
     let status = res.status();
-    if status == reqwest::StatusCode::NOT_FOUND {
-        return Err("no existe (404)".into());
-    }
     if !status.is_success() {
-        return Err(format!("HTTP {status}"));
+        return Err(fail_with("http", status));
     }
-    res.text().await.map_err(|e| e.to_string())
+    res.text().await.map_err(|e| fail_with("network", e))
 }
 
 /// yt-dlp empaquetado junto al ejecutable (sidecar de Tauri) o, si no está, el del PATH.
@@ -124,10 +124,10 @@ async fn ytdlp_json(post_url: &str) -> Result<String, String> {
         let out = std::process::Command::new(ytdlp_binary())
             .args(["--dump-json", "--no-warnings", "--no-playlist", "--socket-timeout", "15", &url])
             .output()
-            .map_err(|e| format!("no se pudo ejecutar ({e})"))?;
+            .map_err(|e| format!("cannot run ({e})"))?;
         if !out.status.success() {
             let err = String::from_utf8_lossy(&out.stderr);
-            return Err(err.lines().last().unwrap_or("falló").to_string());
+            return Err(err.lines().last().unwrap_or("failed").to_string());
         }
         String::from_utf8(out.stdout).map_err(|e| e.to_string())
     })
@@ -137,9 +137,10 @@ async fn ytdlp_json(post_url: &str) -> Result<String, String> {
 
 fn describe(e: &ParseError) -> String {
     match e {
-        ParseError::Empty => "respuesta vacía".into(),
-        ParseError::Tombstone => "post retirado".into(),
-        ParseError::Malformed(m) => format!("formato inesperado ({m})"),
+        // detalle técnico (va dentro de post_unavailable): en inglés neutro, no se traduce
+        ParseError::Empty => "empty response".into(),
+        ParseError::Tombstone => "removed".into(),
+        ParseError::Malformed(m) => format!("unexpected format ({m})"),
     }
 }
 
@@ -186,6 +187,6 @@ mod tests {
     #[ignore]
     fn live_missing_post_is_a_clear_error() {
         let err = tauri::async_runtime::block_on(extract("1")).unwrap_err();
-        assert!(err.starts_with("No se pudo leer el post"), "{err}");
+        assert!(err.starts_with("post_unavailable: "), "{err}");
     }
 }

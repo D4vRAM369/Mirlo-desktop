@@ -2,6 +2,7 @@
   // Medios del post abierto: fotos en rejilla con visor a pantalla completa y vídeos inline.
   import * as api from './api'
   import type { FileRow } from './api'
+  import { t, tn } from './i18n.svelte'
 
   let { id, dir, files }: { id: string; dir: string; files: FileRow[] } = $props()
 
@@ -28,7 +29,7 @@
     }
   }
 
-  const alt = (f: FileRow, i: number) => f.alt || `Foto ${i + 1} de ${photos.length}, sin descripción del autor`
+  const alt = (f: FileRow, i: number) => f.alt || t('gallery.photo_alt', { n: i + 1, total: photos.length })
 
   // Vídeos como blob: (WebKitGTK no reproduce <video> por el protocolo asset:). Se liberan al cambiar de post.
   let videos = $state<Record<string, string>>({})
@@ -59,40 +60,38 @@
     <!-- svelte-ignore a11y_media_has_caption -->
     <video class="clip" controls preload="metadata" src={videos[f.path]}></video>
   {:else}
-    <div class="clip loading">Cargando vídeo…</div>
+    <div class="clip loading">{t('gallery.loading_video')}</div>
   {/if}
 {/each}
 
 {#if photos.length}
   <div class="gallery n{shown.length}">
     {#each shown as f, i (f.path)}
-      <button onclick={() => show(i)} aria-label="Ver a pantalla completa: {alt(f, i)}">
+      <button onclick={() => show(i)} aria-label={t('gallery.view_full', { alt: alt(f, i) })}>
         <img src={api.fileUrl(dir, f.path)} alt="" loading="lazy" />
         {#if i === 2 && photos.length > 3}<span class="more">+{photos.length - 3}</span>{/if}
       </button>
     {/each}
   </div>
-  <p class="hint">
-    {photos.length === 1 ? '1 foto' : `${photos.length} fotos`} a resolución original. Pulsa una para verla a pantalla completa.
-  </p>
+  <p class="hint">{tn('gallery.hint', photos.length)}</p>
 {/if}
 
-<dialog bind:this={dialog} onkeydown={onKey} aria-label="Visor de fotos">
+<dialog bind:this={dialog} onkeydown={onKey} aria-label={t('gallery.viewer')}>
   {#if photos[open]}
     <figure>
       <img src={api.fileUrl(dir, photos[open].path)} alt={alt(photos[open], open)} />
       <figcaption>
-        <span>{open + 1} de {photos.length}</span>
+        <span>{t('gallery.counter', { n: open + 1, total: photos.length })}</span>
         {#if photos[open].alt}<span>{photos[open].alt}</span>{/if}
       </figcaption>
     </figure>
   {/if}
   <div class="controls">
     {#if photos.length > 1}
-      <button class="btn" onclick={() => go(-1)}>Anterior</button>
-      <button class="btn" onclick={() => go(1)}>Siguiente</button>
+      <button class="btn" onclick={() => go(-1)}>{t('gallery.prev')}</button>
+      <button class="btn" onclick={() => go(1)}>{t('gallery.next')}</button>
     {/if}
-    <form method="dialog"><button class="btn">Cerrar</button></form>
+    <form method="dialog"><button class="btn">{t('gallery.close')}</button></form>
   </div>
 </dialog>
 

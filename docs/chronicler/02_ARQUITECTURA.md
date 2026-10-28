@@ -114,3 +114,14 @@ Flujo: `pegar URL → x_url::status_id → sources::extract → parser::parse_* 
 - **Qué cambió:** nombre del paquete y del binario (`mirlo`), `productName`, identificador `com.mirlo.desktop`, carpeta `~/Mirlo`, base de datos `mirlo.db`, sidecar `mirlo-yt-dlp`, marca `"mirlo": 1` en `post.json`. Los documentos históricos de Chronicler y los mockups conservan "XVault".
 - **Migración de datos (una sola vez, a mano):** `mv ~/XVault ~/Mirlo`, `xvault.db` → `mirlo.db`, `UPDATE posts SET dir = …` para las rutas absolutas y la marca de `post.json`. No se dejó código de migración en la app: solo había una bóveda, la del autor.
 - **Banner del README:** compuesto en HTML (`docs/assets/banner.html`) con el icono real y la tipografía de la app, exportado con Chromium a 2560×800. Así el texto sale perfecto, cosa que un generador de imágenes no garantiza.
+
+## Decisión 13: interfaz en español e inglés (i18n) antes de la primera release
+
+- **Errores de Rust como códigos** (`src-tauri/src/error.rs`): `codigo` o `codigo: detalle`. Rust dice qué pasó; el frontend lo cuenta en el idioma de la app. El detalle técnico (HTTP, rutas, errores del sistema) no se traduce y se muestra aparte como "Detalles".
+- **Mismo formato en la BD y en post.json:** un error guardado en español se lee en inglés al cambiar de idioma. Un texto antiguo sin código conocido se muestra tal cual (sin migración).
+- **Diccionario** en `src/lib/i18n.svelte.ts`: `en` se declara con las claves de `es`, así que TypeScript no compila si falta una traducción.
+- **`scripts/check-i18n.mjs`** (dentro de `npm run check`) falla si Rust usa un código de error sin traducción. Probado con un código inventado: falla con salida 1.
+- **Plurales** con `Intl.PluralRules`; **fechas y tamaños** con `Intl` en el idioma elegido.
+- **Teclas dentro de frases** (`[Ctrl] [V]`) se pintan como `<kbd>` con un snippet, sin `{@html}`: los textos llevan datos del post y `{@html}` permitiría inyectar HTML.
+- **Idioma inicial:** el del sistema (`es*` → español, el resto → inglés); se recuerda en `localStorage`. `post.md` se escribe en el idioma de la app al guardar.
+- **Por qué antes de publicar:** después habría mensajes en español guardados en la BD de cada usuario.

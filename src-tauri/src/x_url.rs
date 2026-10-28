@@ -1,6 +1,7 @@
 //! Valida lo que pega el usuario. Solo se acepta un post de X y se devuelve su ID numérico:
 //! el backend nunca hace peticiones a una URL arbitraria (evita SSRF).
 
+use crate::error::fail;
 use reqwest::Url;
 
 const HOSTS: [&str; 6] = [
@@ -8,13 +9,13 @@ const HOSTS: [&str; 6] = [
 ];
 
 pub fn status_id(input: &str) -> Result<String, String> {
-    let url = Url::parse(input.trim()).map_err(|_| "No es un enlace válido".to_string())?;
+    let url = Url::parse(input.trim()).map_err(|_| fail("invalid_link"))?;
     if !matches!(url.scheme(), "http" | "https") {
-        return Err("El enlace debe empezar por https://".into());
+        return Err(fail("link_scheme"));
     }
     let host = url.host_str().unwrap_or_default().to_ascii_lowercase();
     if !HOSTS.contains(&host.as_str()) {
-        return Err("Solo se aceptan enlaces de x.com o twitter.com".into());
+        return Err(fail("host_not_allowed"));
     }
     let segments: Vec<&str> = url.path_segments().map(|s| s.collect()).unwrap_or_default();
     // /usuario/status/ID, /i/status/ID o /i/web/status/ID; lo que venga detrás (/photo/1) se ignora
@@ -22,9 +23,9 @@ pub fn status_id(input: &str) -> Result<String, String> {
         .windows(2)
         .find(|w| w[0] == "status" || w[0] == "statuses")
         .map(|w| w[1])
-        .ok_or("El enlace no apunta a un post (falta /status/)")?;
+        .ok_or_else(|| fail("not_a_post"))?;
     if id.is_empty() || id.len() > 20 || !id.bytes().all(|b| b.is_ascii_digit()) {
-        return Err("El ID del post no es válido".into());
+        return Err(fail("invalid_post_id"));
     }
     Ok(id.to_string())
 }
@@ -60,5 +61,14 @@ mod tests {
         ] {
             assert!(status_id(input).is_err(), "{input}");
         }
+    }
+
+    #[test]
+    fn errors_are_codes_not_sentences() {
+        assert_eq!(status_id("no es una url"), Err("invalid_link".into()));
+        assert_eq!(status_id("file:///etc/passwd"), Err("link_scheme".into()));
+        assert_eq!(status_id("https://evil.com/a/status/1"), Err("host_not_allowed".into()));
+        assert_eq!(status_id("https://x.com/jack"), Err("not_a_post".into()));
+        assert_eq!(status_id("https://x.com/a/status/12ab"), Err("invalid_post_id".into()));
     }
 }

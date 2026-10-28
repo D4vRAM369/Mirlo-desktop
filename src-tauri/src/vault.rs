@@ -3,6 +3,7 @@
 //! Todo archivo se escribe como `.part` y se renombra al terminar: un archivo con su nombre final
 //! siempre está completo, aunque se corte la luz a mitad de descarga.
 
+use crate::error::{fail, fail_with};
 use crate::parser::{self, MediaKind, Post};
 use crate::sources::{self, Extracted};
 use serde::Serialize;
@@ -56,9 +57,10 @@ enum Fetch {
     Failed(String),
 }
 
-pub async fn save(root: &Path, ex: Extracted, max_doc: u64) -> Result<Saved, String> {
+/// `lang`: idioma de la app al guardar ("es" | "en"); solo afecta a los títulos de post.md.
+pub async fn save(root: &Path, ex: Extracted, max_doc: u64, lang: &str) -> Result<Saved, String> {
     let dir = post_dir(root, &ex.post);
-    std::fs::create_dir_all(dir.join("media")).map_err(|e| format!("no se pudo crear {}: {e}", dir.display()))?;
+    std::fs::create_dir_all(dir.join("media")).map_err(|e| fail_with("disk_write", format!("{}: {e}", dir.display())))?;
     let client = client()?;
     let mut files = Vec::new();
 
@@ -72,7 +74,7 @@ pub async fn save(root: &Path, ex: Extracted, max_doc: u64) -> Result<Saved, Str
             let mut got = if is_media_url(&m.url) {
                 get_file(&client, &m.url, &dest).await
             } else {
-                Fetch::Failed("servidor de medios no reconocido".into())
+                Fetch::Failed(fail("media_host_not_allowed"))
             };
             if m.kind != MediaKind::Photo {
                 video_n += 1;
@@ -96,7 +98,7 @@ pub async fn save(root: &Path, ex: Extracted, max_doc: u64) -> Result<Saved, Str
             Fetch::Done(f) => {
                 let rel = format!("attachments/{}", attachment_name(i + 1, url, f.ext.unwrap_or("bin")));
                 if let Err(e) = std::fs::rename(&part, dir.join(&rel)) {
-                    files.extend(record(rel, url, Fetch::Failed(e.to_string())));
+                    files.extend(record(rel, url, Fetch::Failed(fail_with("disk_write", e))));
                     continue;
                 }
                 rel
@@ -118,9 +120,9 @@ pub async fn save(root: &Path, ex: Extracted, max_doc: u64) -> Result<Saved, Str
         "files": &files,
         "raw": raw,
     });
-    let pretty = serde_json::to_string_pretty(&json).map_err(|e| e.to_string())?;
+    let pretty = serde_json::to_string_pretty(&json).map_err(|e| fail_with("internal", e))?;
     write_atomic(&dir.join("post.json"), pretty.as_bytes())?;
-    write_atomic(&dir.join("post.md"), render_markdown(&ex.post, &files).as_bytes())?;
+    write_atomic(&dir.join("post.md"), render_markdown(&ex.post, &files, lang).as_bytes())?;
 
     Ok(Saved { dir, status, source: ex.source, post: ex.post, files })
 }
@@ -234,7 +236,7 @@ fn client() -> Result<reqwest::Client, String> {
             }
         }))
         .build()
-        .map_err(|e| e.to_string())
+        .map_err(|e| fail_with("internal", e))
 }
 
 /// Medio con nombre conocido. Si ya existe (reintento), no se vuelve a bajar.
@@ -246,7 +248,7 @@ async fn get_file(client: &reqwest::Client, url: &str, dest: &Path) -> Fetch {
     match fetch_to(client, url, &part, u64::MAX, false).await {
         Fetch::Done(f) => match std::fs::rename(&part, dest) {
             Ok(()) => Fetch::Done(f),
-            Err(e) => Fetch::Failed(e.to_string()),
+            Err(e) => Fetch::Failed(fail_with("disk_write", e)),
         },
         other => other,
     }
@@ -270,13 +272,13 @@ async fn fetch_to(client: &reqwest::Client, url: &str, part: &Path, max: u64, do
 
 /// Err = vale la pena reintentar
 async fn fetch_once(client: &reqwest::Client, url: &str, part: &Path, max: u64, doc: bool) -> Result<Fetch, String> {
-    let mut res = client.get(url).send().await.map_err(|e| format!("sin conexión ({e})"))?;
+    let mut res = client.get(url).send().await.map_err(|e| fail_with("network", e))?;
     let status = res.status();
     if status.is_server_error() || status == reqwest::StatusCode::TOO_MANY_REQUESTS {
-        return Err(format!("HTTP {status}"));
+        return Err(fail_with("http", status));
     }
     if !status.is_success() {
-        return Ok(Fetch::Failed(format!("HTTP {status}")));
+        return Ok(Fetch::Failed(fail_with("http", status)));
     }
     let ext = if doc {
         let ct = res.headers().get(reqwest::header::CONTENT_TYPE).and_then(|v| v.to_str().ok()).unwrap_or("");
@@ -287,19 +289,20 @@ async fn fetch_once(client: &reqwest::Client, url: &str, part: &Path, max: u64, 
     } else {
         None
     };
-    let too_big = || Fetch::Skipped(Some(format!("supera {} MB", max / 1024 / 1024)));
+    // el detalle es el límite en MB: el frontend lo pone en la frase ("Supera 50 MB")
+    let too_big = || Fetch::Skipped(Some(fail_with("too_big", max.div_ceil(1024 * 1024))));
     if res.content_length().is_some_and(|n| n > max) {
         return Ok(too_big());
     }
-    let fail = |e: std::io::Error| Fetch::Failed(e.to_string());
+    let disk = |e: std::io::Error| Fetch::Failed(fail_with("disk_write", e));
     if let Some(parent) = part.parent() {
         if let Err(e) = std::fs::create_dir_all(parent) {
-            return Ok(fail(e));
+            return Ok(disk(e));
         }
     }
     let mut file = match std::fs::File::create(part) {
         Ok(f) => f,
-        Err(e) => return Ok(fail(e)),
+        Err(e) => return Ok(disk(e)),
     };
     let mut hasher = Sha256::new();
     let mut size = 0u64;
@@ -316,19 +319,19 @@ async fn fetch_once(client: &reqwest::Client, url: &str, part: &Path, max: u64, 
                 if let Err(e) = file.write_all(&chunk) {
                     drop(file);
                     let _ = std::fs::remove_file(part);
-                    return Ok(fail(e));
+                    return Ok(disk(e));
                 }
             }
             Ok(None) => break,
             Err(e) => {
                 drop(file);
                 let _ = std::fs::remove_file(part);
-                return Err(format!("corte de conexión ({e})"));
+                return Err(fail_with("network", e));
             }
         }
     }
     if let Err(e) = file.sync_all() {
-        return Ok(fail(e));
+        return Ok(disk(e));
     }
     Ok(Fetch::Done(Fetched { size, sha256: format!("{:x}", hasher.finalize()), ext }))
 }
@@ -349,11 +352,11 @@ async fn ytdlp_download(post_url: &str, n: usize, dest: &Path) -> Fetch {
     match ran {
         Ok(Ok(o)) if o.status.success() && tmp.is_file() => match std::fs::rename(&tmp, dest) {
             Ok(()) => hash_file(dest),
-            Err(e) => Fetch::Failed(e.to_string()),
+            Err(e) => Fetch::Failed(fail_with("disk_write", e)),
         },
         _ => {
             let _ = std::fs::remove_file(&tmp);
-            Fetch::Failed("ni descarga directa ni yt-dlp".into())
+            Fetch::Failed(fail("video_unavailable"))
         }
     }
 }
@@ -362,7 +365,7 @@ fn hash_file(path: &Path) -> Fetch {
     let mut hasher = Sha256::new();
     match std::fs::File::open(path).and_then(|mut f| std::io::copy(&mut f, &mut hasher)) {
         Ok(size) => Fetch::Done(Fetched { size, sha256: format!("{:x}", hasher.finalize()), ext: None }),
-        Err(e) => Fetch::Failed(e.to_string()),
+        Err(e) => Fetch::Failed(fail_with("disk_write", e)),
     }
 }
 
@@ -375,7 +378,7 @@ fn write_atomic(path: &Path, bytes: &[u8]) -> Result<(), String> {
     let part = part_path(path);
     std::fs::write(&part, bytes)
         .and_then(|()| std::fs::rename(&part, path))
-        .map_err(|e| format!("no se pudo escribir {}: {e}", path.display()))
+        .map_err(|e| fail_with("disk_write", format!("{}: {e}", path.display())))
 }
 
 /// Fetch → fila del manifiesto. Un enlace que no es documento no deja fila.
@@ -389,15 +392,21 @@ fn record(path: String, url: &str, got: Fetch) -> Option<SavedFile> {
     Some(SavedFile { path, url: url.to_string(), status, size, sha256, error, alt: None })
 }
 
-fn render_markdown(post: &Post, files: &[SavedFile]) -> String {
+fn render_markdown(post: &Post, files: &[SavedFile], lang: &str) -> String {
+    // post.md es para leerlo fuera de Mirlo: títulos en el idioma de la app al guardar
+    let [unknown_date, view, media_h, links_h, docs_h, quoting] = if lang == "en" {
+        ["Unknown date", "View on X", "Media", "Links", "Attachments", "Quoting"]
+    } else {
+        ["Fecha desconocida", "Ver en X", "Medios", "Enlaces", "Adjuntos", "Cita a"]
+    };
     let mut md = format!("# {} (@{})\n\n", post.author.name, post.author.handle);
-    md += &format!("{} · [Ver en X]({})\n\n", post.created_at.as_deref().unwrap_or("Fecha desconocida"), post.url);
+    md += &format!("{} · [{view}]({})\n\n", post.created_at.as_deref().unwrap_or(unknown_date), post.url);
     md += &post.text;
     md += "\n";
     let ok = |prefix: &str| files.iter().filter(move |f| f.status == "ok" && f.path.starts_with(prefix)).collect::<Vec<_>>();
     let media = ok("media/");
     if !media.is_empty() {
-        md += "\n## Medios\n\n";
+        md += &format!("\n## {media_h}\n\n");
         let alts = post.media.iter().chain(post.quoted.iter().flat_map(|q| q.media.iter()));
         for (f, m) in media.iter().zip(alts) {
             let alt = m.alt_text.as_deref().unwrap_or("").replace(['[', ']', '\n'], " ");
@@ -405,24 +414,24 @@ fn render_markdown(post: &Post, files: &[SavedFile]) -> String {
         }
     }
     if !post.links.is_empty() {
-        md += "\n## Enlaces\n\n";
+        md += &format!("\n## {links_h}\n\n");
         for l in &post.links {
             md += &format!("- <{}>\n", l.expanded_url);
         }
     }
     let docs = ok("attachments/");
     if !docs.is_empty() {
-        md += "\n## Adjuntos\n\n";
+        md += &format!("\n## {docs_h}\n\n");
         for f in docs {
             md += &format!("- [{}]({}) ({} KB)\n", f.path, f.path, f.size.div_ceil(1024));
         }
     }
     if let Some(q) = &post.quoted {
-        md += &format!("\n## Cita a @{}\n\n", q.author.handle);
+        md += &format!("\n## {quoting} @{}\n\n", q.author.handle);
         for line in q.text.lines() {
             md += &format!("> {line}\n");
         }
-        md += &format!(">\n> [Ver en X]({})\n", q.url);
+        md += &format!(">\n> [{view}]({})\n", q.url);
     }
     md
 }
@@ -543,17 +552,17 @@ mod tests {
         ]);
         let run = |max| tauri::async_runtime::block_on(fetch_to(&c, &format!("{base}/x"), &part, max, true));
         assert_eq!(run(10), Fetch::Skipped(None), "una web no es un adjunto");
-        assert!(matches!(run(10), Fetch::Skipped(Some(_))), "demasiado grande");
+        assert_eq!(run(10), Fetch::Skipped(Some("too_big: 1".into())), "demasiado grande, en MB redondeando arriba");
         assert!(!part.exists(), "no queda basura");
         assert!(matches!(run(10), Fetch::Done(Fetched { size: 4, ext: Some("pdf"), .. })));
-        assert_eq!(run(10), Fetch::Failed("HTTP 404 Not Found".into()), "sin reintentos ni esperas");
+        assert_eq!(run(10), Fetch::Failed("http: 404 Not Found".into()), "sin reintentos ni esperas");
     }
 
     #[test]
     fn markdown_has_text_media_and_quote() {
         let p = post("quote");
         let files = vec![SavedFile { path: "media/01.mp4".into(), url: String::new(), status: "ok", size: 1, sha256: String::new(), error: None, alt: None }];
-        let md = render_markdown(&p, &files);
+        let md = render_markdown(&p, &files, "es");
         assert!(md.starts_with(&format!("# {} (@{})", p.author.name, p.author.handle)));
         assert!(md.contains(&p.text));
         assert!(md.contains("[media/01.mp4](media/01.mp4)"));
@@ -568,7 +577,7 @@ mod tests {
         let root = tmp("live");
         for id in ["2051361508181856362", "1969515038512926823", "1403463121138851843", "1846679441088696480", "2024282115454419182"] {
             let saved = tauri::async_runtime::block_on(async {
-                save(&root, sources::extract(id).await.unwrap(), MAX_DOC_BYTES).await.unwrap()
+                save(&root, sources::extract(id).await.unwrap(), MAX_DOC_BYTES, "es").await.unwrap()
             });
             println!("{id} {} {} {:?}", saved.status, saved.source, saved.dir);
             for f in &saved.files {
@@ -591,5 +600,15 @@ mod tests {
         assert!(!dest.with_extension("ytdlp.mp4").exists(), "no queda el temporal");
         let head = std::fs::read(&dest).unwrap();
         assert_eq!(&head[4..8], b"ftyp", "es un MP4");
+    }
+
+    #[test]
+    fn markdown_follows_the_app_language() {
+        let p = post("quote");
+        let es = render_markdown(&p, &[], "es");
+        let en = render_markdown(&p, &[], "en");
+        assert!(es.contains("[Ver en X]") && es.contains("## Cita a @"));
+        assert!(en.contains("[View on X]") && en.contains("## Quoting @"));
+        assert!(!en.contains("Ver en X"));
     }
 }

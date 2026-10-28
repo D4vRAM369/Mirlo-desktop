@@ -8,6 +8,8 @@ Bóveda local para posts de X (Twitter). Pegas el enlace de un post y Mirlo guar
 
 Sin cuenta, sin nube y sin telemetría.
 
+> La interfaz está en español y en inglés. La primera vez Mirlo usa el idioma del sistema; puedes cambiarlo cuando quieras con el botón que hay junto al del tema.
+
 ## Cómo se usa
 
 1. Copia el enlace de un post en X.

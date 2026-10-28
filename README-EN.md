@@ -8,13 +8,13 @@ A local vault for X (Twitter) posts. Paste a post link and Mirlo saves the text,
 
 No account, no cloud, no telemetry.
 
-> The app's interface is in Spanish for now.
+> The interface is available in English and Spanish. Mirlo follows your system language the first time; switch it anytime with the button next to the theme toggle.
 
 ## How to use it
 
 1. Copy the link of a post on X.
 2. Press <kbd>Ctrl</kbd>+<kbd>V</kbd> anywhere in the Mirlo window.
-3. The post appears in the list. If something could not be downloaded, it is marked **◐ Parcial** (partial) or **✕ Error**, and you can retry it with <kbd>R</kbd>.
+3. The post appears in the list. If something could not be downloaded, it is marked **◐ Partial** or **✕ Error**, and you can retry it with <kbd>R</kbd>.
 
 | Shortcut | Action |
 |---|---|

@@ -161,3 +161,8 @@ Términos técnicos del proyecto. Si un término no se entiende en otro archivo,
 ## actionlint
 
 **Definición simple:** Un corrector para los archivos de GitHub Actions. Encuentra errores (una clave mal escrita, una expresión `${{ }}` inválida, un `run:` con un fallo de shell) antes de hacer push, en lugar de descubrirlos cuando el workflow falla en GitHub.
+
+## i18n
+
+**Definición simple:** "Internationalization" (i + 18 letras + n). Preparar la app para mostrarse en varios idiomas sin tocar el código de cada pantalla.
+**En este proyecto:** `t('clave')` busca el texto en el diccionario del idioma activo (`src/lib/i18n.svelte.ts`).

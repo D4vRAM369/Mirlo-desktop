@@ -4,6 +4,7 @@
   import * as api from './lib/api'
   import type { Detail, Facets, Filter, Kind, PostRow, Status } from './lib/api'
   import Gallery from './lib/Gallery.svelte'
+  import { errorParts, errorText, formatDate, formatSize, i18n, setLang, t, withKeys } from './lib/i18n.svelte'
 
   let input = $state('')
   let filter = $state<Filter>({})
@@ -18,22 +19,16 @@
   let field: HTMLInputElement
   const rows: Record<string, HTMLElement> = {}
 
-  const KINDS: [Kind, string][] = [
-    ['video', 'Con vídeo'],
-    ['photo', 'Con fotos'],
-    ['gif', 'Con GIF'],
-    ['document', 'Con documentos'],
-    ['text', 'Solo texto'],
-  ]
-  const STATUS: Record<Status, string> = { ok: '✓ Completo', partial: '◐ Parcial', error: '✕ Error' }
+  const KINDS: Kind[] = ['video', 'photo', 'gif', 'document', 'text']
+  const status = (s: Status) => t(`status.${s}`)
   const total = $derived(counts.ok + counts.partial + counts.error)
   const media = $derived(detail?.files.filter((f) => f.status === 'ok' && f.path.startsWith('media/')) ?? [])
   const title = $derived(
-    filter.status === 'partial' ? 'Parciales'
-    : filter.status === 'error' ? 'Con error'
-    : filter.kind ? KINDS.find(([k]) => k === filter.kind)![1]
+    filter.status === 'partial' ? t('side.partial')
+    : filter.status === 'error' ? t('side.error')
+    : filter.kind ? t(`kind.${filter.kind}`)
     : filter.handle ? `@${filter.handle}`
-    : 'Todos',
+    : t('side.all'),
   )
 
   // ---- tema: sigue al sistema hasta que eliges uno; se recuerda en este equipo ----
@@ -61,7 +56,7 @@
     try {
       ;[posts, counts] = await Promise.all([api.listPosts(filter), api.facets()])
     } catch (e) {
-      message = String(e)
+      message = errorText(e)
     }
   }
 
@@ -84,11 +79,11 @@
     saving = [...saving, url]
     message = ''
     try {
-      const row = await api.savePost(url)
+      const row = await api.savePost(url, i18n.lang)
       selectedId = row.id
-      message = row.status === 'ok' ? `Guardado: @${row.handle}` : `Guardado con avisos: @${row.handle}`
+      message = t(row.status === 'ok' ? 'msg.saved' : 'msg.saved_partial', { user: row.handle })
     } catch (e) {
-      message = `No se pudo guardar: ${e}`
+      message = t('msg.save_failed', { error: errorParts(e).text })
     } finally {
       saving = saving.filter((u) => u !== url)
       await refresh()
@@ -96,12 +91,12 @@
   }
 
   async function retry(id: string) {
-    message = 'Reintentando…'
+    message = t('msg.retrying')
     try {
-      const row = await api.retryPost(id)
-      message = row.status === 'ok' ? 'Reintento correcto: ya está completo' : 'Reintentado, pero sigue incompleto'
+      const row = await api.retryPost(id, i18n.lang)
+      message = t(row.status === 'ok' ? 'msg.retry_ok' : 'msg.retry_partial')
     } catch (e) {
-      message = `Sigue fallando: ${e}`
+      message = t('msg.retry_failed', { error: errorParts(e).text })
     }
     await refresh()
     if (selectedId === id) detail = await api.getPost(id)
@@ -160,7 +155,7 @@
       k: () => move(-1),
       ArrowUp: () => move(-1),
       '/': () => field.focus(),
-      o: () => selectedId && api.openFolder(selectedId).catch((err) => (message = String(err))),
+      o: () => selectedId && api.openFolder(selectedId).catch((err) => (message = errorText(err))),
       r: () => selectedId && detail?.post.status !== 'ok' && retry(selectedId),
     }
     const action = actions[e.key]
@@ -171,25 +166,24 @@
   }
 
   // ---- formato ----
-  const date = (iso: string | null, long = false) =>
-    iso
-      ? new Intl.DateTimeFormat('es', long ? { dateStyle: 'long', timeStyle: 'short' } : { day: 'numeric', month: 'short', year: 'numeric' }).format(new Date(iso))
-      : 'Sin fecha'
-  const size = (n: number) => (n >= 1048576 ? `${(n / 1048576).toFixed(1).replace('.', ',')} MB` : `${Math.ceil(n / 1024)} KB`)
   const mediaLabel = (p: PostRow) =>
-    [...p.media_kinds.map((k) => ({ photo: 'Fotos', video: 'Vídeo', gif: 'GIF' })[k]), p.has_attachments ? 'Documento' : ''].filter(Boolean).join(', ') ||
-    (p.status === 'error' ? '' : 'Texto')
+    [...p.media_kinds.map((k) => t(`media.${k}`)), p.has_attachments ? t('media.document') : ''].filter(Boolean).join(', ') ||
+    (p.status === 'error' ? '' : t('media.text'))
   // color estable por autor: el mismo @usuario siempre tiene el mismo círculo
   const hue = (handle: string) => [...handle].reduce((a, c) => (a * 31 + c.charCodeAt(0)) % 360, 7)
   const queueLabel = (url: string) => {
     const user = url.match(/\.com\/([^/]+)\/status/i)?.[1]
-    return user && user !== 'i' ? `Guardando el post de @${user}…` : 'Guardando post…'
+    return user && user !== 'i' ? t('list.saving_user', { user }) : t('list.saving')
   }
   const fileState = (f: Detail['files'][number]) =>
-    f.status === 'ok' ? '✓ Descargado' : f.status === 'skipped' ? `Omitido: ${f.error}` : `✕ ${f.error}`
+    f.status === 'ok' ? t('read.downloaded') : f.status === 'skipped' ? t('read.skipped', { why: errorText(f.error) }) : `✕ ${errorText(f.error)}`
 </script>
 
 <svelte:window onkeydown={onKey} />
+
+{#snippet keyed(text: string)}
+  {#each withKeys(text) as part}{#if part.key}<kbd>{part.text}</kbd>{:else}{part.text}{/if}{/each}
+{/snippet}
 
 <div class="app">
   <form class="cmd" onsubmit={onSubmit}>
@@ -198,32 +192,33 @@
         bind:this={field}
         bind:value={input}
         oninput={onInput}
-        placeholder="Pega un enlace de X para guardarlo, o escribe para buscar"
-        aria-label="Enlace o búsqueda"
+        placeholder={t('cmd.placeholder')}
+        aria-label={t('cmd.label')}
       />
       <kbd>/</kbd>
     </label>
-    <button class="btn primary" disabled={!api.looksLikePostUrl(input)}>Guardar post</button>
-    <button type="button" class="btn" onclick={toggleTheme}>{isDark ? 'Tema claro' : 'Tema oscuro'}</button>
+    <button class="btn primary" disabled={!api.looksLikePostUrl(input)}>{t('cmd.save')}</button>
+    <button type="button" class="btn" onclick={toggleTheme}>{isDark ? t('cmd.theme_light') : t('cmd.theme_dark')}</button>
+    <button type="button" class="btn" lang={i18n.lang === 'es' ? 'en' : 'es'} onclick={() => setLang(i18n.lang === 'es' ? 'en' : 'es')}>{t('cmd.other_lang')}</button>
   </form>
 
   <div class="panes">
-    <nav class="side" aria-label="Filtros">
+    <nav class="side" aria-label={t('side.label')}>
       <button aria-pressed={!filter.status && !filter.kind && !filter.handle} onclick={() => setFilter({})}>
-        Todos <span>{total}</span>
+        {t('side.all')} <span>{total}</span>
       </button>
       <button aria-pressed={filter.status === 'partial'} onclick={() => setFilter({ status: 'partial' })}>
-        Parciales <span>{counts.partial}</span>
+        {t('side.partial')} <span>{counts.partial}</span>
       </button>
       <button aria-pressed={filter.status === 'error'} onclick={() => setFilter({ status: 'error' })}>
-        Con error <span>{counts.error}</span>
+        {t('side.error')} <span>{counts.error}</span>
       </button>
-      <h2>Por tipo</h2>
-      {#each KINDS as [kind, label]}
-        <button aria-pressed={filter.kind === kind} onclick={() => setFilter({ kind })}>{label}</button>
+      <h2>{t('side.by_type')}</h2>
+      {#each KINDS as kind}
+        <button aria-pressed={filter.kind === kind} onclick={() => setFilter({ kind })}>{t(`kind.${kind}`)}</button>
       {/each}
       {#if counts.authors.length}
-        <h2>Autores</h2>
+        <h2>{t('side.authors')}</h2>
         {#each counts.authors as a}
           <button aria-pressed={filter.handle === a.handle} onclick={() => setFilter({ handle: a.handle })} title={a.name}>
             <span class="handle"><i class="dot" style="background: hsl({hue(a.handle)} 32% 46%)" aria-hidden="true"></i><span class="name">{a.handle}</span></span>
@@ -232,24 +227,24 @@
         {/each}
       {/if}
       <details open={!!(filter.from || filter.to)}>
-        <summary>Fecha del post: {filter.from || filter.to ? `${filter.from ?? '…'} a ${filter.to ?? '…'}` : 'cualquiera'}</summary>
-        <label>Desde <input type="date" bind:value={filter.from} /></label>
-        <label>Hasta <input type="date" bind:value={filter.to} /></label>
+        <summary>{t('side.date', { range: filter.from || filter.to ? t('side.date_range', { from: filter.from ?? '…', to: filter.to ?? '…' }) : t('side.date_any') })}</summary>
+        <label>{t('side.from')} <input type="date" bind:value={filter.from} /></label>
+        <label>{t('side.to')} <input type="date" bind:value={filter.to} /></label>
         {#if filter.from || filter.to}
-          <button class="btn" onclick={() => (filter = { ...filter, from: undefined, to: undefined })}>Quitar fechas</button>
+          <button class="btn" onclick={() => (filter = { ...filter, from: undefined, to: undefined })}>{t('side.clear_dates')}</button>
         {/if}
       </details>
     </nav>
 
-    <section class="list" aria-label="Posts">
+    <section class="list" aria-label={t('list.label')}>
       <div class="list-head">
         <h1>{title}</h1>
-        <small>{filter.q ? `Buscando «${filter.q}»` : 'Más recientes primero'}</small>
+        <small>{filter.q ? t('list.searching', { q: filter.q }) : t('list.newest')}</small>
       </div>
       {#each saving as url}
         <div class="queue" role="status">{queueLabel(url)}<div class="bar"><i></i></div></div>
       {/each}
-      <div role="listbox" aria-label="Posts guardados">
+      <div role="listbox" aria-label={t('list.items_label')}>
         {#each posts as p (p.id)}
           <div
             bind:this={rows[p.id]}
@@ -260,39 +255,43 @@
             onclick={() => (selectedId = p.id)}
             onkeydown={(e) => e.key === 'Enter' && (selectedId = p.id)}
           >
-            <span class="who">{p.handle ? `@${p.handle}` : `Post ${p.id}`}</span><time>{date(p.created_at)}</time>
-            <p>{p.text || p.error}</p>
-            <div class="meta"><span>{mediaLabel(p)}</span><span class="st {p.status}">{STATUS[p.status]}</span></div>
+            <span class="who">{p.handle ? `@${p.handle}` : t('list.post_id', { id: p.id })}</span><time>{formatDate(p.created_at)}</time>
+            <p>{p.text || errorParts(p.error).text}</p>
+            <div class="meta"><span>{mediaLabel(p)}</span><span class="st {p.status}">{status(p.status)}</span></div>
           </div>
         {:else}
           <p class="empty">
             {#if filter.q || filter.kind || filter.handle || filter.status || filter.from || filter.to}
-              Nada coincide con estos filtros.
+              {t('list.no_match')}
             {:else}
-              Tu bóveda está vacía. Copia el enlace de un post de X y pulsa <kbd>Ctrl</kbd> <kbd>V</kbd> en cualquier parte de esta ventana.
+              {@render keyed(t('list.empty'))}
             {/if}
           </p>
         {/each}
       </div>
     </section>
 
-    <article class="read" aria-label="Post abierto">
+    <article class="read" aria-label={t('read.label')}>
       {#if detail}
         {@const p = detail.post}
         <header>
           <i class="dot big" style="background: hsl({hue(p.handle || p.id)} 32% 46%)" aria-hidden="true">{(p.author_name || '?')[0]}</i>
           <div>
-            <b>{p.author_name || `Post ${p.id}`}</b>
-            <span>{p.handle ? `@${p.handle}, ${date(p.created_at, true)}` : p.url}</span>
+            <b>{p.author_name || t('list.post_id', { id: p.id })}</b>
+            <span>{p.handle ? `@${p.handle}, ${formatDate(p.created_at, true)}` : p.url}</span>
           </div>
           <div class="btns">
-            {#if p.status !== 'ok'}<button class="btn primary" onclick={() => retry(p.id)}>Reintentar</button>{/if}
-            {#if p.dir}<button class="btn" onclick={() => api.openFolder(p.id).catch((e) => (message = String(e)))}>Abrir carpeta</button>{/if}
-            <button class="btn" onclick={() => api.openOnX(p.id).catch((e) => (message = String(e)))}>Ver en X</button>
+            {#if p.status !== 'ok'}<button class="btn primary" onclick={() => retry(p.id)}>{t('read.retry')}</button>{/if}
+            {#if p.dir}<button class="btn" onclick={() => api.openFolder(p.id).catch((e) => (message = errorText(e)))}>{t('read.open_folder')}</button>{/if}
+            <button class="btn" onclick={() => api.openOnX(p.id).catch((e) => (message = errorText(e)))}>{t('read.view_on_x')}</button>
           </div>
         </header>
         {#if p.error}
-          <p class="alert" role="alert"><b class="st {p.status}">{STATUS[p.status]}.</b> {p.error}</p>
+          {@const err = errorParts(p.error)}
+          <div class="alert" role="alert">
+            <p><b class="st {p.status}">{status(p.status)}.</b> {err.text}</p>
+            {#if err.detail}<p class="detail">{t('read.details', { detail: err.detail })}</p>{/if}
+          </div>
         {/if}
         {#if p.text}<p class="body">{p.text}</p>{/if}
         {#if media.length && p.dir}
@@ -300,41 +299,41 @@
         {/if}
         {#if p.quoted_handle}
           <div class="quoted">
-            <b>Cita a @{p.quoted_handle}</b>
+            <b>{t('read.quoting', { user: p.quoted_handle })}</b>
             <p>{p.quoted_text}</p>
           </div>
         {/if}
         {#if detail.files.length}
           <table>
-            <caption>Archivos en disco</caption>
-            <thead><tr><th>Archivo</th><th>Estado</th><th class="num">Tamaño</th></tr></thead>
+            <caption>{t('read.files')}</caption>
+            <thead><tr><th>{t('read.file')}</th><th>{t('read.state')}</th><th class="num">{t('read.size')}</th></tr></thead>
             <tbody>
               {#each detail.files as f}
                 <tr>
                   <td>{f.path}</td>
                   <td class:st={f.status !== 'ok'} class:error={f.status === 'error'}>{fileState(f)}</td>
-                  <td class="num">{f.status === 'ok' ? size(f.size) : ''}</td>
+                  <td class="num">{f.status === 'ok' ? formatSize(f.size) : ''}</td>
                 </tr>
               {/each}
-              <tr><td>post.json</td><td>Fuente: {p.source || 'ninguna'}</td><td class="num"></td></tr>
+              <tr><td>post.json</td><td>{t('read.source', { source: p.source || t('read.source_none') })}</td><td class="num"></td></tr>
             </tbody>
           </table>
         {/if}
       {:else}
         <div class="empty">
-          <p>Elige un post de la lista con <kbd>J</kbd> y <kbd>K</kbd>, o con el ratón.</p>
-          <p>Para guardar uno nuevo, copia su enlace en X y pulsa <kbd>Ctrl</kbd> <kbd>V</kbd> aquí.</p>
+          <p>{@render keyed(t('read.pick'))}</p>
+          <p>{@render keyed(t('read.how_to_save'))}</p>
         </div>
       {/if}
     </article>
   </div>
 
-  <footer class="keys" aria-label="Atajos de teclado">
-    <span><kbd>J</kbd> <kbd>K</kbd> siguiente y anterior</span>
-    <span><kbd>/</kbd> buscar</span>
-    <span><kbd>Ctrl</kbd> <kbd>V</kbd> guardar enlace</span>
-    <span><kbd>O</kbd> abrir carpeta</span>
-    <span><kbd>R</kbd> reintentar</span>
+  <footer class="keys" aria-label={t('keys.label')}>
+    <span><kbd>J</kbd> <kbd>K</kbd> {t('keys.nav')}</span>
+    <span><kbd>/</kbd> {t('keys.search')}</span>
+    <span><kbd>Ctrl</kbd> <kbd>V</kbd> {t('keys.save')}</span>
+    <span><kbd>O</kbd> {t('keys.open')}</span>
+    <span><kbd>R</kbd> {t('keys.retry')}</span>
     <span class="msg" role="status" aria-live="polite">{message}</span>
   </footer>
 </div>
@@ -389,7 +388,9 @@
   .read header b { font-size: 18px; display: block; }
   .read header span { color: var(--muted); }
   .read header .btns { margin-left: auto; display: flex; gap: 8px; }
-  .alert { max-width: 62ch; background: var(--err-soft); border-radius: 6px; padding: 10px 12px; }
+  .alert { max-width: 62ch; background: var(--err-soft); border-radius: 6px; padding: 10px 12px; margin-bottom: 16px; }
+  .alert p { margin: 0; }
+  .alert .detail { margin-top: 6px; font-size: 13px; color: var(--muted); overflow-wrap: anywhere; }
   .body { font-size: 18px; line-height: 1.6; max-width: 62ch; margin: 0 0 18px; white-space: pre-wrap; overflow-wrap: anywhere; }
   .quoted { border: 1px solid var(--line); border-radius: 8px; padding: 12px 14px; max-width: 620px; background: var(--paper); margin-bottom: 22px; }
   .quoted b { font-size: 14px; }

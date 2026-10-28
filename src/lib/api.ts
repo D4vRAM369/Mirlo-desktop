@@ -53,8 +53,9 @@ export interface Facets {
   error: number
 }
 
-export const savePost = (url: string) => invoke<PostRow>('save_post', { url })
-export const retryPost = (id: string) => invoke<PostRow>('retry_post', { id })
+/** `lang`: idioma de la app, para los títulos de post.md */
+export const savePost = (url: string, lang: string) => invoke<PostRow>('save_post', { url, lang })
+export const retryPost = (id: string, lang: string) => invoke<PostRow>('retry_post', { id, lang })
 export const listPosts = (filter: Filter) => invoke<PostRow[]>('list_posts', { filter })
 export const getPost = (id: string) => invoke<Detail | null>('get_post', { id })
 export const facets = () => invoke<Facets>('facets')
