@@ -40,7 +40,7 @@ El panel del navegador integrado es estrecho, así que se usan capturas headless
 cd src-tauri && cargo test live_save -- --ignored     # guarda 5 posts reales en target/test-tmp/live
 ```
 
-Después: servidor estático con CORS sobre `target/test-tmp/live` (puerto 4318, config `vault-files` en `.claude/launch.json`), un `_mock.js` que simula `window.__TAURI_INTERNALS__` y `target/test-tmp/review.html?row=1&theme=dark&lightbox=1`, capturado con:
+Después: servidor estático con CORS sobre `target/test-tmp/live` (`scripts/review-server.py`, puerto 4318, config `vault-files` en `.claude/launch.json`), un `_mock.js` que simula `window.__TAURI_INTERNALS__` y `target/test-tmp/review.html?row=1&theme=dark&lightbox=1`, capturado con:
 
 ```bash
 chromium --headless=new --window-size=1280,840 --virtual-time-budget=6000 --screenshot=out.png "http://localhost:1420/src-tauri/target/test-tmp/review.html?row=1"
