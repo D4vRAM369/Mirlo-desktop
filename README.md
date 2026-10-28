@@ -92,7 +92,7 @@ cd src-tauri && cargo clippy --all-targets -- -D warnings
 npm run tauri build                             # paquetes .deb, .rpm y AppImage
 ```
 
-La documentación del proceso está en `docs/chronicler/` (decisiones, errores y soluciones, paso a paso).
+La documentación del proceso está en `docs/chronicler/` (decisiones, errores y soluciones, paso a paso), la cual puede venir genial para estudiantes, aprendices y aquellos que quieran saber todo lo que se hizo en la construcción de Mirlo. Gran variedad de detalles, también he publicado la doc pública de la skill [ProfesorIA](https://github.com/D4vRAM369/ProfesorIA). Espero que resulte productiva y didáctica.
 
 Qué viene después: [`docs/ROADMAP.md`](docs/ROADMAP.md). Cambios por versión: [`CHANGELOG.md`](CHANGELOG.md).
 
