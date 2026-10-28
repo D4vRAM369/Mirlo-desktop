@@ -3,6 +3,7 @@
   // Todo se maneja con teclado; los atajos están siempre a la vista en el pie.
   import * as api from './lib/api'
   import type { Detail, Facets, Filter, Kind, PostRow, Status } from './lib/api'
+  import Backup from './lib/Backup.svelte'
   import Gallery from './lib/Gallery.svelte'
   import NameEditor from './lib/NameEditor.svelte'
   import Organizer from './lib/Organizer.svelte'
@@ -272,6 +273,7 @@
       <kbd>/</kbd>
     </label>
     <button class="btn primary" disabled={!api.looksLikePostUrl(input)}>{t('cmd.save')}</button>
+    <Backup onmessage={(m) => (message = m)} ondone={reload} />
     <button type="button" class="btn" onclick={toggleTheme}>{isDark ? t('cmd.theme_light') : t('cmd.theme_dark')}</button>
     <button type="button" class="btn" lang={i18n.lang === 'es' ? 'en' : 'es'} onclick={() => setLang(i18n.lang === 'es' ? 'en' : 'es')}>{t('cmd.other_lang')}</button>
   </form>

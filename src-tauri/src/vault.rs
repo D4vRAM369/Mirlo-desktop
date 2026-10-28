@@ -7,7 +7,7 @@ use crate::error::{fail, fail_with};
 use crate::organize::UserData;
 use crate::parser::{self, MediaKind, Post};
 use crate::sources::{self, Extracted};
-use serde::Serialize;
+use serde::{Deserialize, Serialize};
 use sha2::{Digest, Sha256};
 use std::io::Write;
 use std::net::IpAddr;
@@ -18,13 +18,13 @@ use std::time::Duration;
 pub const MAX_DOC_BYTES: u64 = 50 * 1024 * 1024;
 const MEDIA_HOSTS: [&str; 2] = ["pbs.twimg.com", "video.twimg.com"];
 
-#[derive(Debug, Serialize)]
+#[derive(Debug, Serialize, Deserialize)]
 pub struct SavedFile {
     /// Relativa a la carpeta del post, con `/`
     pub path: String,
     pub url: String,
     /// "ok" | "error" | "skipped" (documento demasiado grande)
-    pub status: &'static str,
+    pub status: String,
     pub size: u64,
     pub sha256: String,
     pub error: Option<String>,
@@ -36,8 +36,8 @@ pub struct SavedFile {
 pub struct Saved {
     pub dir: PathBuf,
     /// "ok" | "partial": parcial si falta texto o falló algún archivo (se puede reintentar)
-    pub status: &'static str,
-    pub source: &'static str,
+    pub status: String,
+    pub source: String,
     pub post: Post,
     pub files: Vec<SavedFile>,
 }
@@ -128,7 +128,7 @@ pub async fn save(root: &Path, ex: Extracted, max_doc: u64, lang: &str) -> Resul
     write_atomic(&dir.join("post.json"), pretty.as_bytes())?;
     write_atomic(&dir.join("post.md"), render_markdown(&ex.post, &files, lang).as_bytes())?;
 
-    Ok(Saved { dir, status, source: ex.source, post: ex.post, files })
+    Ok(Saved { dir, status: status.into(), source: ex.source.into(), post: ex.post, files })
 }
 
 /// Cambia solo el bloque "user" de post.json. Atómico: o queda el archivo viejo entero o el nuevo.
@@ -137,6 +137,20 @@ pub fn write_user(dir: &Path, user: &UserData) -> Result<(), String> {
     json["user"] = serde_json::json!(user);
     let pretty = serde_json::to_string_pretty(&json).map_err(|e| fail_with("internal", e))?;
     write_atomic(&dir.join("post.json"), pretty.as_bytes())
+}
+
+/// Un post ya guardado, leído de su post.json. Importar crea las filas desde aquí y no desde el
+/// mirlo.db del export: la verdad está en disco.
+pub fn load(dir: &Path) -> Result<Saved, String> {
+    #[derive(Deserialize)]
+    struct OnDisk {
+        status: String,
+        source: String,
+        post: Post,
+        files: Vec<SavedFile>,
+    }
+    let d: OnDisk = serde_json::from_value(read_json(dir)?).map_err(|e| fail_with("read_file", format!("{}: {e}", dir.display())))?;
+    Ok(Saved { dir: dir.to_path_buf(), status: d.status, source: d.source, post: d.post, files: d.files })
 }
 
 fn read_json(dir: &Path) -> Result<serde_json::Value, String> {
@@ -387,12 +401,12 @@ fn hash_file(path: &Path) -> Fetch {
     }
 }
 
-fn part_path(dest: &Path) -> PathBuf {
+pub(crate) fn part_path(dest: &Path) -> PathBuf {
     let name = dest.file_name().map(|n| n.to_string_lossy().into_owned()).unwrap_or_default();
     dest.with_file_name(format!("{name}.part"))
 }
 
-fn write_atomic(path: &Path, bytes: &[u8]) -> Result<(), String> {
+pub(crate) fn write_atomic(path: &Path, bytes: &[u8]) -> Result<(), String> {
     let part = part_path(path);
     std::fs::write(&part, bytes)
         .and_then(|()| std::fs::rename(&part, path))
@@ -407,7 +421,7 @@ fn record(path: String, url: &str, got: Fetch) -> Option<SavedFile> {
         Fetch::Skipped(Some(why)) => ("skipped", 0, String::new(), Some(why)),
         Fetch::Failed(why) => ("error", 0, String::new(), Some(why)),
     };
-    Some(SavedFile { path, url: url.to_string(), status, size, sha256, error, alt: None })
+    Some(SavedFile { path, url: url.to_string(), status: status.into(), size, sha256, error, alt: None })
 }
 
 fn render_markdown(post: &Post, files: &[SavedFile], lang: &str) -> String {
@@ -579,7 +593,7 @@ mod tests {
     #[test]
     fn markdown_has_text_media_and_quote() {
         let p = post("quote");
-        let files = vec![SavedFile { path: "media/01.mp4".into(), url: String::new(), status: "ok", size: 1, sha256: String::new(), error: None, alt: None }];
+        let files = vec![SavedFile { path: "media/01.mp4".into(), url: String::new(), status: "ok".into(), size: 1, sha256: String::new(), error: None, alt: None }];
         let md = render_markdown(&p, &files, "es");
         assert!(md.starts_with(&format!("# {} (@{})", p.author.name, p.author.handle)));
         assert!(md.contains(&p.text));

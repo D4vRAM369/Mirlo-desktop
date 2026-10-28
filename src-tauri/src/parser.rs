@@ -3,14 +3,14 @@
 
 use serde::{Deserialize, Serialize};
 
-#[derive(Debug, Clone, PartialEq, Serialize)]
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 pub struct Author {
     pub handle: String,
     pub name: String,
     pub avatar_url: Option<String>,
 }
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(rename_all = "lowercase")]
 pub enum MediaKind {
     Photo,
@@ -18,7 +18,7 @@ pub enum MediaKind {
     Gif,
 }
 
-#[derive(Debug, Clone, PartialEq, Serialize)]
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 pub struct Media {
     pub kind: MediaKind,
     /// URL a la mejor calidad disponible (foto `name=orig`, vídeo MP4 de mayor bitrate)
@@ -30,13 +30,13 @@ pub struct Media {
     pub duration_ms: Option<u64>,
 }
 
-#[derive(Debug, Clone, PartialEq, Serialize)]
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 pub struct Link {
     pub expanded_url: String,
     pub display_url: String,
 }
 
-#[derive(Debug, Clone, PartialEq, Serialize)]
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 pub struct Post {
     pub id: String,
     pub url: String,

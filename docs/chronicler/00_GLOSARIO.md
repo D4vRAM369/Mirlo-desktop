@@ -216,3 +216,13 @@ Términos técnicos del proyecto. Si un término no se entiende en otro archivo,
 
 **Definición simple:** Programa de Linux (X11) que mueve el ratón y pulsa teclas en una ventana como si lo hiciera una persona.
 **En este proyecto:** se usa para probar la ventana real de Mirlo (WebKitGTK) junto con `import -window` para las capturas.
+
+## Zip-slip
+
+**Definición simple:** Ataque con un `.zip` que trae rutas como `../../algo` para que, al descomprimir, se escriba fuera de la carpeta elegida.
+**En este proyecto:** `backup::is_safe` solo acepta rutas relativas normales y se comprueba todo el zip antes de escribir nada.
+
+## VACUUM INTO
+
+**Definición simple:** Orden de SQLite que escribe una copia compacta y consistente de la base de datos en otro archivo, aunque esté abierta.
+**En este proyecto:** exportar la usa para meter `mirlo.db` en el `.zip`.

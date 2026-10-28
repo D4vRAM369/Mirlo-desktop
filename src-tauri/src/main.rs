@@ -1,5 +1,6 @@
 #![cfg_attr(not(debug_assertions), windows_subsystem = "windows")]
 
+mod backup;
 mod db;
 mod error;
 mod organize;
@@ -9,7 +10,7 @@ mod vault;
 mod x_url;
 
 use error::{fail, fail_with};
-use std::path::PathBuf;
+use std::path::{Path, PathBuf};
 use std::sync::Mutex;
 use tauri::{Manager, State};
 
@@ -172,6 +173,25 @@ fn sync_user(app: &App, conn: &rusqlite::Connection, ids: &[String]) -> Result<(
     Ok(())
 }
 
+// ---- copias de seguridad: en un hilo aparte y con su propia conexión, para que la ventana
+// y los demás comandos sigan respondiendo mientras se comprime o se descomprime ----
+
+#[tauri::command]
+async fn export_vault(app: State<'_, App>, dest: String, with_media: bool) -> Result<backup::ExportSummary, String> {
+    let root = app.root.clone();
+    blocking(move || backup::export(&db::open(&root.join("mirlo.db")).map_err(db_err)?, &root, Path::new(&dest), with_media)).await
+}
+
+#[tauri::command]
+async fn import_vault(app: State<'_, App>, src: String) -> Result<backup::ImportSummary, String> {
+    let root = app.root.clone();
+    blocking(move || backup::import(&db::open(&root.join("mirlo.db")).map_err(db_err)?, &root, Path::new(&src), backup::MAX_IMPORT_BYTES)).await
+}
+
+async fn blocking<T: Send + 'static>(work: impl FnOnce() -> Result<T, String> + Send + 'static) -> Result<T, String> {
+    tauri::async_runtime::spawn_blocking(work).await.map_err(|e| fail_with("internal", e))?
+}
+
 /// Abre la carpeta del post en el explorador de archivos del sistema.
 #[tauri::command]
 fn open_folder(app: State<'_, App>, id: String) -> Result<(), String> {
@@ -220,6 +240,7 @@ fn db_err(e: rusqlite::Error) -> String {
 
 fn main() {
     tauri::Builder::default()
+        .plugin(tauri_plugin_dialog::init())
         .setup(|app| {
             let root = app.path().home_dir()?.join("Mirlo");
             std::fs::create_dir_all(&root)?;
@@ -230,7 +251,7 @@ fn main() {
         .invoke_handler(tauri::generate_handler![
             save_post, retry_post, list_posts, get_post, facets, open_folder, open_on_x, read_media,
             set_favorite, set_note, set_collection, add_tag, remove_tag, create_collection, rename_collection,
-            delete_collection, move_collection, rename_tag, set_tag_color, delete_tag
+            delete_collection, move_collection, rename_tag, set_tag_color, delete_tag, export_vault, import_vault
         ])
         .run(tauri::generate_context!())
         .expect("error al iniciar Mirlo");

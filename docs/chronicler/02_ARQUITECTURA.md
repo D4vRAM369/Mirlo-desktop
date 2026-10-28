@@ -140,3 +140,19 @@ Flujo: `pegar URL → x_url::status_id → sources::extract → parser::parse_* 
 
 **Descartado:** colecciones anidadas (más complejidad que valor por ahora) y arrastrar filas a una colección (opcional en la SPEC; el `M` + flechas cubre el caso).
 **Código:** `src-tauri/src/organize.rs` (lógica y tests), `db.rs` (esquema y migración), `vault::write_user`, `src/lib/Organizer.svelte`, `NameEditor.svelte`, `ColorWheel.svelte`.
+
+## Decisión 15: copias de seguridad en .zip (2026-10-28)
+
+| Tema | Elegido | Por qué |
+|---|---|---|
+| Formato | `.zip` con `manifest.json` (`mirlo_export: 1`), `mirlo.db` y las carpetas tal cual | Se abre con cualquier programa; el manifest permite rechazar lo que no es de Mirlo y cambiar el formato en el futuro |
+| Copia de la BD | `VACUUM INTO` | Copia consistente aunque la BD esté abierta; copiar el archivo a pelo podría pillarla a medias |
+| Compresión | Fotos y vídeos `Stored`, json/md/db `Deflated` | Los medios ya vienen comprimidos: recomprimir solo gasta tiempo |
+| Copia ligera | Casilla "Incluir fotos, vídeos y documentos" | Sin medios, lo que falta se marca `not_in_export` y el post queda parcial: Reintentar lo baja |
+| Importar | Fusiona, nunca sobrescribe: un post que ya está no cambia archivos ni texto; datos de la persona con `merge_user` (unión de etiquetas, favorito OR, colección y nota locales si las hay) | Importar una copia vieja nunca puede deshacer trabajo |
+| De dónde salen las filas | De cada `post.json` (`vault::load`), no del `mirlo.db` exportado | La verdad está en disco. Del `mirlo.db` solo se toma lo que no está en ningún post.json: orden de colecciones y colores |
+| Seguridad | Todo el zip se valida antes de escribir: rutas solo relativas normales (zip-slip), tope de 20 GB, SHA-256 de cada archivo | Un zip es entrada no fiable. Un archivo con huella distinta se borra y se marca `hash_mismatch` |
+| Ventana | Comandos `async` con `spawn_blocking` y conexión propia | Un export de varios GB no congela la ventana ni bloquea los demás comandos |
+
+**Descartado:** exportar a otros formatos (HTML estático queda para v0.2.0) y restaurar sobrescribiendo (contradice "nunca pisar").
+**Código:** `src-tauri/src/backup.rs` (lógica y tests), `organize::merge_user`/`apply_user`, `vault::load`, `src/lib/Backup.svelte`.

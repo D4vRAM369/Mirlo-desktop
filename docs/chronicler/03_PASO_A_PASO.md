@@ -205,3 +205,12 @@ npm run tauri dev               # pega un enlace de X con Ctrl+V en la ventana
 7. Interfaz: sidebar (Favoritos, Colecciones, Etiquetas), panel de lectura (estrella, colección, etiquetas, nota), atajos F/T/M/N, editor en línea con doble clic o F2, Alt+↑/↓.
 8. Rueda de color HEX (9.º círculo) para colores fuera de la paleta.
 9. Verificación en la ventana real (WebKitGTK) con una bóveda de pruebas: `HOME=<carpeta de pruebas> src-tauri/target/release/mirlo`, `xdotool` para teclear y `import -window` para capturar.
+
+## Paso 11: exportar e importar la bóveda (2026-10-28)
+
+1. Tests de fusión en `organize.rs` en rojo (`merge_user`, `apply_user`, `ensure_collection`, `ensure_tag`) y luego el código.
+2. `vault::load`: un post.json vuelve a ser un `Saved` (por eso `Post` y `SavedFile` ganan `Deserialize` y los estados pasan a `String`).
+3. `backup.rs` con 6 tests primero: ida y vuelta, copia sin medios, fusión, huella incorrecta, zip-slip, archivo inválido o demasiado grande.
+4. Crates nuevos: `zip` (solo deflate) y `tauri-plugin-dialog` (permisos `dialog:allow-save` y `dialog:allow-open`).
+5. Comandos `export_vault` e `import_vault` (hilo aparte) y menú "Copia de seguridad" en la barra superior.
+6. Verificación en la ventana real: exportar la bóveda de pruebas, importar en una bóveda vacía (todo vuelve, colores incluidos) y otra vez (1 fusionado, nada duplicado).

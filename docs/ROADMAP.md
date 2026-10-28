@@ -10,7 +10,7 @@
 
 ## 🔨 v0.1.0: primera versión pública (en curso)
 1. ✅ **Organizar:** favoritos, colecciones, etiquetas (paleta de 8 tonos o color HEX propio) y notas, con migración `user_version = 2` y bloque `user` en `post.json`.
-2. **Exportar / importar:** `.zip` con manifiesto, importación que fusiona y nunca sobrescribe, protección zip-slip.
+2. ✅ **Exportar / importar:** `.zip` con manifiesto, importación que fusiona y nunca sobrescribe, protección zip-slip.
 3. **Release:** CHANGELOG, README, etiqueta `v0.1.0`, revisar el borrador y publicar.
 
 ## 🔜 v0.2.0

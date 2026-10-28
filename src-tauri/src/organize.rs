@@ -186,13 +186,17 @@ pub fn rename_tag(conn: &Connection, tag: i64, name: &str) -> R<Vec<String>> {
 /// `None` quita el color. Vale un nombre de la paleta o un `#rrggbb`; nada más, porque el valor
 /// acaba en el CSS de la página y un texto libre podría colar otras reglas.
 pub fn set_tag_color(conn: &Connection, tag: i64, color: Option<&str>) -> R<()> {
-    let color = match color {
+    let color = valid_color(color)?;
+    one(conn.execute("UPDATE tags SET color = ?2 WHERE id = ?1", params![tag, color]).map_err(sql)?, "tag_not_found")
+}
+
+fn valid_color(color: Option<&str>) -> R<Option<String>> {
+    Ok(match color {
         None => None,
         Some(c) if COLORS.contains(&c) => Some(c.to_string()),
         Some(c) if c.len() == 7 && c.starts_with('#') && c[1..].bytes().all(|b| b.is_ascii_hexdigit()) => Some(c.to_ascii_lowercase()),
         Some(_) => return Err(fail("invalid_color")),
-    };
-    one(conn.execute("UPDATE tags SET color = ?2 WHERE id = ?1", params![tag, color]).map_err(sql)?, "tag_not_found")
+    })
 }
 
 pub fn delete_tag(conn: &Connection, tag: i64) -> R<Vec<String>> {
@@ -244,6 +248,56 @@ pub fn tags(conn: &Connection) -> rusqlite::Result<Vec<Counted<Tag>>> {
     )?;
     let rows = stmt.query_map([], |r| Ok(Counted { item: to_tag(r)?, count: r.get(3)? }))?.collect();
     rows
+}
+
+/// Importar: junta lo de esta bóveda (`local`) con lo que trae el export. Nunca quita nada local:
+/// unión de etiquetas, favorito si lo es en cualquiera, y colección y nota locales si las hay.
+pub fn merge_user(local: &UserData, imported: &UserData) -> UserData {
+    let mut tags = local.tags.clone();
+    for t in &imported.tags {
+        if !tags.iter().any(|mine| mine.eq_ignore_ascii_case(t)) {
+            tags.push(t.clone());
+        }
+    }
+    UserData {
+        collection: local.collection.clone().or_else(|| imported.collection.clone()),
+        tags,
+        favorite: local.favorite || imported.favorite,
+        note: if local.note.is_empty() { imported.note.clone() } else { local.note.clone() },
+    }
+}
+
+/// Deja el post con los datos `u`, creando por nombre la colección y las etiquetas que falten.
+/// Solo añade etiquetas: llamarla con el resultado de `merge_user` nunca quita una local.
+pub fn apply_user(conn: &Connection, id: &str, u: &UserData) -> R<()> {
+    let collection = u.collection.as_deref().map(|name| ensure_collection(conn, name)).transpose()?;
+    set_collection(conn, id, collection)?;
+    set_favorite(conn, id, u.favorite)?;
+    set_note(conn, id, &u.note)?;
+    for tag in &u.tags {
+        add_tag(conn, id, tag)?;
+    }
+    Ok(())
+}
+
+/// Colección por nombre; si no existe se crea al final. Devuelve su id.
+pub fn ensure_collection(conn: &Connection, name: &str) -> R<i64> {
+    let name = clean_name(name)?;
+    conn.execute(
+        "INSERT INTO collections (name, position) VALUES (?1, (SELECT coalesce(max(position) + 1, 0) FROM collections))
+         ON CONFLICT(name) DO NOTHING",
+        [&name],
+    )
+    .map_err(sql)?;
+    conn.query_row("SELECT id FROM collections WHERE name = ?1", [&name], |r| r.get(0)).map_err(sql)
+}
+
+/// Crea la etiqueta si falta, con ese color. Si ya existe, su color local se queda.
+pub fn ensure_tag(conn: &Connection, name: &str, color: Option<&str>) -> R<()> {
+    let name = clean_name(name)?;
+    let color = valid_color(color)?;
+    conn.execute("INSERT INTO tags (name, color) VALUES (?1, ?2) ON CONFLICT(name) DO NOTHING", params![name, color]).map_err(sql)?;
+    Ok(())
 }
 
 #[cfg(test)]
@@ -393,5 +447,32 @@ mod tests {
         let want = UserData { collection: Some("Recetas".into()), tags: vec!["Cocina".into(), "pan".into()], favorite: true, note: "nota".into() };
         assert_eq!(user_data(&conn, "20").unwrap(), want);
         assert_eq!(user_data(&conn, "999"), Err("not_found".into()));
+    }
+
+    #[test]
+    fn importing_merges_without_losing_anything_local() {
+        let local = UserData { collection: None, tags: vec!["pan".into()], favorite: false, note: "mía".into() };
+        let imported = UserData { collection: Some("Recetas".into()), tags: vec!["Pan".into(), "dulce".into()], favorite: true, note: "otra".into() };
+        let want = UserData { collection: Some("Recetas".into()), tags: vec!["pan".into(), "dulce".into()], favorite: true, note: "mía".into() };
+        assert_eq!(merge_user(&local, &imported), want, "unión de etiquetas, favorito OR, nota local");
+        let local = UserData { collection: Some("Mía".into()), favorite: true, ..Default::default() };
+        let got = merge_user(&local, &UserData { collection: Some("Otra".into()), note: "nueva".into(), ..Default::default() });
+        assert_eq!((got.collection.as_deref(), got.favorite, got.note.as_str()), (Some("Mía"), true, "nueva"));
+    }
+
+    #[test]
+    fn applying_user_data_creates_collections_and_tags_by_name() {
+        let conn = two_posts();
+        add_tag(&conn, NASA, "Espacio").unwrap();
+        ensure_tag(&conn, "espacio", Some("blue")).unwrap();
+        ensure_tag(&conn, "Pan", Some("#ABCDEF")).unwrap();
+        assert_eq!(ensure_tag(&conn, "Mal", Some("url(x)")), Err("invalid_color".into()));
+        let u = UserData { collection: Some("Recetas".into()), tags: vec!["pan".into(), "Espacio".into()], favorite: true, note: "ojo".into() };
+        apply_user(&conn, "20", &u).unwrap();
+        assert_eq!(user_data(&conn, "20").unwrap(), UserData { tags: vec!["Espacio".into(), "Pan".into()], ..u });
+        let colors: Vec<_> = tags(&conn).unwrap().into_iter().map(|t| (t.item.name, t.item.color)).collect();
+        assert_eq!(colors, [("Espacio".into(), None), ("Pan".into(), Some("#abcdef".into()))], "el color local no cambia");
+        assert_eq!(ensure_collection(&conn, " recetas ").unwrap(), ensure_collection(&conn, "Recetas").unwrap());
+        assert_eq!(collections(&conn).unwrap().len(), 1);
     }
 }

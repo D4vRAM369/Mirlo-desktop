@@ -117,3 +117,10 @@ export const moveCollection = (id: number, position: number) => invoke<void>('mo
 export const renameTag = (id: number, name: string) => invoke<void>('rename_tag', { id, name })
 export const setTagColor = (id: number, color: string | null) => invoke<void>('set_tag_color', { id, color })
 export const deleteTag = (id: number) => invoke<void>('delete_tag', { id })
+
+// ---- copias de seguridad ----
+export type ExportSummary = { posts: number; files: number }
+export type ImportSummary = { added: number; merged: number; bad_hash: string[]; errors: string[] }
+/** `dest`: ruta del .zip elegida en el diálogo de guardar */
+export const exportVault = (dest: string, withMedia: boolean) => invoke<ExportSummary>('export_vault', { dest, withMedia })
+export const importVault = (src: string) => invoke<ImportSummary>('import_vault', { src })

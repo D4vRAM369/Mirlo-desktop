@@ -409,9 +409,9 @@ pub(crate) mod tests {
         let post = parser::parse_tweet(&std::fs::read_to_string(path).unwrap()).unwrap();
         let files = files
             .iter()
-            .map(|p| SavedFile { path: p.to_string(), url: String::new(), status: "ok", size: 1, sha256: "x".into(), error: None, alt: Some(format!("alt {p}")) })
+            .map(|p| SavedFile { path: p.to_string(), url: String::new(), status: "ok".into(), size: 1, sha256: "x".into(), error: None, alt: Some(format!("alt {p}")) })
             .collect();
-        Saved { dir: PathBuf::from(format!("/v/{fixture}")), status, source: "syndication", post, files }
+        Saved { dir: PathBuf::from(format!("/v/{fixture}")), status: status.into(), source: "syndication".into(), post, files }
     }
 
     fn ids(conn: &Connection, f: Filter) -> Vec<String> {
@@ -452,7 +452,7 @@ pub(crate) mod tests {
         let mut s = saved("text_only", "partial", &["media/01.jpg", "media/02.jpg"]);
         upsert(&conn, &s).unwrap();
         s.post.text = "texto nuevo".into();
-        s.status = "ok";
+        s.status = "ok".into();
         s.files.truncate(1);
         upsert(&conn, &s).unwrap();
         let d = get(&conn, "20").unwrap().unwrap();

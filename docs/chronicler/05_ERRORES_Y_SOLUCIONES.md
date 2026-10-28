@@ -178,3 +178,10 @@ Resuelto con FxTwitter como fuente extra solo del texto (Decisión 6). Si FxTwit
 - **Síntoma:** al abrir la rueda, el editor desbordaba el sidebar por la derecha.
 - **Causa:** el `<input type="range">` nativo exige unos 130 px de ancho mínimo.
 - **Solución:** `width: 0; flex: 1` en el deslizador y `min-width: 0` en el editor.
+
+## Error: las teclas iban a la ventana principal y no al diálogo
+
+- **Síntoma:** al escribir la ruta en el diálogo de guardar, el texto acabó en el buscador de Mirlo y la tecla `o` abrió el explorador varias veces.
+- **Causa:** el diálogo nativo es otra ventana; `xdotool getactivewindow` seguía devolviendo la principal. Además `pgrep -n -f mirlo` cogía el propio shell de la prueba.
+- **Solución:** buscar el diálogo por nombre (`xdotool search --name "Open File"`), activarlo y comprobar que es la ventana activa antes de teclear; filtrar procesos por el PID real.
+- **Lección:** al automatizar, comprobar el destino de cada pulsación: un atajo de una letra en el sitio equivocado hace cosas.
