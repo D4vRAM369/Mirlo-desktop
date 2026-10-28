@@ -1,0 +1,169 @@
+{
+    "__typename": "Tweet",
+    "favorite_count": 182862,
+    "lang": "en",
+    "possibly_sensitive": false,
+    "created_at": "2026-04-03T13:31:59.000Z",
+    "display_text_range": [
+        0,
+        220
+    ],
+    "entities": {
+        "media": [
+            {
+                "display_url": "pic.x.com/QjxGfWiRcS",
+                "expanded_url": "https://x.com/NASA/status/2040059740848283920/photo/1",
+                "indices": [
+                    220,
+                    243
+                ],
+                "url": "https://t.co/QjxGfWiRcS"
+            }
+        ]
+    },
+    "id_str": "2040059740848283920",
+    "text": "Good morning, world! \ud83c\udf0e\n\nWe have spectacular new high-resolution images of our home planet, all of us looking back through the Orion capsule window at our Artemis II astronauts as they continue their journey to the Moon. https://t.co/QjxGfWiRcS",
+    "user": {
+        "id_str": "11348282",
+        "name": "NASA",
+        "screen_name": "NASA",
+        "is_blue_verified": true,
+        "profile_image_shape": "Square",
+        "verified": false,
+        "verified_type": "Government",
+        "profile_image_url_https": "https://pbs.twimg.com/profile_images/1321163587679784960/0ZxKlEKB_normal.jpg"
+    },
+    "edit_control": {
+        "edit_tweet_ids": [
+            "2040059740848283920"
+        ],
+        "editable_until_msecs": "1775226719000",
+        "edits_remaining": "5",
+        "is_edit_eligible": true
+    },
+    "mediaDetails": [
+        {
+            "display_url": "pic.x.com/QjxGfWiRcS",
+            "expanded_url": "https://x.com/NASA/status/2040059740848283920/photo/1",
+            "ext_alt_text": "One-third of Earth peeking through the window of the Orion capsule. The planet is a dreamy pale blue, swirling with white clouds and reflected sunlight. Although Earth only fills a fraction of the image it is the brightest object in the image by far. The capsule window is surrounded by a thick frame held in place with bolts, reminiscent of a heavy duty airplane window. It is dark in the capsule, but the outlines of straps and various components of the capsule are visible. Brighter white components are visible in the upper right corner. Credit: NASA/Reid Weisman",
+            "ext_media_availability": {
+                "status": "Available"
+            },
+            "indices": [
+                220,
+                243
+            ],
+            "media_url_https": "https://pbs.twimg.com/media/HE-_hJkWgAApuRC.jpg",
+            "original_info": {
+                "focus_rects": [
+                    {
+                        "h": 3118,
+                        "w": 5568,
+                        "x": 0,
+                        "y": 529
+                    },
+                    {
+                        "h": 3712,
+                        "w": 3712,
+                        "x": 0,
+                        "y": 0
+                    },
+                    {
+                        "h": 3712,
+                        "w": 3256,
+                        "x": 0,
+                        "y": 0
+                    },
+                    {
+                        "h": 3712,
+                        "w": 1856,
+                        "x": 603,
+                        "y": 0
+                    },
+                    {
+                        "h": 3712,
+                        "w": 5568,
+                        "x": 0,
+                        "y": 0
+                    }
+                ],
+                "height": 3712,
+                "width": 5568
+            },
+            "sizes": {
+                "large": {
+                    "h": 1365,
+                    "resize": "fit",
+                    "w": 2048
+                },
+                "medium": {
+                    "h": 800,
+                    "resize": "fit",
+                    "w": 1200
+                },
+                "small": {
+                    "h": 453,
+                    "resize": "fit",
+                    "w": 680
+                },
+                "thumb": {
+                    "h": 150,
+                    "resize": "crop",
+                    "w": 150
+                }
+            },
+            "type": "photo",
+            "url": "https://t.co/QjxGfWiRcS"
+        }
+    ],
+    "photos": [
+        {
+            "accessibilityLabel": "One-third of Earth peeking through the window of the Orion capsule. The planet is a dreamy pale blue, swirling with white clouds and reflected sunlight. Although Earth only fills a fraction of the image it is the brightest object in the image by far. The capsule window is surrounded by a thick frame held in place with bolts, reminiscent of a heavy duty airplane window. It is dark in the capsule, but the outlines of straps and various components of the capsule are visible. Brighter white components are visible in the upper right corner. Credit: NASA/Reid Weisman",
+            "backgroundColor": {
+                "red": 204,
+                "green": 214,
+                "blue": 221
+            },
+            "cropCandidates": [
+                {
+                    "h": 3118,
+                    "w": 5568,
+                    "x": 0,
+                    "y": 529
+                },
+                {
+                    "h": 3712,
+                    "w": 3712,
+                    "x": 0,
+                    "y": 0
+                },
+                {
+                    "h": 3712,
+                    "w": 3256,
+                    "x": 0,
+                    "y": 0
+                },
+                {
+                    "h": 3712,
+                    "w": 1856,
+                    "x": 603,
+                    "y": 0
+                },
+                {
+                    "h": 3712,
+                    "w": 5568,
+                    "x": 0,
+                    "y": 0
+                }
+            ],
+            "expandedUrl": "https://x.com/NASA/status/2040059740848283920/photo/1",
+            "url": "https://pbs.twimg.com/media/HE-_hJkWgAApuRC.jpg",
+            "width": 5568,
+            "height": 3712
+        }
+    ],
+    "conversation_count": 3265,
+    "news_action_type": "conversation",
+    "isEdited": false,
+    "isStaleEdit": false
+}

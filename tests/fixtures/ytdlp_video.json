@@ -1,0 +1,126 @@
+{
+  "id": "1969513398892445696",
+  "display_id": "1969515038512926823",
+  "title": "Guillermo Rauch - Turso is an incredible technical feat. A Rust rewrite of sqlite, with...",
+  "description": "Turso is an incredible technical feat. A Rust rewrite of sqlite, with an async-first architecture, incoming support for concurrent writes, vector search, and browser / wasm support out of the box.  I think this has a very good chance of being a foundational piece of https://t.co/aKyiN5zQa0",
+  "uploader": "Guillermo Rauch",
+  "uploader_id": "rauchg",
+  "timestamp": 1758403951,
+  "duration": 19.381,
+  "thumbnail": "https://pbs.twimg.com/amplify_video_thumb/1969513398892445696/img/-rM_b8k6Zt_CqfYA.jpg?name=orig",
+  "url": null,
+  "webpage_url": "https://x.com/rauchg/status/1969515038512926823",
+  "ext": "mp4",
+  "formats": [
+    {
+      "format_id": "hls-audio-32000-Audio",
+      "url": "https://video.twimg.com/amplify_video/1969513398892445696/pl/mp4a/32000/6lEuc236Fu705eHa.m3u8",
+      "ext": "mp4",
+      "vcodec": "none",
+      "tbr": 32,
+      "width": null,
+      "height": null,
+      "protocol": "m3u8_native"
+    },
+    {
+      "format_id": "hls-audio-64000-Audio",
+      "url": "https://video.twimg.com/amplify_video/1969513398892445696/pl/mp4a/64000/0-YIcDdbv1w6tLp0.m3u8",
+      "ext": "mp4",
+      "vcodec": "none",
+      "tbr": 64,
+      "width": null,
+      "height": null,
+      "protocol": "m3u8_native"
+    },
+    {
+      "format_id": "hls-audio-128000-Audio",
+      "url": "https://video.twimg.com/amplify_video/1969513398892445696/pl/mp4a/128000/kM3-Nx7_JdDn7_Et.m3u8",
+      "ext": "mp4",
+      "vcodec": "none",
+      "tbr": 128,
+      "width": null,
+      "height": null,
+      "protocol": "m3u8_native"
+    },
+    {
+      "format_id": "http-256",
+      "url": "https://video.twimg.com/amplify_video/1969513398892445696/vid/avc1/406x270/AysIGpBuzKlFWSjn.mp4?tag=21",
+      "ext": "mp4",
+      "vcodec": null,
+      "tbr": 256,
+      "width": 406,
+      "height": 270,
+      "protocol": "https"
+    },
+    {
+      "format_id": "hls-55",
+      "url": "https://video.twimg.com/amplify_video/1969513398892445696/pl/avc1/406x270/wTBbFM7SGMA7EGsx.m3u8",
+      "ext": "mp4",
+      "vcodec": "avc1.4D4015",
+      "tbr": 55.112,
+      "width": 406,
+      "height": 270,
+      "protocol": "m3u8_native"
+    },
+    {
+      "format_id": "http-832",
+      "url": "https://video.twimg.com/amplify_video/1969513398892445696/vid/avc1/542x360/vBKav2EGGII5Jcof.mp4?tag=21",
+      "ext": "mp4",
+      "vcodec": null,
+      "tbr": 832,
+      "width": 542,
+      "height": 360,
+      "protocol": "https"
+    },
+    {
+      "format_id": "hls-104",
+      "url": "https://video.twimg.com/amplify_video/1969513398892445696/pl/avc1/542x360/2fjTNQZZHZrYpO8H.m3u8",
+      "ext": "mp4",
+      "vcodec": "avc1.4D401E",
+      "tbr": 104.863,
+      "width": 542,
+      "height": 360,
+      "protocol": "m3u8_native"
+    },
+    {
+      "format_id": "http-2176",
+      "url": "https://video.twimg.com/amplify_video/1969513398892445696/vid/avc1/1086x720/FJi7yMaOdR9y9xvd.mp4?tag=21",
+      "ext": "mp4",
+      "vcodec": null,
+      "tbr": 2176,
+      "width": 1086,
+      "height": 720,
+      "protocol": "https"
+    },
+    {
+      "format_id": "hls-219",
+      "url": "https://video.twimg.com/amplify_video/1969513398892445696/pl/avc1/1086x720/WrYizT5pB2RYwAyN.m3u8",
+      "ext": "mp4",
+      "vcodec": "avc1.64001F",
+      "tbr": 219.429,
+      "width": 1086,
+      "height": 720,
+      "protocol": "m3u8_native"
+    },
+    {
+      "format_id": "http-10368",
+      "url": "https://video.twimg.com/amplify_video/1969513398892445696/vid/avc1/1828x1210/0B4vTK2y6e2J12C2.mp4?tag=21",
+      "ext": "mp4",
+      "vcodec": null,
+      "tbr": 10368,
+      "width": 1828,
+      "height": 1210,
+      "protocol": "https"
+    },
+    {
+      "format_id": "hls-329",
+      "url": "https://video.twimg.com/amplify_video/1969513398892445696/pl/avc1/1828x1210/AAarHQSiTuxpgQxb.m3u8",
+      "ext": "mp4",
+      "vcodec": "avc1.640032",
+      "tbr": 329.435,
+      "width": 1828,
+      "height": 1210,
+      "protocol": "m3u8_native"
+    }
+  ]
+}

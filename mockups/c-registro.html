@@ -1,0 +1,209 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>XVault · Registro</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Literata:opsz,wght@7..72,400;7..72,500;7..72,700&family=Schibsted+Grotesk:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+/* Registro: el texto manda. Un río cronológico donde cada post se lee como una cita;
+   los medios acompañan. Oscuro por defecto: verde de cuaderno de bitácora, no negro. */
+:root {
+  --bg: #13272A;
+  --surface: #1A3337;
+  --ink: #ECEFE7;
+  --muted: #A1B4B0;
+  --line: #2C4A4E;
+  --accent: #E3BC45;   /* mostaza: tinta de sello */
+  --err: #FF907F;
+  --focus: #9FD3FF;
+  color-scheme: dark;
+}
+@media (prefers-color-scheme: light) {
+  :root:not([data-theme="dark"]) {
+    --bg: #EDF1EC; --surface: #FFFFFF; --ink: #142A2D; --muted: #4D6563;
+    --line: #C8D4CF; --accent: #8A6400; --err: #B3261E; --focus: #1E5FAF; color-scheme: light;
+  }
+}
+:root[data-theme="light"] {
+  --bg: #EDF1EC; --surface: #FFFFFF; --ink: #142A2D; --muted: #4D6563;
+  --line: #C8D4CF; --accent: #8A6400; --err: #B3261E; --focus: #1E5FAF; color-scheme: light;
+}
+* { box-sizing: border-box; }
+body { margin: 0; background: var(--bg); color: var(--ink); font: 400 15px/1.5 "Schibsted Grotesk", system-ui, sans-serif; }
+button, input { font: inherit; color: inherit; }
+:focus-visible { outline: 2px solid var(--focus); outline-offset: 3px; }
+.btn { background: transparent; border: 1px solid var(--line); border-radius: 999px; padding: 6px 14px; cursor: pointer; }
+.btn.solid { background: var(--accent); border-color: var(--accent); color: var(--bg); font-weight: 700; }
+
+.page { max-width: 1060px; margin: 0 auto; padding: 0 24px 80px; }
+.top { display: flex; justify-content: space-between; align-items: center; padding: 20px 0 8px; }
+.logo { font: 700 22px/1 "Literata", serif; }
+/* La búsqueda es una frase */
+.ask { padding: 40px 0 16px; border-bottom: 1px solid var(--line); }
+.ask label { display: block; color: var(--muted); margin-bottom: 6px; }
+#q { width: 100%; background: transparent; border: 0; border-bottom: 2px solid var(--ink); padding: 4px 0 8px; font: 400 clamp(26px, 4vw, 40px)/1.2 "Literata", serif; outline: none; }
+#q::placeholder { color: var(--muted); opacity: .7; }
+#q:focus-visible { border-bottom-color: var(--focus); }
+.filters { display: flex; gap: 20px; flex-wrap: wrap; padding: 14px 0; color: var(--muted); }
+.filters a { color: inherit; text-decoration: none; padding-bottom: 2px; }
+.filters a[aria-current="true"] { color: var(--ink); border-bottom: 2px solid var(--accent); }
+.save { margin-left: auto; display: flex; gap: 8px; align-items: center; }
+
+/* Río: mes a la izquierda (fijo al hacer scroll), posts a la derecha */
+.month { display: grid; grid-template-columns: 200px minmax(0, 1fr); gap: 32px; padding-top: 36px; }
+.month h2 { margin: 0; font: 500 28px/1.1 "Literata", serif; position: sticky; top: 20px; align-self: start; }
+.month h2 small { display: block; font: 400 14px/1.4 "Schibsted Grotesk", sans-serif; color: var(--muted); margin-top: 6px; }
+.posts { border-left: 1px solid var(--line); }
+.post { position: relative; padding: 4px 0 34px 28px; }
+.post::before { content: ""; position: absolute; left: -5px; top: 11px; width: 9px; height: 9px; border-radius: 50%; background: var(--bg); border: 2px solid var(--muted); }
+.post.err::before { border-color: var(--err); }
+.byline { display: flex; flex-wrap: wrap; gap: 4px 10px; align-items: baseline; color: var(--muted); font-size: 14px; }
+.byline b { color: var(--ink); font-weight: 500; }
+.quote { font: 400 21px/1.6 "Literata", serif; margin: 6px 0 12px; max-width: 34em; overflow-wrap: anywhere; }
+.quote.short { font-size: 28px; line-height: 1.35; }
+.quote a { color: var(--accent); text-underline-offset: 3px; }
+.media { display: flex; gap: 8px; margin-bottom: 10px; flex-wrap: wrap; }
+.media button { padding: 0; border: 0; background: none; border-radius: 6px; overflow: hidden; height: 120px; cursor: zoom-in; position: relative; }
+.media svg { height: 100%; width: auto; display: block; }
+.media .len { position: absolute; left: 8px; bottom: 6px; background: rgba(0,0,0,.6); color: #fff; font-size: 12px; padding: 1px 7px; border-radius: 999px; }
+.doc { display: inline-flex; gap: 12px; align-items: center; border: 1px solid var(--line); border-radius: 8px; padding: 10px 14px; background: var(--surface); margin-bottom: 10px; }
+.doc b { font: 700 13px/1 "Schibsted Grotesk"; color: var(--accent); border: 1.5px solid currentColor; border-radius: 4px; padding: 6px 5px; }
+.doc span { display: block; color: var(--muted); font-size: 13px; }
+.quoted { border-left: 3px solid var(--line); padding: 2px 0 2px 14px; margin: 0 0 12px; color: var(--muted); max-width: 34em; font: 400 16px/1.55 "Literata", serif; }
+.foot { display: flex; gap: 16px; font-size: 13px; color: var(--muted); align-items: center; flex-wrap: wrap; }
+.foot a { color: inherit; }
+.problem { color: var(--err); }
+
+dialog { border: 0; padding: 0; background: #000; border-radius: 10px; max-width: min(960px, 94vw); color: #fff; }
+dialog::backdrop { background: rgba(5,15,16,.85); }
+dialog svg { display: block; width: min(960px, 94vw); height: auto; }
+.player { display: flex; gap: 12px; align-items: center; padding: 10px 14px; font-size: 13px; font-variant-numeric: tabular-nums; }
+.player .bar { flex: 1; height: 4px; background: #444; border-radius: 2px; }
+.player .bar i { display: block; width: 30%; height: 100%; background: #fff; border-radius: 2px; }
+.player button { background: none; border: 1px solid #555; color: #fff; border-radius: 999px; padding: 4px 12px; cursor: pointer; }
+
+@media (max-width: 760px) {
+  .page { padding: 0 16px 60px; }
+  .month { grid-template-columns: minmax(0, 1fr); gap: 12px; }
+  .month h2 { position: static; }
+  .quote { font-size: 18px; } .quote.short { font-size: 22px; }
+  .save { margin-left: 0; width: 100%; }
+  .media button { height: 90px; }
+}
+</style>
+</head>
+<body>
+<div class="page">
+  <header class="top">
+    <span class="logo">XVault</span>
+    <button class="btn" id="theme">Tema claro</button>
+  </header>
+
+  <section class="ask">
+    <label for="q">Buscar en 248 posts guardados</label>
+    <input id="q" type="search" placeholder="radio de válvulas, sqlite, mapas…">
+    <div class="filters" role="group" aria-label="Filtrar por contenido">
+      <a href="#" aria-current="true">Todo</a>
+      <a href="#">Con vídeo</a>
+      <a href="#">Con fotos</a>
+      <a href="#">Con documentos</a>
+      <a href="#">Solo texto</a>
+      <a href="#">Con problemas (9)</a>
+      <div class="save">
+        <input id="url" aria-label="Enlace de X" placeholder="Enlace de X (o Ctrl+V)" style="background:var(--surface);border:1px solid var(--line);border-radius:999px;padding:6px 14px;min-width:0;flex:1">
+        <button class="btn solid">Guardar</button>
+      </div>
+    </div>
+  </section>
+
+  <section class="month">
+    <h2>Octubre<small>2026, 34 posts</small></h2>
+    <div class="posts">
+      <article class="post">
+        <div class="byline"><b>Lucía Ferrer</b><span>@lucia_ferrer</span><time>27 oct, 21:14</time></div>
+        <p class="quote">Restauré una radio Telefunken de válvulas de 1958. Tres semanas, dos condensadores reventados y un dial que nadie fabrica ya, así que lo imprimí en resina. El esquema original: <a href="#">radiomuseum.org/r/telefunken_opus</a></p>
+        <div class="media" data-media="11,23,37,51"></div>
+        <blockquote class="quoted">Cita a @mapas_raros: ¿alguien sabe reparar diales de radios antiguas?</blockquote>
+        <div class="foot"><span>4 fotos, 11,9 MB</span><a href="#">Abrir carpeta</a><a href="#">Ver en X</a></div>
+      </article>
+
+      <article class="post">
+        <div class="byline"><b>Ana Beltrán</b><span>@devnotes_ana</span><time>26 oct, 18:02</time></div>
+        <p class="quote">El truco de SQLite que más tiempo me ha ahorrado este año: tablas FTS5 con <em>remove_diacritics</em>. Buscas «cancion» y encuentra «canción».</p>
+        <div class="media" data-media="101" data-video="0:42"></div>
+        <div class="foot"><span>Vídeo 1080p, 18,4 MB</span><a href="#">Abrir carpeta</a><a href="#">Ver en X</a></div>
+      </article>
+
+      <article class="post err">
+        <div class="byline"><b>Estación Meteo Grao</b><span>@estacion_meteo</span><time>26 oct, 07:40</time></div>
+        <p class="quote">Timelapse de la DANA entrando por el puerto. Seis horas en treinta segundos.</p>
+        <div class="foot"><span class="problem">El vídeo se cortó al 63 %. El texto está guardado.</span><button class="btn">Reintentar descarga</button></div>
+      </article>
+
+      <article class="post">
+        <div class="byline"><b>Jordi Mas</b><span>@jordi_text</span><time>23 oct, 23:51</time></div>
+        <p class="quote short">Lo que más echo de menos de los foros antiguos es que nadie tenía prisa.</p>
+        <div class="foot"><span>Solo texto</span><a href="#">Ver en X</a></div>
+      </article>
+
+      <article class="post">
+        <div class="byline"><b>Pablo Ruiz</b><span>@pablo_r</span><time>22 oct, 12:30</time></div>
+        <p class="quote">Informe completo de calidad del aire 2026, con los datos por barrio. Ojo al gráfico de la página 14.</p>
+        <div class="doc"><b>PDF</b><div>informe-calidad-aire-2026.pdf<span>2,4 MB, guardado en attachments/</span></div></div>
+        <div class="foot"><a href="#">Abrir documento</a><a href="#">Ver en X</a></div>
+      </article>
+    </div>
+  </section>
+
+  <section class="month">
+    <h2>Septiembre<small>2026, 51 posts</small></h2>
+    <div class="posts">
+      <article class="post">
+        <div class="byline"><b>Mapas raros</b><span>@mapas_raros</span><time>30 sept, 10:05</time></div>
+        <p class="quote">Mapa de 1891 de las líneas de tranvía de Valencia. Fijaos en el ramal del Grao: duró solo cuatro años.</p>
+        <div class="media" data-media="77"></div>
+        <div class="foot"><span>1 foto, 6,2 MB</span><a href="#">Abrir carpeta</a></div>
+      </article>
+    </div>
+  </section>
+</div>
+
+<dialog id="viewer" aria-label="Visor de medios">
+  <div id="big"></div>
+  <div class="player"><span>0:13</span><div class="bar"><i></i></div><span id="dur">0:42</span><form method="dialog"><button>Cerrar</button></form></div>
+</dialog>
+
+<script>
+function photo(seed, w = 160) {
+  const r = n => { seed = (seed * 9301 + 49297) % 233280; return seed / 233280 * n; };
+  const h = 150 + Math.floor(r(120));
+  return `<svg viewBox="0 0 ${w} 120" aria-hidden="true">
+    <rect width="${w}" height="120" fill="hsl(${h} 18% 48%)"/>
+    <path d="M0 ${70+r(20)} C ${w*.3} ${40+r(20)}, ${w*.6} ${90+r(20)}, ${w} ${60+r(20)} V120 H0Z" fill="hsl(${h+20} 22% 30%)"/>
+    <circle cx="${r(w)}" cy="${20+r(30)}" r="${8+r(10)}" fill="hsl(45 70% 80%)" opacity=".85"/>
+  </svg>`;
+}
+const dlg = document.getElementById('viewer');
+document.querySelectorAll('[data-media]').forEach(el => {
+  const seeds = el.dataset.media.split(',').map(Number), vid = el.dataset.video;
+  el.innerHTML = seeds.map((s, i) => `<button aria-label="${vid ? 'Reproducir vídeo' : `Ver foto ${i+1} de ${seeds.length}`}">${photo(s, vid ? 213 : 160)}${vid ? `<span class="len">▶ ${vid}</span>` : ''}</button>`).join('');
+  el.querySelectorAll('button').forEach((b, i) => b.onclick = () => {
+    document.getElementById('big').innerHTML = photo(seeds[i], 213);
+    dlg.querySelector('.player').style.display = vid ? 'flex' : 'none';
+    dlg.showModal();
+  });
+});
+document.addEventListener('paste', e => {
+  if (e.target.tagName === 'INPUT') return;
+  const u = document.getElementById('url'); u.value = e.clipboardData.getData('text'); u.focus();
+});
+const tb = document.getElementById('theme');
+const sync = () => tb.textContent = getComputedStyle(document.documentElement).colorScheme === 'dark' ? 'Tema claro' : 'Tema oscuro';
+tb.onclick = () => { const r = document.documentElement; r.dataset.theme = getComputedStyle(r).colorScheme === 'dark' ? 'light' : 'dark'; sync(); };
+sync();
+</script>
+</body>
+</html>

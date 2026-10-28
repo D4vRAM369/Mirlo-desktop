@@ -1,0 +1,128 @@
+{
+    "__typename": "Tweet",
+    "favorite_count": 311,
+    "lang": "en",
+    "possibly_sensitive": false,
+    "created_at": "2021-06-11T21:24:17.000Z",
+    "display_text_range": [
+        0,
+        243
+    ],
+    "entities": {
+        "media": [
+            {
+                "display_url": "pic.x.com/2y8kfGD6oQ",
+                "expanded_url": "https://x.com/CohhCarnage/status/1403463121138851843/photo/1",
+                "indices": [
+                    244,
+                    267
+                ],
+                "url": "https://t.co/2y8kfGD6oQ"
+            }
+        ]
+    },
+    "id_str": "1403463121138851843",
+    "text": "You know, there have simply been too many tweets lately that I want to reply with the following gif.\n\nSo please, in the interest of time, for any tweet you see (from any account), just imagine me responding with only the attached gif.\n\nThanks! https://t.co/2y8kfGD6oQ",
+    "user": {
+        "id_str": "31233851",
+        "name": "Cohh Carnage",
+        "screen_name": "CohhCarnage",
+        "is_blue_verified": true,
+        "profile_image_shape": "Circle",
+        "verified": false,
+        "profile_image_url_https": "https://pbs.twimg.com/profile_images/2009322855834521600/Mbc3VxXJ_normal.jpg"
+    },
+    "edit_control": {
+        "edit_tweet_ids": [
+            "1403463121138851843"
+        ],
+        "editable_until_msecs": "1623448457820",
+        "edits_remaining": "5",
+        "is_edit_eligible": true
+    },
+    "mediaDetails": [
+        {
+            "display_url": "pic.x.com/2y8kfGD6oQ",
+            "expanded_url": "https://x.com/CohhCarnage/status/1403463121138851843/photo/1",
+            "ext_alt_text": "Interested Saturday Night Live GIF by HULU",
+            "ext_media_availability": {
+                "status": "Available"
+            },
+            "indices": [
+                244,
+                267
+            ],
+            "media_url_https": "https://pbs.twimg.com/tweet_video_thumb/E3oaRJwWQAYxwM-.jpg",
+            "original_info": {
+                "focus_rects": [],
+                "height": 274,
+                "width": 400
+            },
+            "sizes": {
+                "large": {
+                    "h": 274,
+                    "resize": "fit",
+                    "w": 400
+                },
+                "medium": {
+                    "h": 274,
+                    "resize": "fit",
+                    "w": 400
+                },
+                "small": {
+                    "h": 274,
+                    "resize": "fit",
+                    "w": 400
+                },
+                "thumb": {
+                    "h": 150,
+                    "resize": "crop",
+                    "w": 150
+                }
+            },
+            "type": "animated_gif",
+            "url": "https://t.co/2y8kfGD6oQ",
+            "video_info": {
+                "aspect_ratio": [
+                    200,
+                    137
+                ],
+                "variants": [
+                    {
+                        "bitrate": 0,
+                        "content_type": "video/mp4",
+                        "url": "https://video.twimg.com/tweet_video/E3oaRJwWQAYxwM-.mp4"
+                    }
+                ]
+            }
+        }
+    ],
+    "photos": [],
+    "video": {
+        "aspectRatio": [
+            200,
+            137
+        ],
+        "contentType": "gif",
+        "durationMs": 0,
+        "mediaAvailability": {
+            "status": "available"
+        },
+        "poster": "https://pbs.twimg.com/tweet_video_thumb/E3oaRJwWQAYxwM-.jpg",
+        "variants": [
+            {
+                "type": "video/mp4",
+                "src": "https://video.twimg.com/tweet_video/E3oaRJwWQAYxwM-.mp4"
+            }
+        ],
+        "videoId": {
+            "type": "tweet",
+            "id": "1403463121138851843"
+        },
+        "viewCount": 0
+    },
+    "conversation_count": 15,
+    "news_action_type": "conversation",
+    "isEdited": false,
+    "isStaleEdit": false
+}

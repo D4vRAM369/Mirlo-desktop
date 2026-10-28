@@ -1,0 +1,188 @@
+{
+    "__typename": "Tweet",
+    "favorite_count": 317,
+    "lang": "en",
+    "possibly_sensitive": false,
+    "created_at": "2024-10-16T22:27:43.000Z",
+    "display_text_range": [
+        0,
+        254
+    ],
+    "entities": {
+        "media": [
+            {
+                "display_url": "pic.x.com/skaXcOZkcc",
+                "expanded_url": "https://x.com/simonw/status/1846679441088696480/photo/1",
+                "indices": [
+                    255,
+                    278
+                ],
+                "url": "https://t.co/skaXcOZkcc"
+            }
+        ],
+        "urls": [
+            {
+                "display_url": "simonwillison.net/2024/Oct/16/sq\u2026",
+                "expanded_url": "https://simonwillison.net/2024/Oct/16/sqlite-rails-world-202/",
+                "indices": [
+                    231,
+                    254
+                ],
+                "url": "https://t.co/M79mGMknUV"
+            }
+        ]
+    },
+    "id_str": "1846679441088696480",
+    "text": "This is such a great talk about SQLite as a production-ready backend for web applications, and one of the best examples I've seen yet of an annotated presentation to accompany a video\n\nWrote a few of my own notes on the talk here: https://t.co/M79mGMknUV https://t.co/skaXcOZkcc",
+    "user": {
+        "id_str": "12497",
+        "name": "Simon Willison",
+        "screen_name": "simonw",
+        "is_blue_verified": true,
+        "profile_image_shape": "Circle",
+        "verified": false,
+        "profile_image_url_https": "https://pbs.twimg.com/profile_images/378800000261649705/be9cc55e64014e6d7663c50d7cb9fc75_normal.jpeg"
+    },
+    "edit_control": {
+        "edit_tweet_ids": [
+            "1846679441088696480"
+        ],
+        "editable_until_msecs": "1729121263000",
+        "edits_remaining": "5",
+        "is_edit_eligible": true
+    },
+    "mediaDetails": [
+        {
+            "display_url": "pic.x.com/skaXcOZkcc",
+            "expanded_url": "https://x.com/simonw/status/1846679441088696480/photo/1",
+            "ext_alt_text": "Animated slide. The text Single-machine SQLite-only deployments can't serve production workloads is stamped with a big red Myth stamp",
+            "ext_media_availability": {
+                "status": "Available"
+            },
+            "indices": [
+                255,
+                278
+            ],
+            "media_url_https": "https://pbs.twimg.com/tweet_video_thumb/GaC5F2db0AEGySX.jpg",
+            "original_info": {
+                "focus_rects": [],
+                "height": 608,
+                "width": 1080
+            },
+            "sizes": {
+                "large": {
+                    "h": 608,
+                    "resize": "fit",
+                    "w": 1080
+                },
+                "medium": {
+                    "h": 608,
+                    "resize": "fit",
+                    "w": 1080
+                },
+                "small": {
+                    "h": 383,
+                    "resize": "fit",
+                    "w": 680
+                },
+                "thumb": {
+                    "h": 150,
+                    "resize": "crop",
+                    "w": 150
+                }
+            },
+            "type": "animated_gif",
+            "url": "https://t.co/skaXcOZkcc",
+            "video_info": {
+                "aspect_ratio": [
+                    135,
+                    76
+                ],
+                "variants": [
+                    {
+                        "bitrate": 0,
+                        "content_type": "video/mp4",
+                        "url": "https://video.twimg.com/tweet_video/GaC5F2db0AEGySX.mp4"
+                    }
+                ]
+            }
+        }
+    ],
+    "photos": [],
+    "video": {
+        "aspectRatio": [
+            135,
+            76
+        ],
+        "contentType": "gif",
+        "durationMs": 0,
+        "mediaAvailability": {
+            "status": "available"
+        },
+        "poster": "https://pbs.twimg.com/tweet_video_thumb/GaC5F2db0AEGySX.jpg",
+        "variants": [
+            {
+                "type": "video/mp4",
+                "src": "https://video.twimg.com/tweet_video/GaC5F2db0AEGySX.mp4"
+            }
+        ],
+        "videoId": {
+            "type": "tweet",
+            "id": "1846679441088696480"
+        },
+        "viewCount": 0
+    },
+    "conversation_count": 6,
+    "news_action_type": "conversation",
+    "quoted_tweet": {
+        "favorite_count": 26,
+        "in_reply_to_screen_name": "fractaledmind",
+        "in_reply_to_status_id_str": "1846649688088588741",
+        "in_reply_to_user_id_str": "1319278286",
+        "lang": "en",
+        "possibly_sensitive": false,
+        "reply_count": 0,
+        "retweet_count": 1,
+        "created_at": "2024-10-16T20:29:32.000Z",
+        "display_text_range": [
+            0,
+            119
+        ],
+        "entities": {
+            "urls": [
+                {
+                    "display_url": "fractaledmind.github.io/2024/10/16/sql\u2026",
+                    "expanded_url": "https://fractaledmind.github.io/2024/10/16/sqlite-supercharges-rails/",
+                    "indices": [
+                        96,
+                        119
+                    ],
+                    "url": "https://t.co/Fi26z2Lmc5"
+                }
+            ]
+        },
+        "id_str": "1846649700260499798",
+        "text": "Or, if you prefer, I have my slides and speaker notes stitched together as a blog post as well: https://t.co/Fi26z2Lmc5",
+        "user": {
+            "id_str": "1319278286",
+            "name": "Stephen Margheim",
+            "screen_name": "fractaledmind",
+            "is_blue_verified": true,
+            "profile_image_shape": "Circle",
+            "verified": false,
+            "profile_image_url_https": "https://pbs.twimg.com/profile_images/1800269998188863488/6UDCPE55_normal.jpg"
+        },
+        "edit_control": {
+            "edit_tweet_ids": [
+                "1846649700260499798"
+            ],
+            "editable_until_msecs": "1729114172000",
+            "edits_remaining": "5",
+            "is_edit_eligible": false
+        },
+        "isEdited": false,
+        "isStaleEdit": false
+    },
+    "isEdited": false,
+    "isStaleEdit": false
+}

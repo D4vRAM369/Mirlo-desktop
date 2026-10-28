@@ -1,0 +1,285 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>XVault · Mesa de luz</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,300..800&display=swap" rel="stylesheet">
+<style>
+/* Mesa de luz: la app es un negatoscopio. Cada post es una tira de negativos;
+   el estado se marca a mano con lápiz graso, como en una hoja de contactos. */
+:root {
+  --table: #E6ECEF;      /* superficie retroiluminada */
+  --sheet: #F7F9FA;      /* papel de la hoja de contactos */
+  --ink: #1B2228;
+  --muted: #5B6670;
+  --film: #2B3136;       /* borde de película */
+  --grease: #C42B2B;     /* lápiz graso rojo: error */
+  --wax: #D99A00;        /* lápiz amarillo: parcial */
+  --ok: #2E7A58;
+  --line: #CDD5DA;
+  --focus: #1F5FBF;
+  color-scheme: light;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --table: #1C2226; --sheet: #242B30; --ink: #E4EAED; --muted: #98A4AD;
+    --film: #0F1417; --grease: #F06060; --wax: #F0B840; --ok: #5CC497;
+    --line: #36414A; --focus: #7FB0FF; color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --table: #1C2226; --sheet: #242B30; --ink: #E4EAED; --muted: #98A4AD;
+  --film: #0F1417; --grease: #F06060; --wax: #F0B840; --ok: #5CC497;
+  --line: #36414A; --focus: #7FB0FF; color-scheme: dark;
+}
+* { box-sizing: border-box; }
+body {
+  margin: 0; background: var(--table); color: var(--ink);
+  font: 400 15px/1.5 "Archivo", system-ui, sans-serif;
+  font-variation-settings: "wdth" 100;
+}
+:focus-visible { outline: 2px solid var(--focus); outline-offset: 2px; }
+button, input, select { font: inherit; color: inherit; }
+
+/* Barra superior: el enlace se pega aquí (o Ctrl+V en cualquier sitio) */
+.top {
+  display: grid; grid-template-columns: auto 1fr auto; gap: 16px; align-items: center;
+  padding: 14px 20px; border-bottom: 1px solid var(--line); background: var(--sheet);
+}
+.brand { font-weight: 800; font-variation-settings: "wdth" 62; font-size: 26px; letter-spacing: -.01em; }
+.paste {
+  display: flex; align-items: center; gap: 10px; background: var(--table);
+  border: 1px dashed var(--muted); border-radius: 3px; padding: 8px 12px;
+}
+.paste input { flex: 1; border: 0; background: transparent; outline: none; min-width: 0; }
+.paste kbd { font-size: 12px; color: var(--muted); border: 1px solid var(--line); border-radius: 3px; padding: 1px 5px; }
+.btn { border: 1px solid var(--ink); background: var(--ink); color: var(--sheet); padding: 7px 14px; border-radius: 3px; cursor: pointer; font-weight: 600; }
+.btn.ghost { background: transparent; color: var(--ink); border-color: var(--line); }
+
+.wrap { display: grid; grid-template-columns: 210px minmax(0,1fr) 380px; min-height: calc(100vh - 63px); }
+
+/* Filtros */
+.filters { padding: 18px 20px; border-right: 1px solid var(--line); }
+.filters h2 { font-size: 13px; font-weight: 600; color: var(--muted); margin: 18px 0 6px; }
+.filters h2:first-child { margin-top: 0; }
+.filters input[type=search] { width: 100%; padding: 7px 9px; border: 1px solid var(--line); background: var(--sheet); border-radius: 3px; }
+.chk { display: flex; gap: 8px; align-items: center; padding: 3px 0; cursor: pointer; }
+.chk span:last-child { margin-left: auto; color: var(--muted); font-variant-numeric: tabular-nums; }
+
+/* Hoja de contactos */
+.sheet { padding: 18px 24px 40px; }
+.sheet-head { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 14px; }
+.sheet-head h1 { margin: 0; font-size: 20px; font-weight: 700; }
+.sheet-head p { margin: 0; color: var(--muted); }
+.strip {
+  position: relative; display: grid; grid-template-columns: 54px minmax(0, 1fr); gap: 0;
+  background: var(--film); border-radius: 2px; margin-bottom: 18px; cursor: pointer;
+  color: #E9EEF1;
+}
+.strip:hover .frames { filter: brightness(1.04); }
+.strip[aria-selected="true"] { box-shadow: 0 0 0 3px var(--focus); }
+/* número de fotograma: el orden en que se guardó (es una secuencia real) */
+.num {
+  writing-mode: vertical-rl; transform: rotate(180deg); text-align: center;
+  font-variation-settings: "wdth" 62; font-weight: 700; font-size: 22px; color: #F0C64A;
+  padding: 8px 0; display: flex; align-items: center; justify-content: center;
+  background-image: radial-gradient(circle, var(--table) 3px, transparent 3.5px);
+  background-size: 54px 18px; background-position: 7px 0; background-repeat: repeat-y;
+}
+.frames { display: flex; gap: 6px; padding: 10px 10px 0; overflow-x: auto; }
+.frame { flex: 0 0 auto; width: 150px; aspect-ratio: 4/3; border-radius: 2px; overflow: hidden; position: relative; background: #3A4248; }
+.frame svg { width: 100%; height: 100%; display: block; }
+.frame .tag { position: absolute; left: 6px; bottom: 5px; font-size: 11px; font-weight: 600; background: rgba(15,20,23,.75); padding: 1px 6px; border-radius: 2px; }
+.frame.textonly { width: 230px; aspect-ratio: auto; height: 112px; background: #EEF2F4; color: #1B2228; padding: 10px 12px; font-size: 13px; line-height: 1.4; }
+.caption { grid-column: 2; display: flex; gap: 14px; align-items: baseline; padding: 8px 12px 10px; font-size: 13px; }
+.caption b { font-weight: 600; }
+.caption .t { color: #B9C3CA; overflow: hidden; white-space: nowrap; text-overflow: ellipsis; flex: 1; min-width: 0; }
+/* marca de lápiz graso */
+.mark { position: absolute; right: 12px; top: 10px; width: 64px; height: 40px; pointer-events: none; }
+.mark-label { position: absolute; right: 10px; top: 52px; font-size: 12px; font-weight: 700; font-variation-settings: "wdth" 75; transform: rotate(-4deg); }
+
+/* Lupa: el post ampliado */
+.loupe { border-left: 1px solid var(--line); background: var(--sheet); padding: 18px 20px 32px; overflow-y: auto; }
+.viewer { background: var(--film); border-radius: 2px; aspect-ratio: 16/10; position: relative; overflow: hidden; }
+.viewer svg { width: 100%; height: 100%; display: block; }
+.play { position: absolute; inset: 0; margin: auto; width: 64px; height: 64px; border-radius: 50%; border: 2px solid #fff; background: rgba(0,0,0,.35); color: #fff; font-size: 22px; cursor: pointer; }
+.scrub { display: flex; gap: 10px; align-items: center; padding: 8px 0; color: var(--muted); font-size: 13px; font-variant-numeric: tabular-nums; }
+.scrub .bar { flex: 1; height: 4px; background: var(--line); border-radius: 2px; position: relative; }
+.scrub .bar i { position: absolute; left: 0; top: 0; bottom: 0; width: 34%; background: var(--ink); border-radius: 2px; }
+.thumbs { display: flex; gap: 6px; margin-bottom: 16px; }
+.thumbs button { width: 56px; aspect-ratio: 4/3; padding: 0; border: 2px solid transparent; border-radius: 2px; overflow: hidden; background: none; cursor: pointer; }
+.thumbs button[aria-current="true"] { border-color: var(--ink); }
+.thumbs svg { width: 100%; height: 100%; display: block; }
+.who { display: flex; gap: 10px; align-items: center; margin-bottom: 8px; }
+.avatar { width: 34px; height: 34px; border-radius: 50%; background: #9AAAB4; flex: none; }
+.who b { display: block; }
+.who small { color: var(--muted); }
+.text { font-size: 16px; line-height: 1.55; margin: 0 0 16px; max-width: 60ch; }
+.text a { color: var(--focus); }
+.files { border-top: 1px solid var(--line); padding-top: 12px; font-size: 13px; }
+.files h3 { font-size: 13px; font-weight: 600; margin: 0 0 6px; color: var(--muted); }
+.files li { display: flex; justify-content: space-between; gap: 10px; padding: 4px 0; list-style: none; }
+.files ul { margin: 0; padding: 0; }
+.files code { font-size: 12px; color: var(--muted); }
+.actions { display: flex; gap: 8px; margin-top: 16px; flex-wrap: wrap; }
+
+@media (max-width: 1100px) {
+  .wrap { grid-template-columns: minmax(0, 1fr); }
+  .filters { border-right: 0; border-bottom: 1px solid var(--line); display: flex; gap: 20px; flex-wrap: wrap; }
+  .filters > div { min-width: 160px; }
+  .loupe { border-left: 0; border-top: 1px solid var(--line); }
+}
+@media (max-width: 640px) {
+  .top { grid-template-columns: 1fr; padding: 12px 16px; }
+  .sheet, .loupe, .filters { padding-left: 16px; padding-right: 16px; }
+  .frame { width: 120px; }
+}
+</style>
+</head>
+<body>
+<header class="top">
+  <div class="brand">XVault</div>
+  <label class="paste">
+    <span aria-hidden="true">⌁</span>
+    <input id="url" placeholder="Pega aquí el enlace de un post de X" aria-label="Enlace del post">
+    <kbd>Ctrl V</kbd>
+  </label>
+  <div style="display:flex;gap:8px">
+    <button class="btn">Guardar</button>
+    <button class="btn ghost" id="theme" aria-label="Cambiar tema">Tema</button>
+  </div>
+</header>
+
+<div class="wrap">
+  <nav class="filters" aria-label="Filtros">
+    <div>
+      <h2>Buscar</h2>
+      <input type="search" placeholder="Texto, autor…" aria-label="Buscar en la bóveda">
+    </div>
+    <div>
+      <h2>Contenido</h2>
+      <label class="chk"><input type="checkbox" checked> Fotos <span>132</span></label>
+      <label class="chk"><input type="checkbox" checked> Vídeos <span>41</span></label>
+      <label class="chk"><input type="checkbox" checked> GIF <span>17</span></label>
+      <label class="chk"><input type="checkbox" checked> Documentos <span>9</span></label>
+      <label class="chk"><input type="checkbox" checked> Solo texto <span>49</span></label>
+    </div>
+    <div>
+      <h2>Estado</h2>
+      <label class="chk"><input type="checkbox" checked> Completo <span>239</span></label>
+      <label class="chk"><input type="checkbox" checked> Parcial <span>6</span></label>
+      <label class="chk"><input type="checkbox" checked> Con error <span>3</span></label>
+    </div>
+    <div>
+      <h2>Autor</h2>
+      <select aria-label="Autor" style="width:100%;padding:6px;border:1px solid var(--line);background:var(--sheet);border-radius:3px">
+        <option>Todos (64)</option><option>@lucia_ferrer</option><option>@devnotes_ana</option>
+      </select>
+    </div>
+  </nav>
+
+  <main class="sheet">
+    <div class="sheet-head">
+      <h1>Octubre 2026</h1>
+      <p>248 posts guardados, 1,9 GB en disco</p>
+    </div>
+    <div id="strips" role="listbox" aria-label="Posts guardados"></div>
+  </main>
+
+  <aside class="loupe" aria-label="Post seleccionado">
+    <div class="viewer" id="viewer"></div>
+    <div class="scrub"><span>0:14</span><div class="bar"><i></i></div><span>0:42</span></div>
+    <div class="thumbs" id="thumbs"></div>
+    <div class="who"><div class="avatar"></div><div><b>Ana Beltrán</b><small>@devnotes_ana</small><small style="display:block">26 oct 2026, 18:02</small></div></div>
+    <p class="text">El truco de SQLite que más tiempo me ha ahorrado este año: tablas virtuales FTS5 con <code>tokenize = 'unicode61 remove_diacritics 2'</code>. Buscas «cancion» y encuentra «canción». Vídeo de 40 segundos 👇 <a href="#">sqlite.org/fts5.html</a></p>
+    <div class="files">
+      <h3>En disco</h3>
+      <ul>
+        <li><span>media/01.mp4</span><code>1080p · 18,4 MB</code></li>
+        <li><span>post.json</span><code>syndication</code></li>
+        <li><span>post.md</span><code>sha256 9f3a…c21e</code></li>
+      </ul>
+    </div>
+    <div class="actions">
+      <button class="btn">Abrir carpeta</button>
+      <button class="btn ghost">Ver en X</button>
+      <button class="btn ghost">Volver a descargar</button>
+    </div>
+  </aside>
+</div>
+
+<script>
+// Fotos de relleno: paisajes abstractos en SVG generados con una semilla (sin red)
+function photo(seed, video) {
+  const r = n => { seed = (seed * 9301 + 49297) % 233280; return seed / 233280 * n; };
+  const hues = [[205,40,62],[28,55,58],[150,25,45],[350,35,55],[45,60,62],[220,20,35]];
+  const [h,s,l] = hues[Math.floor(r(hues.length))];
+  const sky = `hsl(${h} ${s}% ${l+18}%)`, ground = `hsl(${(h+30)%360} ${s}% ${l-14}%)`;
+  const hill = `hsl(${(h+15)%360} ${s}% ${l-4}%)`;
+  const y = 50 + r(25);
+  return `<svg viewBox="0 0 160 120" preserveAspectRatio="xMidYMid slice" aria-hidden="true">
+    <rect width="160" height="120" fill="${sky}"/>
+    <circle cx="${20+r(120)}" cy="${18+r(20)}" r="${6+r(10)}" fill="hsl(${h} 30% 92%)" opacity=".8"/>
+    <path d="M0 ${y} Q ${40+r(40)} ${y-20-r(20)} 90 ${y} T 160 ${y-5} V120 H0Z" fill="${hill}"/>
+    <path d="M0 ${y+25} Q 60 ${y+10} 160 ${y+28} V120 H0Z" fill="${ground}"/>
+    ${video ? '<rect width="160" height="120" fill="rgba(0,0,0,.15)"/>' : ''}
+  </svg>`;
+}
+// Marcas a mano alzada (lápiz graso)
+const marks = {
+  error: `<svg class="mark" viewBox="0 0 64 40"><path d="M6 6 L58 34 M58 6 L8 35" stroke="var(--grease)" stroke-width="4" stroke-linecap="round" fill="none"/></svg>`,
+  partial: `<svg class="mark" viewBox="0 0 64 40"><path d="M6 20 C 8 4, 56 2, 58 18 C 60 36, 10 40, 8 22" stroke="var(--wax)" stroke-width="3.5" fill="none" stroke-linecap="round"/></svg>`,
+};
+const posts = [
+  { n: 248, who: "@devnotes_ana", text: "El truco de SQLite que más tiempo me ha ahorrado este año: tablas virtuales FTS5…", media: [["video","0:42"]], sel: true },
+  { n: 247, who: "@lucia_ferrer", text: "Restauré una radio de válvulas de 1958. Antes, durante y después, en cuatro fotos.", media: [["photo"],["photo"],["photo"],["photo"]] },
+  { n: 246, who: "@estacion_meteo", text: "Timelapse de la DANA entrando por el puerto, 6 horas en 30 segundos.", media: [["video","0:30"]], state: "error", note: "Cortado al 63 %" },
+  { n: 245, who: "@pablo_r", text: "Informe completo de calidad del aire 2026, con los datos por barrio.", media: [["doc","PDF"]], state: "partial", note: "Solo texto" },
+  { n: 244, who: "@nora.codes", text: "Cuando por fin compila a la primera", media: [["gif","GIF"]] },
+  { n: 243, who: "@mapas_raros", text: "Mapa de 1891 de las líneas de tranvía de Valencia. Fijaos en el ramal del Grao.", media: [["photo"]] },
+  { n: 242, who: "@jordi_text", text: "", media: [["text","Lo que más echo de menos de los foros antiguos es que nadie tenía prisa. Respondías una semana después y la conversación seguía viva."]] },
+];
+let seed = 7;
+document.getElementById('strips').innerHTML = posts.map(p => `
+  <div class="strip" role="option" tabindex="0" aria-selected="${!!p.sel}">
+    <div class="num">${p.n}</div>
+    <div>
+      <div class="frames">${p.media.map(([k, tag]) =>
+        k === 'text' ? `<div class="frame textonly">${tag}</div>`
+        : k === 'doc' ? `<div class="frame" style="background:#EEF2F4;color:#1B2228;display:grid;place-items:center;font-weight:800;font-size:26px;font-variation-settings:'wdth' 62">PDF<span class="tag" style="color:#fff">2,4 MB</span></div>`
+        : `<div class="frame">${photo(seed += 13, k==='video')}${tag ? `<span class="tag">${k==='video'?'▶ ':''}${tag}</span>` : ''}</div>`
+      ).join('')}</div>
+      <div class="caption"><b>${p.who}</b><span class="t">${p.text}</span></div>
+    </div>
+    ${p.state ? marks[p.state] + `<span class="mark-label" style="color:var(--${p.state==='error'?'grease':'wax'})">${p.note}</span>` : ''}
+  </div>`).join('');
+document.getElementById('viewer').innerHTML = photo(101, true) + '<button class="play" aria-label="Reproducir vídeo">▶</button>';
+document.getElementById('thumbs').innerHTML = [101].map((s,i) => `<button aria-current="${i===0}" aria-label="Medio ${i+1}">${photo(s)}</button>`).join('');
+
+// Selección con teclado y ratón
+const strips = [...document.querySelectorAll('.strip')];
+strips.forEach(s => {
+  const pick = () => strips.forEach(o => o.setAttribute('aria-selected', o === s));
+  s.addEventListener('click', pick);
+  s.addEventListener('keydown', e => {
+    const i = strips.indexOf(s);
+    if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); pick(); }
+    if (e.key === 'ArrowDown') strips[Math.min(i+1, strips.length-1)].focus();
+    if (e.key === 'ArrowUp') strips[Math.max(i-1, 0)].focus();
+  });
+});
+// Ctrl+V desde cualquier parte rellena el campo
+document.addEventListener('paste', e => {
+  if (e.target.tagName === 'INPUT') return;
+  document.getElementById('url').value = e.clipboardData.getData('text'); document.getElementById('url').focus();
+});
+document.getElementById('theme').onclick = () => {
+  const r = document.documentElement, dark = getComputedStyle(r).colorScheme === 'dark';
+  r.dataset.theme = dark ? 'light' : 'dark';
+};
+</script>
+</body>
+</html>

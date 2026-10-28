@@ -1,0 +1,47 @@
+{
+    "__typename": "Tweet",
+    "favorite_count": 24,
+    "lang": "en",
+    "possibly_sensitive": false,
+    "created_at": "2026-02-19T00:37:20.000Z",
+    "display_text_range": [
+        0,
+        202
+    ],
+    "entities": {
+        "urls": [
+            {
+                "display_url": "data.ntsb.gov/carol-repgen/a\u2026",
+                "expanded_url": "https://data.ntsb.gov/carol-repgen/api/Aviation/ReportMain/GenerateNewestReport/202401/pdf",
+                "indices": [
+                    179,
+                    202
+                ],
+                "url": "https://t.co/ip2eWoq6pK"
+            }
+        ]
+    },
+    "id_str": "2024282115454419182",
+    "text": "NTSB has released its preliminary report for its ongoing investigation on the Feb. 6 crash of a Cirrus Design Corp SR22 aircraft in Lexington, SC. Download the full report (PDF): https://t.co/ip2eWoq6pK",
+    "user": {
+        "id_str": "743161872669630464",
+        "name": "NTSB Newsroom",
+        "screen_name": "NTSB_Newsroom",
+        "is_blue_verified": true,
+        "profile_image_shape": "Circle",
+        "verified": false,
+        "profile_image_url_https": "https://pbs.twimg.com/profile_images/1502015610968064010/6GM-JucT_normal.png"
+    },
+    "edit_control": {
+        "edit_tweet_ids": [
+            "2024282115454419182"
+        ],
+        "editable_until_msecs": "1771465040000",
+        "edits_remaining": "5",
+        "is_edit_eligible": true
+    },
+    "conversation_count": 0,
+    "news_action_type": "conversation",
+    "isEdited": false,
+    "isStaleEdit": false
+}

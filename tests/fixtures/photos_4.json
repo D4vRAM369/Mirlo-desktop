@@ -1,0 +1,531 @@
+{
+    "__typename": "Tweet",
+    "favorite_count": 34929,
+    "lang": "en",
+    "possibly_sensitive": false,
+    "created_at": "2026-05-04T18:01:10.000Z",
+    "display_text_range": [
+        0,
+        257
+    ],
+    "entities": {
+        "media": [
+            {
+                "display_url": "pic.x.com/LuHxS5UC4n",
+                "expanded_url": "https://x.com/NASA/status/2051361508181856362/photo/1",
+                "indices": [
+                    258,
+                    281
+                ],
+                "url": "https://t.co/LuHxS5UC4n"
+            }
+        ],
+        "urls": [
+            {
+                "display_url": "go.nasa.gov/4usiN8W",
+                "expanded_url": "https://go.nasa.gov/4usiN8W",
+                "indices": [
+                    234,
+                    257
+                ],
+                "url": "https://t.co/XInWMJwMYY"
+            }
+        ]
+    },
+    "id_str": "2051361508181856362",
+    "text": "Start your week with some new photos from Artemis II!\n\nThough our journey around the Moon has ended, we're still retrieving plenty of new images. Keep an eye on our Artemis II multimedia gallery for image highlights from the mission: https://t.co/XInWMJwMYY https://t.co/LuHxS5UC4n",
+    "user": {
+        "id_str": "11348282",
+        "name": "NASA",
+        "screen_name": "NASA",
+        "is_blue_verified": true,
+        "profile_image_shape": "Square",
+        "verified": false,
+        "verified_type": "Government",
+        "profile_image_url_https": "https://pbs.twimg.com/profile_images/1321163587679784960/0ZxKlEKB_normal.jpg"
+    },
+    "edit_control": {
+        "edit_tweet_ids": [
+            "2051361508181856362"
+        ],
+        "editable_until_msecs": "1777921270000",
+        "edits_remaining": "5",
+        "is_edit_eligible": true
+    },
+    "mediaDetails": [
+        {
+            "display_url": "pic.x.com/LuHxS5UC4n",
+            "expanded_url": "https://x.com/NASA/status/2051361508181856362/photo/1",
+            "ext_alt_text": "Earthset captured through the Orion spacecraft window during the Artemis II crew's flyby of the Moon. A muted blue Earth with bright white clouds sets behind the cratered lunar surface. The dark portion of Earth is in nighttime. Credit: NASA",
+            "ext_media_availability": {
+                "status": "Available"
+            },
+            "indices": [
+                258,
+                281
+            ],
+            "media_url_https": "https://pbs.twimg.com/media/HHfmYn1X0AA-tjt.jpg",
+            "original_info": {
+                "focus_rects": [
+                    {
+                        "h": 3118,
+                        "w": 5568,
+                        "x": 0,
+                        "y": 0
+                    },
+                    {
+                        "h": 3712,
+                        "w": 3712,
+                        "x": 788,
+                        "y": 0
+                    },
+                    {
+                        "h": 3712,
+                        "w": 3256,
+                        "x": 1016,
+                        "y": 0
+                    },
+                    {
+                        "h": 3712,
+                        "w": 1856,
+                        "x": 1716,
+                        "y": 0
+                    },
+                    {
+                        "h": 3712,
+                        "w": 5568,
+                        "x": 0,
+                        "y": 0
+                    }
+                ],
+                "height": 3712,
+                "width": 5568
+            },
+            "sizes": {
+                "large": {
+                    "h": 1365,
+                    "resize": "fit",
+                    "w": 2048
+                },
+                "medium": {
+                    "h": 800,
+                    "resize": "fit",
+                    "w": 1200
+                },
+                "small": {
+                    "h": 453,
+                    "resize": "fit",
+                    "w": 680
+                },
+                "thumb": {
+                    "h": 150,
+                    "resize": "crop",
+                    "w": 150
+                }
+            },
+            "type": "photo",
+            "url": "https://t.co/LuHxS5UC4n"
+        },
+        {
+            "display_url": "pic.x.com/LuHxS5UC4n",
+            "expanded_url": "https://x.com/NASA/status/2051361508181856362/photo/1",
+            "ext_alt_text": "A crisp image of Earth illuminated against black space taken by an Artemis II crew member through the Orion spacecraft window. Credit: NASA",
+            "ext_media_availability": {
+                "status": "Available"
+            },
+            "indices": [
+                258,
+                281
+            ],
+            "media_url_https": "https://pbs.twimg.com/media/HHfmZLUXcAAabwz.jpg",
+            "original_info": {
+                "focus_rects": [
+                    {
+                        "h": 3118,
+                        "w": 5568,
+                        "x": 0,
+                        "y": 0
+                    },
+                    {
+                        "h": 3712,
+                        "w": 3712,
+                        "x": 1345,
+                        "y": 0
+                    },
+                    {
+                        "h": 3712,
+                        "w": 3256,
+                        "x": 1573,
+                        "y": 0
+                    },
+                    {
+                        "h": 3712,
+                        "w": 1856,
+                        "x": 2273,
+                        "y": 0
+                    },
+                    {
+                        "h": 3712,
+                        "w": 5568,
+                        "x": 0,
+                        "y": 0
+                    }
+                ],
+                "height": 3712,
+                "width": 5568
+            },
+            "sizes": {
+                "large": {
+                    "h": 1365,
+                    "resize": "fit",
+                    "w": 2048
+                },
+                "medium": {
+                    "h": 800,
+                    "resize": "fit",
+                    "w": 1200
+                },
+                "small": {
+                    "h": 453,
+                    "resize": "fit",
+                    "w": 680
+                },
+                "thumb": {
+                    "h": 150,
+                    "resize": "crop",
+                    "w": 150
+                }
+            },
+            "type": "photo",
+            "url": "https://t.co/LuHxS5UC4n"
+        },
+        {
+            "display_url": "pic.x.com/LuHxS5UC4n",
+            "expanded_url": "https://x.com/NASA/status/2051361508181856362/photo/1",
+            "ext_alt_text": "A sliver of the edge of Earth glows blue against the vast darkness of space. Credit: NASA",
+            "ext_media_availability": {
+                "status": "Available"
+            },
+            "indices": [
+                258,
+                281
+            ],
+            "media_url_https": "https://pbs.twimg.com/media/HHfmZ1sXkAACmSj.jpg",
+            "original_info": {
+                "focus_rects": [
+                    {
+                        "h": 3118,
+                        "w": 5568,
+                        "x": 0,
+                        "y": 0
+                    },
+                    {
+                        "h": 3712,
+                        "w": 3712,
+                        "x": 1856,
+                        "y": 0
+                    },
+                    {
+                        "h": 3712,
+                        "w": 3256,
+                        "x": 2312,
+                        "y": 0
+                    },
+                    {
+                        "h": 3712,
+                        "w": 1856,
+                        "x": 3712,
+                        "y": 0
+                    },
+                    {
+                        "h": 3712,
+                        "w": 5568,
+                        "x": 0,
+                        "y": 0
+                    }
+                ],
+                "height": 3712,
+                "width": 5568
+            },
+            "sizes": {
+                "large": {
+                    "h": 1365,
+                    "resize": "fit",
+                    "w": 2048
+                },
+                "medium": {
+                    "h": 800,
+                    "resize": "fit",
+                    "w": 1200
+                },
+                "small": {
+                    "h": 453,
+                    "resize": "fit",
+                    "w": 680
+                },
+                "thumb": {
+                    "h": 150,
+                    "resize": "crop",
+                    "w": 150
+                }
+            },
+            "type": "photo",
+            "url": "https://t.co/LuHxS5UC4n"
+        },
+        {
+            "display_url": "pic.x.com/LuHxS5UC4n",
+            "expanded_url": "https://x.com/NASA/status/2051361508181856362/photo/1",
+            "ext_alt_text": "Earth as a thin arc glowing in the darkness of space. Sunlight traces the curves of the ocean and clouds, while the rest of the planet fades into shadow. Credit: NASA",
+            "ext_media_availability": {
+                "status": "Available"
+            },
+            "indices": [
+                258,
+                281
+            ],
+            "media_url_https": "https://pbs.twimg.com/media/HHfmaoUW4AEPF-9.jpg",
+            "original_info": {
+                "focus_rects": [
+                    {
+                        "h": 3118,
+                        "w": 5568,
+                        "x": 0,
+                        "y": 529
+                    },
+                    {
+                        "h": 3712,
+                        "w": 3712,
+                        "x": 1067,
+                        "y": 0
+                    },
+                    {
+                        "h": 3712,
+                        "w": 3256,
+                        "x": 1295,
+                        "y": 0
+                    },
+                    {
+                        "h": 3712,
+                        "w": 1856,
+                        "x": 1995,
+                        "y": 0
+                    },
+                    {
+                        "h": 3712,
+                        "w": 5568,
+                        "x": 0,
+                        "y": 0
+                    }
+                ],
+                "height": 3712,
+                "width": 5568
+            },
+            "sizes": {
+                "large": {
+                    "h": 1365,
+                    "resize": "fit",
+                    "w": 2048
+                },
+                "medium": {
+                    "h": 800,
+                    "resize": "fit",
+                    "w": 1200
+                },
+                "small": {
+                    "h": 453,
+                    "resize": "fit",
+                    "w": 680
+                },
+                "thumb": {
+                    "h": 150,
+                    "resize": "crop",
+                    "w": 150
+                }
+            },
+            "type": "photo",
+            "url": "https://t.co/LuHxS5UC4n"
+        }
+    ],
+    "photos": [
+        {
+            "accessibilityLabel": "Earthset captured through the Orion spacecraft window during the Artemis II crew's flyby of the Moon. A muted blue Earth with bright white clouds sets behind the cratered lunar surface. The dark portion of Earth is in nighttime. Credit: NASA",
+            "backgroundColor": {
+                "red": 204,
+                "green": 214,
+                "blue": 221
+            },
+            "cropCandidates": [
+                {
+                    "h": 3118,
+                    "w": 5568,
+                    "x": 0,
+                    "y": 0
+                },
+                {
+                    "h": 3712,
+                    "w": 3712,
+                    "x": 788,
+                    "y": 0
+                },
+                {
+                    "h": 3712,
+                    "w": 3256,
+                    "x": 1016,
+                    "y": 0
+                },
+                {
+                    "h": 3712,
+                    "w": 1856,
+                    "x": 1716,
+                    "y": 0
+                },
+                {
+                    "h": 3712,
+                    "w": 5568,
+                    "x": 0,
+                    "y": 0
+                }
+            ],
+            "expandedUrl": "https://x.com/NASA/status/2051361508181856362/photo/1",
+            "url": "https://pbs.twimg.com/media/HHfmYn1X0AA-tjt.jpg",
+            "width": 5568,
+            "height": 3712
+        },
+        {
+            "accessibilityLabel": "A crisp image of Earth illuminated against black space taken by an Artemis II crew member through the Orion spacecraft window. Credit: NASA",
+            "backgroundColor": {
+                "red": 204,
+                "green": 214,
+                "blue": 221
+            },
+            "cropCandidates": [
+                {
+                    "h": 3118,
+                    "w": 5568,
+                    "x": 0,
+                    "y": 0
+                },
+                {
+                    "h": 3712,
+                    "w": 3712,
+                    "x": 1345,
+                    "y": 0
+                },
+                {
+                    "h": 3712,
+                    "w": 3256,
+                    "x": 1573,
+                    "y": 0
+                },
+                {
+                    "h": 3712,
+                    "w": 1856,
+                    "x": 2273,
+                    "y": 0
+                },
+                {
+                    "h": 3712,
+                    "w": 5568,
+                    "x": 0,
+                    "y": 0
+                }
+            ],
+            "expandedUrl": "https://x.com/NASA/status/2051361508181856362/photo/1",
+            "url": "https://pbs.twimg.com/media/HHfmZLUXcAAabwz.jpg",
+            "width": 5568,
+            "height": 3712
+        },
+        {
+            "accessibilityLabel": "A sliver of the edge of Earth glows blue against the vast darkness of space. Credit: NASA",
+            "backgroundColor": {
+                "red": 204,
+                "green": 214,
+                "blue": 221
+            },
+            "cropCandidates": [
+                {
+                    "h": 3118,
+                    "w": 5568,
+                    "x": 0,
+                    "y": 0
+                },
+                {
+                    "h": 3712,
+                    "w": 3712,
+                    "x": 1856,
+                    "y": 0
+                },
+                {
+                    "h": 3712,
+                    "w": 3256,
+                    "x": 2312,
+                    "y": 0
+                },
+                {
+                    "h": 3712,
+                    "w": 1856,
+                    "x": 3712,
+                    "y": 0
+                },
+                {
+                    "h": 3712,
+                    "w": 5568,
+                    "x": 0,
+                    "y": 0
+                }
+            ],
+            "expandedUrl": "https://x.com/NASA/status/2051361508181856362/photo/1",
+            "url": "https://pbs.twimg.com/media/HHfmZ1sXkAACmSj.jpg",
+            "width": 5568,
+            "height": 3712
+        },
+        {
+            "accessibilityLabel": "Earth as a thin arc glowing in the darkness of space. Sunlight traces the curves of the ocean and clouds, while the rest of the planet fades into shadow. Credit: NASA",
+            "backgroundColor": {
+                "red": 204,
+                "green": 214,
+                "blue": 221
+            },
+            "cropCandidates": [
+                {
+                    "h": 3118,
+                    "w": 5568,
+                    "x": 0,
+                    "y": 529
+                },
+                {
+                    "h": 3712,
+                    "w": 3712,
+                    "x": 1067,
+                    "y": 0
+                },
+                {
+                    "h": 3712,
+                    "w": 3256,
+                    "x": 1295,
+                    "y": 0
+                },
+                {
+                    "h": 3712,
+                    "w": 1856,
+                    "x": 1995,
+                    "y": 0
+                },
+                {
+                    "h": 3712,
+                    "w": 5568,
+                    "x": 0,
+                    "y": 0
+                }
+            ],
+            "expandedUrl": "https://x.com/NASA/status/2051361508181856362/photo/1",
+            "url": "https://pbs.twimg.com/media/HHfmaoUW4AEPF-9.jpg",
+            "width": 5568,
+            "height": 3712
+        }
+    ],
+    "conversation_count": 1019,
+    "news_action_type": "conversation",
+    "isEdited": false,
+    "isStaleEdit": false
+}
