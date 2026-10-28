@@ -74,3 +74,19 @@ assertion `left == right` failed
 **El error:** `json.decoder.JSONDecodeError: Expecting value` al leer `publish.twitter.com/oembed`.
 **Por qué ocurrió:** El dominio redirige (`301`) a `publish.x.com` con cuerpo vacío, y `curl` sin `-L` no sigue redirecciones.
 **Cómo se resolvió:** Usar directamente `publish.x.com/oembed`.
+
+## Actualización: posts largos (2026-10-28)
+
+Resuelto con FxTwitter como fuente extra solo del texto (Decisión 6). Si FxTwitter no responde, el post sigue marcado como parcial.
+
+## Error: el PDF enlazado no termina en .pdf
+
+- **Síntoma:** `https://data.ntsb.gov/.../GenerateNewestReport/202401/pdf` es un PDF, pero su URL acaba en `/pdf`.
+- **Causa:** muchas webs generan documentos sin extensión en la URL.
+- **Solución:** pedir el enlace, leer la cabecera `Content-Type` y cortar antes de bajar el cuerpo si no es un documento de la lista blanca.
+- **Lección:** la URL miente; la cabecera la manda el servidor que sirve el archivo.
+
+## Error: los tests dejaban carpetas en /tmp
+
+- **Síntoma:** carpetas `xvault-test-*` en `/tmp` tras cada ejecución, con el PID en el nombre.
+- **Solución:** los tests escriben en `src-tauri/target/test-tmp/`, ignorado por git y limpiado por `cargo clean`.

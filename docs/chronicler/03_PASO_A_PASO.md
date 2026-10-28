@@ -85,3 +85,30 @@ cd src-tauri
 cargo test                 # 17 passed, 2 ignored
 cargo test -- --ignored    # 2 pruebas en vivo contra X
 ```
+
+
+## Paso 3: texto completo con FxTwitter (2026-10-28)
+
+1. Descargar la respuesta real de FxTwitter para el post largo de rauchg y guardar un fixture recortado (`fxtwitter_long.json`).
+2. Test primero: `fxtwitter_gives_full_text_of_long_post` exige el texto completo, enlaces expandidos y rechazo si el ID no coincide o llega HTML. Rojo.
+3. `parser::parse_fxtwitter_text` y su uso en `sources::extract` solo cuando `text_truncated`. Verde.
+4. Prueba en vivo `live_long_post_gets_full_text`: `source = "syndication+fxtwitter"`, `partial = false`.
+
+## Paso 4: guardar en disco (fase 2)
+
+1. Mirar los datos reales: el PDF del fixture `pdf_link` no termina en `.pdf`. Decisión: Content-Type manda.
+2. Módulo nuevo `vault.rs`. Funciones puras con test: `post_dir`, `media_name`, `attachment_name`, `doc_ext`, `is_public_ip`, `render_markdown`.
+3. La descarga se prueba contra un **servidor HTTP de usar y tirar** en `127.0.0.1` dentro del propio test: comprueba el `.part`, el SHA-256 de `"abc"`, el límite de tamaño y que un 404 no se reintenta.
+4. Comando `save_post` en `main.rs` y botón "Guardar post" en la pantalla provisional.
+5. Prueba en vivo con 5 posts reales (4 fotos, vídeo, GIF, cita, PDF): todos `ok`, ningún `.part` sobrante, `sha256sum` coincide con `post.json`, la foto conserva 5568x3712.
+
+> 💡 **Nota para aprendices:** No hace falta internet para probar una descarga. Un `TcpListener` en el puerto 0 (el sistema elige uno libre) que responde texto fijo es un servidor real para `reqwest`.
+
+> ⚠️ **Errores comunes:** Escribir directamente en el nombre final. Si la descarga se corta, queda un archivo roto que parece bueno. Con `.part` + `rename`, el nombre final solo aparece cuando está completo.
+
+**Verificación:**
+```bash
+cd src-tauri
+cargo test                                      # 26 passed, 4 ignored
+cargo test live_save -- --ignored --nocapture   # guarda 5 posts reales en target/test-tmp/live
+```

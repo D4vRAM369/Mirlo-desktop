@@ -15,11 +15,10 @@ pub struct Extracted {
     pub partial: bool,
     /// JSON crudo de la fuente, para volver a parsearlo en el futuro (post.json)
     #[serde(skip)]
-    #[allow(dead_code, reason = "se escribe como post.json en la fase 2")]
     pub raw_json: String,
 }
 
-const UA: &str = "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/130 Safari/537.36";
+pub(crate) const UA: &str = "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/130 Safari/537.36";
 
 pub async fn extract(id: &str) -> Result<Extracted, String> {
     let client = reqwest::Client::builder()
@@ -31,9 +30,19 @@ pub async fn extract(id: &str) -> Result<Extracted, String> {
 
     match get(&client, &syndication_url(id)).await {
         Ok(raw) => match parser::parse_tweet(&raw) {
-            Ok(post) => {
+            Ok(mut post) => {
+                let mut source = "syndication";
+                // X corta los posts largos a ~280: FxTwitter da el texto completo (solo el texto)
+                if post.text_truncated {
+                    let fx = format!("https://api.fxtwitter.com/status/{id}");
+                    if let Ok(text) = get(&client, &fx).await.and_then(|j| parser::parse_fxtwitter_text(&j, id).map_err(|e| describe(&e))) {
+                        post.text = text;
+                        post.text_truncated = false;
+                        source = "syndication+fxtwitter";
+                    }
+                }
                 let partial = post.text_truncated;
-                return Ok(Extracted { post, source: "syndication", partial, raw_json: raw });
+                return Ok(Extracted { post, source, partial, raw_json: raw });
             }
             Err(e) => tried.push(format!("syndication: {}", describe(&e))),
         },
@@ -161,6 +170,15 @@ mod tests {
         let got = tauri::async_runtime::block_on(extract("20")).unwrap();
         assert_eq!(got.source, "syndication");
         assert_eq!(got.post.text, "just setting up my twttr");
+    }
+
+    #[test]
+    #[ignore]
+    fn live_long_post_gets_full_text() {
+        let got = tauri::async_runtime::block_on(extract("1969515038512926823")).unwrap();
+        assert_eq!(got.source, "syndication+fxtwitter");
+        assert!(!got.partial);
+        assert!(got.post.text.ends_with("shell.turso.tech"), "{}", got.post.text);
     }
 
     #[test]

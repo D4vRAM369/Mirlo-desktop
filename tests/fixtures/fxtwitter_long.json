@@ -1,0 +1,9 @@
+{
+ "code": 200,
+ "message": "OK",
+ "tweet": {
+  "id": "1969515038512926823",
+  "url": "https://x.com/rauchg/status/1969515038512926823",
+  "text": "Turso is an incredible technical feat. A Rust rewrite of sqlite, with an async-first architecture, incoming support for concurrent writes, vector search, and browser / wasm support out of the box.\n\nI think this has a very good chance of being a foundational piece of infrastructure of the vibe-coding age. On-demand, sqlite-compatible global databases that can also run in-browser and on-device.\n\nThe pace at which the project is evolving is most definitely *not normal*. @penberg and @glcst are built different.\n\nDemo: http://shell.turso.tech"
+ }
+}

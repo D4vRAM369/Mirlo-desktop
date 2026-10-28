@@ -48,3 +48,21 @@ Flujo: `pegar URL → x_url::status_id → sources::extract → parser::parse_* 
 
 **Por qué separar parser y sources:** El parser no sabe de dónde viene el JSON. Así se prueba con fixtures (rápido, sin red) y las fuentes se pueden cambiar sin tocarlo.
 **Sin dependencias nuevas:** fechas ISO con 15 líneas (algoritmo de Hinnant) en lugar de `chrono`; entidades HTML con 5 `replace`.
+
+## Decisión 6: FxTwitter solo para el texto de posts largos (2026-10-28)
+
+- **Problema:** syndication y yt-dlp cortan los posts de más de 280 caracteres.
+- **Opciones:** dejarlos como parciales / pedir el texto a FxTwitter (`api.fxtwitter.com`), un servicio de terceros.
+- **Elegida:** FxTwitter, pero **solo** cuando `text_truncated` es true y **solo** para el texto. Autor, fecha y medios siguen saliendo de X. Se comprueba que el ID de la respuesta coincide.
+- **Coste aceptado:** el ID de cada post largo guardado se envía a un tercero. Si FxTwitter falla, el post queda como parcial, igual que antes.
+- **Rastro:** `source = "syndication+fxtwitter"`.
+
+## Decisión 7: cómo se guardan los archivos (fase 2)
+
+- **Escritura atómica:** todo se escribe como `nombre.part` y se renombra al terminar. Un archivo con su nombre final está siempre completo.
+- **Reintentos:** hasta 3 intentos con esperas de 2 s y 4 s, solo para conexión caída, 429 y 5xx. Un 404 no se reintenta.
+- **Medios:** solo de `pbs.twimg.com` y `video.twimg.com` por https. Si un vídeo falla, se reintenta con yt-dlp.
+- **Documentos:** decide el **Content-Type**, no la extensión de la URL (el PDF de la NTSB acaba en `/pdf`). Lista blanca: pdf, epub, doc(x), xls(x), ppt(x), odt, csv. Máximo 50 MB, comprobado antes y durante la descarga.
+- **Anti-SSRF en enlaces:** antes de tocar un enlace del post se resuelve su DNS y se rechaza cualquier IP privada, localhost, enlace local, CGNAT o multicast. Cada salto de una redirección pasa el mismo control. Límite conocido: rebinding de DNS (ver comentario `ponytail:` en `vault.rs`).
+- **Reintento barato:** un medio que ya existe en disco no se vuelve a bajar; se recalcula su SHA-256.
+- **post.json** guarda el post normalizado, la lista de archivos con su SHA-256 y el JSON crudo de la fuente (`raw`) para poder reinterpretarlo en el futuro.

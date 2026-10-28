@@ -113,3 +113,22 @@ Términos técnicos del proyecto. Si un término no se entiende en otro archivo,
 
 **Definición simple:** Engañar a un programa para que haga peticiones a sitios a los que no debería.
 **En este proyecto:** `x_url::status_id` solo acepta enlaces de x.com o twitter.com con `/status/<número>`, y el backend construye él mismo las URLs a partir del número.
+
+## Escritura atómica (.part + rename)
+
+**Definición simple:** Escribir en un nombre provisional y renombrar al final. Renombrar dentro del mismo disco es instantáneo: el archivo aparece entero o no aparece.
+**En este proyecto:** `vault::fetch_to` escribe `01.jpg.part`; `get_file` lo renombra a `01.jpg`.
+
+## SHA-256
+
+**Definición simple:** La "huella dactilar" de un archivo: 64 caracteres que cambian por completo si cambia un solo byte.
+**En este proyecto:** se guarda en `post.json` por cada archivo. Sirve para detectar corrupción y, más adelante, duplicados.
+
+## Content-Type
+
+**Definición simple:** Cabecera HTTP donde el servidor dice qué tipo de archivo envía (`application/pdf`, `text/html`…).
+**En este proyecto:** decide si un enlace es un documento que se guarda o una web que se ignora.
+
+## Backoff
+
+**Definición simple:** Esperar cada vez más entre reintentos (2 s, 4 s…) para no machacar un servidor que ya va mal.

@@ -111,6 +111,25 @@ pub fn parse_ytdlp(json: &str) -> Result<Post, ParseError> {
     })
 }
 
+/// Texto completo de un post largo vía FxTwitter (tercero). Solo se usa para eso:
+/// medios, autor y fecha siguen saliendo de X. Comprueba que el ID coincide.
+pub fn parse_fxtwitter_text(json: &str, id: &str) -> Result<String, ParseError> {
+    #[derive(Deserialize)]
+    struct Fx {
+        tweet: FxTweet,
+    }
+    #[derive(Deserialize)]
+    struct FxTweet {
+        id: String,
+        text: String,
+    }
+    let fx: Fx = serde_json::from_str(json).map_err(|e| ParseError::Malformed(e.to_string()))?;
+    if fx.tweet.id != id || fx.tweet.text.trim().is_empty() {
+        return Err(ParseError::Empty);
+    }
+    Ok(fx.tweet.text.trim().to_string())
+}
+
 /// Respaldo 2: oEmbed. Solo trae texto y autor; los enlaces siguen como t.co.
 /// El HTML es un fragmento pequeño y fijo de la API oficial (`<blockquote><p>texto</p>&mdash; Nombre (@user)…`),
 /// no una página: se lee solo el primer `<p>`.
@@ -341,7 +360,7 @@ fn decode_entities(s: &str) -> String {
 }
 
 /// Segundos Unix → ISO 8601 UTC sin dependencias (algoritmo civil_from_days de H. Hinnant)
-fn iso_from_unix(secs: i64) -> String {
+pub(crate) fn iso_from_unix(secs: i64) -> String {
     let (days, rem) = (secs.div_euclid(86_400), secs.rem_euclid(86_400));
     let z = days + 719_468;
     let era = z.div_euclid(146_097);
@@ -506,5 +525,18 @@ mod tests {
         assert!(p.text.contains("we're still"), "entidades decodificadas");
         assert!(!p.text.contains("pic.twitter.com"), "el enlace de la foto no es texto del post");
         assert!(!p.text.contains("&mdash;") && !p.text.contains("May 4, 2026"), "la firma no es texto del post");
+    }
+
+    #[test]
+    fn fxtwitter_gives_full_text_of_long_post() {
+        let short = fixture("video");
+        let full = parse_fxtwitter_text(&raw("fxtwitter_long"), "1969515038512926823").unwrap();
+        assert!(full.starts_with(&short.text[..200]), "mismo post: {full:?}");
+        assert!(full.len() > short.text.len() + 200);
+        assert!(full.ends_with("Demo: http://shell.turso.tech"), "enlaces ya expandidos: {full:?}");
+        assert!(!full.contains("t.co/"));
+        // otro post o respuesta HTML (post inexistente): no se acepta
+        assert!(parse_fxtwitter_text(&raw("fxtwitter_long"), "20").is_err());
+        assert!(parse_fxtwitter_text("<!DOCTYPE html>", "20").is_err());
     }
 }
