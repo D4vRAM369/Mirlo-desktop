@@ -33,6 +33,12 @@
   "bundle": {
     "active": true,
     "targets": "all",
+    "publisher": "D4vRAM369",
+    "copyright": "Copyright (C) 2026 D4vRAM369. GPL-3.0-or-later.",
+    "category": "Utility",
+    "shortDescription": "Local vault for X posts",
+    "longDescription": "Save X (Twitter) posts to your own disk: text, photos, videos and documents, organized and searchable, with no account or cloud.\n\nGuarda posts de X (Twitter) en tu propio disco: texto, fotos, vídeos y documentos, organizados y con búsqueda, sin cuenta ni nube.",
+    "homepage": "https://github.com/D4vRAM369/Mirlo-desktop",
     "icon": [
       "icons/128x128@2x.png",
       "icons/32x32.png",

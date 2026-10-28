@@ -2,7 +2,10 @@
 name = "mirlo"
 version = "0.1.0"
 license = "GPL-3.0-or-later"
-description = "Mirlo desktop"
+description = "Local vault for X posts: text, photos, videos and documents saved on your own disk."
+authors = ["D4vRAM369"]
+repository = "https://github.com/D4vRAM369/Mirlo-desktop"
+homepage = "https://github.com/D4vRAM369/Mirlo-desktop"
 edition = "2021"
 build = "build.rs"
 
