@@ -171,3 +171,25 @@ npm run tauri dev               # pega un enlace de X con Ctrl+V en la ventana
 3. Etiqueta `v0.1.0` subida → se decidió añadir funciones antes → `gh run cancel`, borrar la etiqueta en GitHub (`git push origin :refs/tags/v0.1.0`) y en local.
 4. Limpieza de datos personales: primero los archivos actuales, después el historial con `git filter-repo` (ver `07_COMANDOS_Y_MANUAL.md`).
 5. `docs/ROADMAP.md` (público) y documentos de trabajo locales, no versionados, para retomar en otra sesión.
+
+---
+
+## Sesión 1 — resumen (2026-10-28 / 2026-10-29)
+
+📋 **RESUMEN DE SESIÓN**
+
+**PROYECTO:** Mirlo (antes XVault)
+
+✅ **LO QUE LOGRAMOS:**
+- Extractor de posts de X con TDD, sin regex sobre HTML, con cadena de fuentes y texto completo de posts largos.
+- Descargas atómicas con SHA-256, documentos por Content-Type y protección SSRF.
+- SQLite con búsqueda FTS5, filtros y reintento; interfaz "Bandeja" con tema claro/oscuro y teclado.
+- Empaquetado `.deb`/`.rpm`/AppImage con yt-dlp, CI y workflow de release.
+- Icono y nombre propios, banner y README en dos idiomas, interfaz en español e inglés.
+- Historial de Git limpio de datos personales.
+
+📚 **CONCEPTOS APRENDIDOS:** ver `../profesoria/CONCEPTOS.md` (10 conceptos) y `../profesoria/HOJA_DE_RUTA.md` (mapa completo).
+
+🔜 **PRÓXIMOS PASOS:** organizar (favoritos, colecciones, etiquetas, notas) → exportar/importar → release v0.1.0 (`../ROADMAP.md`).
+
+❓ **PENDIENTES:** botón de idioma sin probar en la ventana real; Windows y macOS sin probar.
