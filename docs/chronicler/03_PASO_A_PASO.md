@@ -143,3 +143,12 @@ npm run tauri dev               # pega un enlace de X con Ctrl+V en la ventana
 5. Revisión visual con capturas headless a 1280x840 y 960x640, en claro y oscuro (ver "Cómo revisar el diseño" en `07_COMANDOS_Y_MANUAL.md`).
 
 > 💡 **Nota para aprendices:** `PRAGMA user_version` es un número que SQLite guarda dentro del archivo y no usa para nada: es tuyo. Sirve para saber qué cambios de esquema ya se aplicaron.
+
+
+## Paso 7: empaquetado (fase 5)
+
+1. `scripts/fetch-yt-dlp.mjs` + `npm run sidecar`; `src-tauri/binaries/` en `.gitignore`.
+2. `externalBin` en `tauri.conf.json` y el script en `beforeDevCommand` y `beforeBuildCommand`.
+3. Test en vivo `live_ytdlp_fallback_downloads_video`: la rama de respaldo de vídeo, sin probar desde la fase 2, descarga un MP4 válido con su SHA-256 y sin dejar el temporal.
+4. `npm run tauri build` → paquetes en `src-tauri/target/release/bundle/`.
+5. `docs/BACKPORT-THREADSVAULT.md` y `README.md`.

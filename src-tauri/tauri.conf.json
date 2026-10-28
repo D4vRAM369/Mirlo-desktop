@@ -4,23 +4,44 @@
   "version": "0.1.0",
   "identifier": "com.xvault.desktop",
   "build": {
-    "beforeDevCommand": "npm run dev",
-    "beforeBuildCommand": "npm run build",
+    "beforeDevCommand": "npm run sidecar && npm run dev",
+    "beforeBuildCommand": "npm run sidecar && npm run build",
     "devUrl": "http://localhost:1420",
     "frontendDist": "../dist"
   },
   "app": {
     "windows": [
-      { "label": "main", "title": "XVault", "width": 1280, "height": 840, "minWidth": 960, "minHeight": 600 }
+      {
+        "label": "main",
+        "title": "XVault",
+        "width": 1280,
+        "height": 840,
+        "minWidth": 960,
+        "minHeight": 600
+      }
     ],
     "security": {
-      "assetProtocol": { "enable": true, "scope": ["$HOME/XVault/**"] },
+      "assetProtocol": {
+        "enable": true,
+        "scope": [
+          "$HOME/XVault/**"
+        ]
+      },
       "csp": "default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; font-src 'self'; img-src 'self' data: blob: asset: http://asset.localhost; media-src 'self' blob: asset: http://asset.localhost; connect-src ipc: http://ipc.localhost"
     }
   },
   "bundle": {
     "active": true,
     "targets": "all",
-    "icon": ["icons/32x32.png", "icons/128x128.png", "icons/128x128@2x.png", "icons/icon.icns", "icons/icon.ico"]
+    "icon": [
+      "icons/32x32.png",
+      "icons/128x128.png",
+      "icons/128x128@2x.png",
+      "icons/icon.icns",
+      "icons/icon.ico"
+    ],
+    "externalBin": [
+      "binaries/xvault-yt-dlp"
+    ]
   }
 }

@@ -47,3 +47,20 @@ chromium --headless=new --window-size=1280,840 --virtual-time-budget=6000 --scre
 ```
 
 Todo vive en `target/` (ignorado por git): es andamio de revisión, no parte de la app.
+
+
+## CI y releases (GitHub Actions)
+
+- `.github/workflows/ci.yml`: en cada push y PR → `npm run check`, `cargo test`, `cargo clippy -D warnings`. Las pruebas en vivo no corren en CI.
+- `.github/workflows/release.yml`: al subir una etiqueta `v*` compila en Linux, Windows y macOS y deja los instaladores en un **borrador** de Release.
+
+```bash
+git tag v0.1.0
+git push --tags        # lanza release.yml
+```
+
+Antes de subir cambios a los workflows:
+
+```bash
+actionlint             # revisa .github/workflows/*.yml (instalado con: go install github.com/rhysd/actionlint/cmd/actionlint@v1.7.12)
+```

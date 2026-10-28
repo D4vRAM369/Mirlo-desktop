@@ -117,3 +117,15 @@ Resuelto con FxTwitter como fuente extra solo del texto (Decisión 6). Si FxTwit
 
 - **Causa:** `text-overflow: ellipsis` no se aplica a un texto suelto dentro de un contenedor flex.
 - **Solución:** envolver el nombre en su propio `<span>` con `overflow: hidden; white-space: nowrap; text-overflow: ellipsis`.
+
+## Error: el .deb no se podría instalar junto al yt-dlp del sistema
+
+- **Síntoma (detectado antes de instalar):** el paquete metía `/usr/bin/yt-dlp`, y en este equipo ese archivo ya es del paquete `yt-dlp` (`dpkg -S /usr/bin/yt-dlp`). `dpkg` habría fallado con "intenta sobrescribir '/usr/bin/yt-dlp'".
+- **Causa:** Tauri instala los sidecars en `/usr/bin` con su nombre tal cual.
+- **Solución:** sidecar con nombre propio, `xvault-yt-dlp`, en el script, en `externalBin` y en `sources::ytdlp_binary()`.
+- **Lección:** antes de dar por bueno un paquete, listar su contenido (`dpkg-deb -c`) y preguntarse qué más hay ya en esas rutas.
+
+## Error: `tauri dev` se cerró con código 101 al renombrar el sidecar
+
+- **Causa:** el vigilante de `tauri dev` recompiló en los segundos entre el cambio de `externalBin` y la descarga del binario con el nombre nuevo: `resource path binaries/xvault-yt-dlp-… doesn't exist`.
+- **Solución:** ninguna en el código; volver a lanzar `npm run tauri dev` cuando el binario ya está.

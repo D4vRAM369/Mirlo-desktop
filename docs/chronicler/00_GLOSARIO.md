@@ -152,3 +152,12 @@ Términos técnicos del proyecto. Si un término no se entiende en otro archivo,
 
 **Definición simple:** La forma en que Tauri deja al WebView mostrar archivos del disco, solo dentro de las carpetas permitidas.
 **En este proyecto:** `assetProtocol.scope = ["$HOME/XVault/**"]`; `api.fileUrl` construye la URL.
+
+## Sidecar
+
+**Definición simple:** Un programa aparte que la app lleva dentro y ejecuta cuando lo necesita.
+**En este proyecto:** `xvault-yt-dlp`, empaquetado con `bundle.externalBin` y descargado por `npm run sidecar`.
+
+## actionlint
+
+**Definición simple:** Un corrector para los archivos de GitHub Actions. Encuentra errores (una clave mal escrita, una expresión `${{ }}` inválida, un `run:` con un fallo de shell) antes de hacer push, en lugar de descubrirlos cuando el workflow falla en GitHub.

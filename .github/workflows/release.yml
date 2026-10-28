@@ -1,0 +1,49 @@
+# Al subir una etiqueta v* (git tag v0.1.0 && git push --tags) compila XVault en Linux, Windows y macOS
+# y deja los instaladores en un borrador de Release. Se publica a mano tras revisarlo.
+# `beforeBuildCommand` (npm run sidecar && npm run build) descarga el yt-dlp de cada plataforma y verifica su SHA-256.
+name: Release
+
+on:
+  push:
+    tags: ['v*']
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-22.04, windows-latest, macos-latest]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Dependencias de Tauri en Linux
+        if: runner.os == 'Linux'
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y libwebkit2gtk-4.1-dev libappindicator3-dev librsvg2-dev patchelf
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - uses: dtolnay/rust-toolchain@stable
+
+      - uses: Swatinem/rust-cache@v2
+        with:
+          workspaces: src-tauri
+
+      - run: npm ci
+
+      - uses: tauri-apps/tauri-action@v0
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tagName: ${{ github.ref_name }}
+          releaseName: XVault ${{ github.ref_name }}
+          releaseBody: Instaladores para Linux (.deb, .rpm, .AppImage), Windows (.msi, .exe) y macOS (.dmg). Incluyen yt-dlp.
+          releaseDraft: true

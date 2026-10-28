@@ -89,3 +89,11 @@ Flujo: `pegar URL → x_url::status_id → sources::extract → parser::parse_* 
 - **Estados con forma + palabra** (✓ Completo, ◐ Parcial, ✕ Error), nunca solo color.
 - **Texto alternativo de las fotos:** se guarda en `files.alt` (lo pone el autor en X) y lo usa el visor. Migración con `PRAGMA user_version` para BD de la fase 3.
 - **Cola sin porcentaje falso:** la barra de "Guardando…" va y viene; no hay progreso real que mostrar y no se inventa uno.
+
+## Decisión 10: yt-dlp como sidecar oficial de Tauri (fase 5)
+
+- **Mecanismo:** `bundle.externalBin = ["binaries/xvault-yt-dlp"]`. Tauri exige el archivo `src-tauri/binaries/xvault-yt-dlp-<target-triple>` y al empaquetar lo deja junto al ejecutable como `xvault-yt-dlp`, que es donde ya lo buscaba `sources::ytdlp_binary()`. ThreadsVault lo metía como recurso y lo buscaba a mano.
+- **El binario no va a git** (41 MB). `npm run sidecar` (`scripts/fetch-yt-dlp.mjs`) baja la versión fijada de la release oficial y comprueba su SHA-256 contra `SHA2-256SUMS`. Corre antes de `tauri dev` y `tauri build`; si ya está y el hash cuadra, no descarga.
+- **Versión fijada** (`VERSION` en el script). Subirla cuando X rompa yt-dlp.
+- **Límite conocido:** la lista de hashes viene de la misma release; protege de descargas corruptas, no de una release comprometida.
+- **Sin ffmpeg:** se pide `best[ext=mp4]`, un único archivo con vídeo y audio.

@@ -107,14 +107,15 @@ async fn get(client: &reqwest::Client, url: &str) -> Result<String, String> {
     res.text().await.map_err(|e| e.to_string())
 }
 
-/// yt-dlp empaquetado junto al ejecutable (sidecar de Tauri) o, en desarrollo, el del PATH.
+/// yt-dlp empaquetado junto al ejecutable (sidecar de Tauri) o, si no está, el del PATH.
+/// El sidecar se llama `xvault-yt-dlp` para no chocar con el paquete `yt-dlp` del sistema en /usr/bin.
 pub fn ytdlp_binary() -> PathBuf {
-    let name = if cfg!(windows) { "yt-dlp.exe" } else { "yt-dlp" };
+    let exe = if cfg!(windows) { ".exe" } else { "" };
     std::env::current_exe()
         .ok()
-        .and_then(|exe| exe.parent().map(|dir| dir.join(name)))
+        .and_then(|path| path.parent().map(|dir| dir.join(format!("xvault-yt-dlp{exe}"))))
         .filter(|p| p.is_file())
-        .unwrap_or_else(|| PathBuf::from(name))
+        .unwrap_or_else(|| PathBuf::from(format!("yt-dlp{exe}")))
 }
 
 async fn ytdlp_json(post_url: &str) -> Result<String, String> {

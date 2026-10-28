@@ -579,4 +579,17 @@ mod tests {
             assert!(!saved.files.is_empty(), "{id}: sin archivos");
         }
     }
+
+    /// La rama de respaldo de vídeo, forzada: `cargo test live_ytdlp -- --ignored`
+    #[test]
+    #[ignore]
+    fn live_ytdlp_fallback_downloads_video() {
+        let dest = tmp("ytdlp").join("media/01.mp4");
+        std::fs::create_dir_all(dest.parent().unwrap()).unwrap();
+        let got = tauri::async_runtime::block_on(ytdlp_download("https://x.com/rauchg/status/1969515038512926823", 1, &dest));
+        assert!(matches!(&got, Fetch::Done(f) if f.size > 100_000 && f.sha256.len() == 64), "{got:?}");
+        assert!(!dest.with_extension("ytdlp.mp4").exists(), "no queda el temporal");
+        let head = std::fs::read(&dest).unwrap();
+        assert_eq!(&head[4..8], b"ftyp", "es un MP4");
+    }
 }
