@@ -48,6 +48,13 @@
     ],
     "externalBin": [
       "binaries/mirlo-yt-dlp"
-    ]
+    ],
+    "linux": {
+      "deb": {
+        "depends": [
+          "libayatana-appindicator3-1"
+        ]
+      }
+    }
   }
 }

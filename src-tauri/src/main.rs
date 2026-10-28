@@ -238,6 +238,44 @@ fn db_err(e: rusqlite::Error) -> String {
     fail_with("database", e)
 }
 
+/// Icono en la bandeja del sistema. En Linux (AppIndicator) el clic sobre el icono no llega a la
+/// app, solo el menú: por eso "Mostrar" va en el menú y el clic izquierdo solo sirve en Windows.
+/// ponytail: textos solo en español; traducir si el menú crece.
+fn tray(app: &tauri::App) -> tauri::Result<()> {
+    use tauri::menu::{Menu, MenuItem};
+    use tauri::tray::{MouseButton, MouseButtonState, TrayIconBuilder, TrayIconEvent};
+
+    let show = MenuItem::with_id(app, "show", "Mostrar Mirlo", true, None::<&str>)?;
+    let quit = MenuItem::with_id(app, "quit", "Salir", true, None::<&str>)?;
+    let mut tray = TrayIconBuilder::new()
+        .tooltip("Mirlo")
+        .menu(&Menu::with_items(app, &[&show, &quit])?)
+        .show_menu_on_left_click(false)
+        .on_menu_event(|app, event| match event.id().as_ref() {
+            "show" => show_main(app),
+            "quit" => app.exit(0),
+            _ => {}
+        })
+        .on_tray_icon_event(|tray, event| {
+            if let TrayIconEvent::Click { button: MouseButton::Left, button_state: MouseButtonState::Up, .. } = event {
+                show_main(tray.app_handle());
+            }
+        });
+    if let Some(icon) = app.default_window_icon() {
+        tray = tray.icon(icon.clone());
+    }
+    tray.build(app)?;
+    Ok(())
+}
+
+fn show_main(app: &tauri::AppHandle) {
+    if let Some(w) = app.get_webview_window("main") {
+        let _ = w.unminimize();
+        let _ = w.show();
+        let _ = w.set_focus();
+    }
+}
+
 fn main() {
     tauri::Builder::default()
         .plugin(tauri_plugin_dialog::init())
@@ -246,7 +284,16 @@ fn main() {
             std::fs::create_dir_all(&root)?;
             let conn = db::open(&root.join("mirlo.db"))?;
             app.manage(App { root, db: Mutex::new(conn) });
+            tray(app)?;
             Ok(())
+        })
+        // minimizar = esconderse en la bandeja; se vuelve desde su menú
+        .on_window_event(|window, event| {
+            if let tauri::WindowEvent::Resized(_) = event {
+                if window.is_minimized().unwrap_or(false) {
+                    let _ = window.hide();
+                }
+            }
         })
         .invoke_handler(tauri::generate_handler![
             save_post, retry_post, list_posts, get_post, facets, open_folder, open_on_x, read_media,
