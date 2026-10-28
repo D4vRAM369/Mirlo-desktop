@@ -106,6 +106,17 @@ Cada concepto apunta al sitio de **tu** código donde vive. Ábrelo mientras lee
 
 ---
 
+## 💾 Zona 8: copias de seguridad (sesión 2)
+
+| Concepto | Dónde lo viste | Estado |
+|---|---|---|
+| Zip-slip: un zip es entrada no fiable | `backup::is_safe` | 🟡 explicado |
+| `VACUUM INTO`: copiar una BD abierta sin pillarla a medias | `backup::export` | ❌ visto |
+| Fusionar sin pisar | `organize::merge_user` | ❌ visto |
+| Trabajo pesado fuera de la ventana (`spawn_blocking`) | `export_vault` / `import_vault` | ❌ visto |
+| De JSON a struct (`Deserialize`) | `vault::load` | ❌ visto |
+| Licencias: MIT frente a GPL | `LICENSE` | 🟡 explicado |
+
 ## 🧭 Próximas misiones (orden recomendado)
 
 Tu stack habitual es Kotlin. Muchas de estas piezas tienen equivalente directo allí, y te lo indico para que conectes lo nuevo con lo que ya conoces.
@@ -120,4 +131,4 @@ Tu stack habitual es Kotlin. Muchas de estas piezas tienen equivalente directo a
 
 ## 🏆 Jefe final de esta temporada
 
-**Publicar Mirlo v0.1.0.** Es la etiqueta de versión, los instaladores compilados por GitHub, las notas de la release y la prueba del `.deb`. Toca SemVer, CI/CD y verificación de paquetes: tres zonas a la vez.
+✅ **Etiqueta v0.1.0 creada (2026-10-28); falta publicar el borrador a mano.** Publicar Mirlo v0.1.0: Es la etiqueta de versión, los instaladores compilados por GitHub, las notas de la release y la prueba del `.deb`. Toca SemVer, CI/CD y verificación de paquetes: tres zonas a la vez.
