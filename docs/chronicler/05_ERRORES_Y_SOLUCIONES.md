@@ -90,3 +90,10 @@ Resuelto con FxTwitter como fuente extra solo del texto (Decisión 6). Si FxTwit
 
 - **Síntoma:** carpetas `xvault-test-*` en `/tmp` tras cada ejecución, con el PID en el nombre.
 - **Solución:** los tests escriben en `src-tauri/target/test-tmp/`, ignorado por git y limpiado por `cargo clean`.
+
+## Error: Ctrl+V fuera de un campo no hacía nada (WebKitGTK)
+
+- **Síntoma:** en la ventana real, pegar un enlace sin tener el cursor en un campo no guardaba ni mostraba aviso.
+- **Causa:** Tauri en Linux usa WebKitGTK (el motor de Safari). WebKit no dispara el evento `paste` si no hay un elemento editable enfocado; Chrome sí. El backend nunca recibió nada.
+- **Solución:** en `keydown` con Ctrl+V se enfoca el campo de enlace antes de que el navegador pegue; `onInput` detecta `inputType === 'insertFromPaste'` y guarda si es un enlace de X.
+- **Lección:** los eventos del portapapeles se prueban en el motor real de la app, no en Chrome.

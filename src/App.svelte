@@ -77,9 +77,14 @@
     if (selectedId === id) detail = await api.getPost(id)
   }
 
-  function onInput() {
-    // un enlace se guarda; cualquier otra cosa busca
-    if (!api.looksLikePostUrl(input)) filter.q = input.trim() || undefined
+  function onInput(e: Event) {
+    // un enlace pegado se guarda al momento; uno tecleado espera a Enter; lo demás busca
+    if (!api.looksLikePostUrl(input)) {
+      filter.q = input.trim() || undefined
+    } else if ((e as InputEvent).inputType === 'insertFromPaste') {
+      save(input.trim())
+      input = ''
+    }
   }
 
   function onSubmit(e: SubmitEvent) {
@@ -105,7 +110,15 @@
   const typing = (t: EventTarget | null) => t instanceof HTMLInputElement || t instanceof HTMLTextAreaElement || t instanceof HTMLSelectElement
 
   function onKey(e: KeyboardEvent) {
-    if (typing(e.target) || e.ctrlKey || e.metaKey || e.altKey) return
+    if (typing(e.target)) return
+    // Ctrl+V fuera de un campo: WebKitGTK no dispara `paste` sin un campo editable enfocado,
+    // así que se enfoca el campo ANTES de que el navegador pegue y el texto cae ahí (ver onInput).
+    if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'v') {
+      field.focus()
+      field.select()
+      return
+    }
+    if (e.ctrlKey || e.metaKey || e.altKey) return
     const actions: Record<string, () => void> = {
       j: () => move(1),
       ArrowDown: () => move(1),
@@ -122,18 +135,6 @@
     }
   }
 
-  // Ctrl+V fuera de un campo de texto: si es un enlace de X, se guarda directamente.
-  function onPaste(e: ClipboardEvent) {
-    if (typing(e.target)) return
-    const text = e.clipboardData?.getData('text') ?? ''
-    if (api.looksLikePostUrl(text)) {
-      e.preventDefault()
-      save(text.trim())
-    } else {
-      message = 'Lo pegado no es un enlace a un post de X'
-    }
-  }
-
   const date = (iso: string | null, long = false) =>
     iso
       ? new Intl.DateTimeFormat('es', long ? { dateStyle: 'long', timeStyle: 'short' } : { day: 'numeric', month: 'short', year: 'numeric' }).format(new Date(iso))
@@ -144,7 +145,7 @@
     (p.status === 'error' ? '' : 'Texto')
 </script>
 
-<svelte:window onkeydown={onKey} onpaste={onPaste} />
+<svelte:window onkeydown={onKey} />
 
 <div class="grid h-screen grid-rows-[auto_minmax(0,1fr)_auto] bg-slate-200 text-slate-900">
   <form class="flex gap-2 border-b border-slate-300 bg-slate-50 p-3" onsubmit={onSubmit}>
