@@ -2,6 +2,8 @@
   <img src="docs/assets/banner.png" width="900" alt="Mirlo: tu bóveda local de posts de X. Icono de un cajón de fichero azul con un post en modo oscuro y un mirlo posado encima.">
 </p>
 
+<p align="center"><b>Español</b> · <a href="README-EN.md">English</a></p>
+
 Bóveda local para posts de X (Twitter). Pegas el enlace de un post y Mirlo guarda en tu disco el texto, el autor, la fecha y todos sus archivos: fotos a resolución original, vídeos, GIF (como MP4) y documentos enlazados (PDF, DOCX…).
 
 Sin cuenta, sin nube y sin telemetría.
