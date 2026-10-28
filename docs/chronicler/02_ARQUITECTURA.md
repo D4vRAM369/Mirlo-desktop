@@ -66,3 +66,17 @@ Flujo: `pegar URL → x_url::status_id → sources::extract → parser::parse_* 
 - **Anti-SSRF en enlaces:** antes de tocar un enlace del post se resuelve su DNS y se rechaza cualquier IP privada, localhost, enlace local, CGNAT o multicast. Cada salto de una redirección pasa el mismo control. Límite conocido: rebinding de DNS (ver comentario `ponytail:` en `vault.rs`).
 - **Reintento barato:** un medio que ya existe en disco no se vuelve a bajar; se recalcula su SHA-256.
 - **post.json** guarda el post normalizado, la lista de archivos con su SHA-256 y el JSON crudo de la fuente (`raw`) para poder reinterpretarlo en el futuro.
+
+## Decisión 8: SQLite con rusqlite en Rust, no plugin-sql (fase 3)
+
+| | plugin-sql (ThreadsVault) | rusqlite (XVault) |
+|---|---|---|
+| Quién escribe SQL | el frontend | solo Rust |
+| Tests | necesita la app abierta | `cargo test` con BD en memoria |
+| Regla "red y disco solo en Rust" | la rompe | la cumple |
+
+- **Elegida:** rusqlite con `bundled` (trae su propio SQLite con FTS5, no depende del del sistema).
+- **Dónde:** `~/XVault/xvault.db`. Es un **índice**: la verdad son las carpetas con `post.json`. Va dentro de la bóveda para que copiar `~/XVault` lo lleve todo.
+- **Búsqueda:** tabla virtual FTS5 en modo *external content* + triggers que la mantienen al día. `remove_diacritics 2`: "cancion" encuentra "canción".
+- **Un fallo nunca pisa una copia buena:** `record_error` solo actualiza el mensaje de error si el post ya estaba guardado.
+- **Candado (Mutex):** la conexión se bloquea solo después de las descargas, nunca durante.

@@ -14,6 +14,7 @@
       { "label": "main", "title": "XVault", "width": 1280, "height": 840, "minWidth": 960, "minHeight": 600 }
     ],
     "security": {
+      "assetProtocol": { "enable": true, "scope": ["$HOME/XVault/**"] },
       "csp": "default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: blob: asset: http://asset.localhost; media-src 'self' blob: asset: http://asset.localhost; connect-src ipc: http://ipc.localhost"
     }
   },

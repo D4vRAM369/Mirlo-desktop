@@ -112,3 +112,23 @@ cd src-tauri
 cargo test                                      # 26 passed, 4 ignored
 cargo test live_save -- --ignored --nocapture   # guarda 5 posts reales en target/test-tmp/live
 ```
+
+
+## Paso 5: BD + UI básica (fase 3)
+
+1. `db.rs` con tests en memoria: búsqueda por prefijo, sin acentos, texto del citado, sintaxis hostil (`"`, `OR`, `NEAR(`), filtros por tipo/autor/estado/fecha, re-guardar reemplaza archivos e índice, un error no pisa una copia guardada.
+2. Comandos en `main.rs`: `save_post`, `retry_post`, `list_posts`, `get_post`, `facets`, `open_folder`, `open_on_x`. Estado compartido `App { root, db: Mutex<Connection> }`.
+3. `src/lib/api.ts`: un wrapper tipado por comando. El frontend no llama a `invoke` en ningún otro sitio.
+4. `App.svelte` con el esqueleto Bandeja: un solo campo (un enlace guarda, lo demás busca), filtros, lista navegable con J/K, lectura con fotos y vídeos locales (protocolo `asset:`), tabla de archivos y fuente.
+5. Ctrl+V fuera de un campo de texto guarda el enlace directamente.
+6. `npm run tauri dev`: la ventana abre y crea `~/XVault/xvault.db`.
+
+> 💡 **Nota para aprendices:** FTS5 no busca dentro del texto como `LIKE '%x%'`: mantiene un índice de palabras, como el índice al final de un libro. Por eso es rápido con miles de posts.
+
+> ⚠️ **Errores comunes:** pasar lo que escribe la persona directamente a `MATCH`. `"` o `NEAR(` son sintaxis de FTS5 y romperían la consulta. `fts_query` mete cada palabra entre comillas.
+
+**Verificación:**
+```bash
+cd src-tauri && cargo test     # 31 passed, 4 ignored
+npm run tauri dev               # pega un enlace de X con Ctrl+V en la ventana
+```

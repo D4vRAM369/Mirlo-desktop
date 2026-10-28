@@ -132,3 +132,23 @@ Términos técnicos del proyecto. Si un término no se entiende en otro archivo,
 ## Backoff
 
 **Definición simple:** Esperar cada vez más entre reintentos (2 s, 4 s…) para no machacar un servidor que ya va mal.
+
+## FTS5
+
+**Definición simple:** El buscador de texto completo que trae SQLite: un índice de palabras, como el de un libro.
+**En este proyecto:** tabla `posts_fts` sobre el texto, autor y texto citado. Se consulta con `MATCH`.
+
+## Trigger
+
+**Definición simple:** Código SQL que la base de datos ejecuta sola cuando pasa algo (un INSERT, UPDATE o DELETE).
+**En este proyecto:** `posts_ai`, `posts_au` y `posts_ad` mantienen `posts_fts` sincronizada con `posts`.
+
+## Mutex
+
+**Definición simple:** Un candado: solo un hilo a la vez puede usar lo que protege.
+**En este proyecto:** la conexión SQLite vive en `Mutex<Connection>` porque varios comandos pueden llegar a la vez.
+
+## Protocolo asset:
+
+**Definición simple:** La forma en que Tauri deja al WebView mostrar archivos del disco, solo dentro de las carpetas permitidas.
+**En este proyecto:** `assetProtocol.scope = ["$HOME/XVault/**"]`; `api.fileUrl` construye la URL.
