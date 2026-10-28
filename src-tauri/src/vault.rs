@@ -26,6 +26,8 @@ pub struct SavedFile {
     pub size: u64,
     pub sha256: String,
     pub error: Option<String>,
+    /// Texto alternativo que puso el autor en X (solo fotos)
+    pub alt: Option<String>,
 }
 
 #[derive(Debug, Serialize)]
@@ -78,7 +80,7 @@ pub async fn save(root: &Path, ex: Extracted, max_doc: u64) -> Result<Saved, Str
                     got = ytdlp_download(&p.url, video_n, &dest).await;
                 }
             }
-            files.extend(record(rel, &m.url, got));
+            files.extend(record(rel, &m.url, got).map(|f| SavedFile { alt: m.alt_text.clone(), ..f }));
         }
     }
 
@@ -384,7 +386,7 @@ fn record(path: String, url: &str, got: Fetch) -> Option<SavedFile> {
         Fetch::Skipped(Some(why)) => ("skipped", 0, String::new(), Some(why)),
         Fetch::Failed(why) => ("error", 0, String::new(), Some(why)),
     };
-    Some(SavedFile { path, url: url.to_string(), status, size, sha256, error })
+    Some(SavedFile { path, url: url.to_string(), status, size, sha256, error, alt: None })
 }
 
 fn render_markdown(post: &Post, files: &[SavedFile]) -> String {
@@ -550,7 +552,7 @@ mod tests {
     #[test]
     fn markdown_has_text_media_and_quote() {
         let p = post("quote");
-        let files = vec![SavedFile { path: "media/01.mp4".into(), url: String::new(), status: "ok", size: 1, sha256: String::new(), error: None }];
+        let files = vec![SavedFile { path: "media/01.mp4".into(), url: String::new(), status: "ok", size: 1, sha256: String::new(), error: None, alt: None }];
         let md = render_markdown(&p, &files);
         assert!(md.starts_with(&format!("# {} (@{})", p.author.name, p.author.handle)));
         assert!(md.contains(&p.text));

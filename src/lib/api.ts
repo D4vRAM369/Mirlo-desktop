@@ -29,6 +29,7 @@ export interface FileRow {
   size: number
   sha256: string
   error: string | null
+  alt: string | null
 }
 
 export interface Detail {

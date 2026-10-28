@@ -34,6 +34,7 @@ CREATE TABLE IF NOT EXISTS files (
     size    INTEGER NOT NULL,
     sha256  TEXT NOT NULL,
     error   TEXT,
+    alt     TEXT,
     PRIMARY KEY (post_id, path)
 );
 -- Índice de texto completo. remove_diacritics: 'cancion' encuentra 'canción'.
@@ -91,6 +92,7 @@ pub struct FileRow {
     pub size: u64,
     pub sha256: String,
     pub error: Option<String>,
+    pub alt: Option<String>,
 }
 
 #[derive(Debug, Serialize)]
@@ -129,7 +131,21 @@ pub struct Facets {
 pub fn open(path: &Path) -> rusqlite::Result<Connection> {
     let conn = Connection::open(path)?;
     conn.execute_batch(SCHEMA)?;
+    migrate(&conn)?;
     Ok(conn)
+}
+
+/// Cambios de esquema para BD creadas por versiones anteriores. `user_version` dice cuáles ya se aplicaron.
+fn migrate(conn: &Connection) -> rusqlite::Result<()> {
+    let version: i32 = conn.pragma_query_value(None, "user_version", |r| r.get(0))?;
+    if version < 1 {
+        // fase 4: texto alternativo de las fotos. Las BD nuevas ya lo traen por SCHEMA.
+        if conn.prepare("SELECT alt FROM files LIMIT 0").is_err() {
+            conn.execute_batch("ALTER TABLE files ADD COLUMN alt TEXT")?;
+        }
+        conn.pragma_update(None, "user_version", 1)?;
+    }
+    Ok(())
 }
 
 /// Guarda (o reemplaza) un post descargado y su lista de archivos, en una transacción.
@@ -178,8 +194,8 @@ pub fn upsert(conn: &Connection, s: &Saved) -> rusqlite::Result<()> {
     tx.execute("DELETE FROM files WHERE post_id = ?1", [&p.id])?;
     for f in &s.files {
         tx.execute(
-            "INSERT INTO files (post_id, path, url, status, size, sha256, error) VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7)",
-            params![p.id, f.path, f.url, f.status, f.size as i64, f.sha256, f.error],
+            "INSERT INTO files (post_id, path, url, status, size, sha256, error, alt) VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8)",
+            params![p.id, f.path, f.url, f.status, f.size as i64, f.sha256, f.error, f.alt],
         )?;
     }
     tx.commit()
@@ -200,10 +216,10 @@ pub fn get(conn: &Connection, id: &str) -> rusqlite::Result<Option<Detail>> {
         .query_row(&format!("SELECT {COLUMNS} FROM posts WHERE id = ?1"), [id], to_row)
         .optional()?;
     let Some(post) = post else { return Ok(None) };
-    let mut stmt = conn.prepare("SELECT path, url, status, size, sha256, error FROM files WHERE post_id = ?1 ORDER BY path")?;
+    let mut stmt = conn.prepare("SELECT path, url, status, size, sha256, error, alt FROM files WHERE post_id = ?1 ORDER BY path")?;
     let files = stmt
         .query_map([id], |r| {
-            Ok(FileRow { path: r.get(0)?, url: r.get(1)?, status: r.get(2)?, size: r.get::<_, i64>(3)? as u64, sha256: r.get(4)?, error: r.get(5)? })
+            Ok(FileRow { path: r.get(0)?, url: r.get(1)?, status: r.get(2)?, size: r.get::<_, i64>(3)? as u64, sha256: r.get(4)?, error: r.get(5)?, alt: r.get(6)? })
         })?
         .collect::<rusqlite::Result<_>>()?;
     Ok(Some(Detail { post, files }))
@@ -312,7 +328,7 @@ mod tests {
         let post = parser::parse_tweet(&std::fs::read_to_string(path).unwrap()).unwrap();
         let files = files
             .iter()
-            .map(|p| SavedFile { path: p.to_string(), url: String::new(), status: "ok", size: 1, sha256: "x".into(), error: None })
+            .map(|p| SavedFile { path: p.to_string(), url: String::new(), status: "ok", size: 1, sha256: "x".into(), error: None, alt: Some(format!("alt {p}")) })
             .collect();
         Saved { dir: PathBuf::from(format!("/v/{fixture}")), status, source: "syndication", post, files }
     }
@@ -395,5 +411,24 @@ mod tests {
         let f = facets(&conn).unwrap();
         assert_eq!((f.ok, f.partial, f.error), (1, 0, 1));
         assert_eq!(f.authors, [AuthorCount { handle: "jack".into(), name: "jack".into(), count: 1 }]);
+    }
+
+    #[test]
+    fn old_database_gets_alt_column_and_keeps_rows() {
+        let conn = Connection::open_in_memory().unwrap();
+        // BD de la fase 3: files sin columna alt
+        conn.execute_batch(&SCHEMA.replace("    alt     TEXT,\n", "")).unwrap();
+        upsert_without_alt(&conn);
+        migrate(&conn).unwrap();
+        migrate(&conn).unwrap(); // dos veces: no falla
+        upsert(&conn, &saved("photos_4", "ok", &["media/01.jpg"])).unwrap();
+        let d = get(&conn, "2051361508181856362").unwrap().unwrap();
+        assert_eq!(d.files[0].alt.as_deref(), Some("alt media/01.jpg"));
+        assert_eq!(get(&conn, "20").unwrap().unwrap().files[0].alt, None, "fila antigua intacta");
+    }
+
+    fn upsert_without_alt(conn: &Connection) {
+        conn.execute("INSERT INTO posts (id, url, status) VALUES ('20', 'u', 'ok')", []).unwrap();
+        conn.execute("INSERT INTO files (post_id, path, url, status, size, sha256) VALUES ('20', 'media/01.jpg', 'u', 'ok', 1, 'x')", []).unwrap();
     }
 }

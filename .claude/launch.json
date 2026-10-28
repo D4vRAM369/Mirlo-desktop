@@ -1,6 +1,28 @@
 {
   "version": "0.0.1",
   "configurations": [
-    { "name": "mockups", "runtimeExecutable": "python3", "runtimeArgs": ["-m", "http.server", "4317", "--directory", "mockups"], "port": 4317 }
+    {
+      "name": "mockups",
+      "runtimeExecutable": "python3",
+      "runtimeArgs": [
+        "-m",
+        "http.server",
+        "4317",
+        "--directory",
+        "mockups"
+      ],
+      "port": 4317
+    },
+    {
+      "name": "vault-files",
+      "runtimeExecutable": "python3",
+      "runtimeArgs": [
+        "-I",
+        "scripts/review-server.py",
+        "4318",
+        "src-tauri/target/test-tmp/live"
+      ],
+      "port": 4318
+    }
   ]
 }

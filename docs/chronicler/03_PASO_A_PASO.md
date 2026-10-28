@@ -132,3 +132,14 @@ cargo test live_save -- --ignored --nocapture   # guarda 5 posts reales en targe
 cd src-tauri && cargo test     # 31 passed, 4 ignored
 npm run tauri dev               # pega un enlace de X con Ctrl+V en la ventana
 ```
+
+
+## Paso 6: diseño final (fase 4)
+
+1. Tokens de color, tema oscuro y fuente local en `src/app.css`; Tailwind desinstalado.
+2. `src/lib/Gallery.svelte`: rejilla 2fr/1fr con "+N", visor `<dialog>` con ←/→, contador y texto alternativo; vídeos inline como blob.
+3. `App.svelte` reescrito con las clases del mockup: cola de guardado, título según filtro, filtro de fecha plegable con "Quitar fechas", estados vacíos que explican qué hacer.
+4. Columna `alt` en `files` + migración `user_version = 1` (test `old_database_gets_alt_column_and_keeps_rows`).
+5. Revisión visual con capturas headless a 1280x840 y 960x640, en claro y oscuro (ver "Cómo revisar el diseño" en `07_COMANDOS_Y_MANUAL.md`).
+
+> 💡 **Nota para aprendices:** `PRAGMA user_version` es un número que SQLite guarda dentro del archivo y no usa para nada: es tuyo. Sirve para saber qué cambios de esquema ya se aplicaron.

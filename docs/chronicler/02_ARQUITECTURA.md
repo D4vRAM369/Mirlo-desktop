@@ -80,3 +80,12 @@ Flujo: `pegar URL → x_url::status_id → sources::extract → parser::parse_* 
 - **Búsqueda:** tabla virtual FTS5 en modo *external content* + triggers que la mantienen al día. `remove_diacritics 2`: "cancion" encuentra "canción".
 - **Un fallo nunca pisa una copia buena:** `record_error` solo actualiza el mensaje de error si el post ya estaba guardado.
 - **Candado (Mutex):** la conexión se bloquea solo después de las descargas, nunca durante.
+
+## Decisión 9: diseño final Bandeja (fase 4)
+
+- **CSS propio con tokens, sin Tailwind.** El mockup elegido ya era CSS con variables (`--bg`, `--accent`…). Tailwind no aportaba nada y se quitó: una dependencia menos.
+- **Fuente empaquetada en local** (`@fontsource-variable/atkinson-hyperlegible-next`, 34 KB). Cargarla de Google Fonts haría que la app llamase a Google cada vez que se abre, y XVault promete no llamar a nadie. La CSP ya no permite fuentes externas.
+- **Tema:** sigue al sistema (`prefers-color-scheme`) hasta que eliges uno con el botón; la elección se recuerda en `localStorage`.
+- **Estados con forma + palabra** (✓ Completo, ◐ Parcial, ✕ Error), nunca solo color.
+- **Texto alternativo de las fotos:** se guarda en `files.alt` (lo pone el autor en X) y lo usa el visor. Migración con `PRAGMA user_version` para BD de la fase 3.
+- **Cola sin porcentaje falso:** la barra de "Guardando…" va y viene; no hay progreso real que mostrar y no se inventa uno.

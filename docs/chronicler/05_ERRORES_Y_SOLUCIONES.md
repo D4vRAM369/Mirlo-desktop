@@ -107,3 +107,13 @@ Resuelto con FxTwitter como fuente extra solo del texto (Decisión 6). Si FxTwit
 - **Límite conocido:** el vídeo entero pasa a memoria (comentario `ponytail:` en `main.rs`). Con vídeos de cientos de MB habría que servirlo por rangos.
 - **Verificación:** confirmado en la ventana real el 2026-10-28.
 - **Lección:** "se guarda" y "se ve" son dos pruebas distintas. Las fotos funcionando no demostraban que el vídeo funcionase: cada tipo de medio usa un camino distinto dentro del motor.
+
+## Error: la inicial del autor salía en cursiva
+
+- **Causa:** el círculo usa `<i>` y los navegadores ponen `<i>` en cursiva por defecto.
+- **Solución:** `font-style: normal` en `.dot`.
+
+## Error: nombres de autor largos cortados sin "…"
+
+- **Causa:** `text-overflow: ellipsis` no se aplica a un texto suelto dentro de un contenedor flex.
+- **Solución:** envolver el nombre en su propio `<span>` con `overflow: hidden; white-space: nowrap; text-overflow: ellipsis`.
