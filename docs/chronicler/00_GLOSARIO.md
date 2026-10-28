@@ -191,3 +191,28 @@ Términos técnicos del proyecto. Si un término no se entiende en otro archivo,
 
 **Definición simple:** El sistema clásico de ventanas de Linux: dibuja las ventanas y comunica a las apps con el escritorio. Su sucesor es Wayland.
 **En este proyecto:** el icono de la ventana viaja como píxeles sin comprimir en la propiedad `_NET_WM_ICON`; uno de 512 px (1 MB) no cabe y GTK lo descarta.
+
+## Transacción
+
+**Definición simple:** Un grupo de cambios en la base de datos que se aplican todos o ninguno, como un punto de guardado en un videojuego.
+**En este proyecto:** la migración a v2 y cada cambio de etiquetas van en `unchecked_transaction()` … `commit()`: si algo falla a mitad, la BD queda como estaba.
+
+## Migración de esquema (`PRAGMA user_version`)
+
+**Definición simple:** Cambiar la forma de una base de datos que ya tiene datos (tablas, columnas) sin perderlos, llevando la cuenta de qué versión tiene.
+**En este proyecto:** `db::migrate` lee `user_version` y aplica los pasos pendientes: v1 añade `alt` a `files`; v2 añade colecciones, etiquetas, favorito y nota, y rehace el índice.
+
+## Desnormalizar
+
+**Definición simple:** Guardar una copia de un dato en otro sitio para leerlo más rápido, a cambio de mantener las dos copias iguales.
+**En este proyecto:** `posts.tags_text` repite los nombres de las etiquetas del post para que la búsqueda FTS5 los encuentre; `organize.rs` lo rehace en cada cambio.
+
+## Rueda de color HSV
+
+**Definición simple:** Una forma de elegir color con tres números: tono (el ángulo en la rueda), saturación (lo lejos del centro) y brillo.
+**En este proyecto:** `ColorWheel.svelte` la dibuja con dos degradados CSS y convierte la posición del puntero a `#rrggbb`.
+
+## xdotool
+
+**Definición simple:** Programa de Linux (X11) que mueve el ratón y pulsa teclas en una ventana como si lo hiciera una persona.
+**En este proyecto:** se usa para probar la ventana real de Mirlo (WebKitGTK) junto con `import -window` para las capturas.

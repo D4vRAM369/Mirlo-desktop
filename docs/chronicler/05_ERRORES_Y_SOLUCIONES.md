@@ -152,3 +152,29 @@ Resuelto con FxTwitter como fuente extra solo del texto (Decisión 6). Si FxTwit
 - **Síntoma:** se subió `v0.1.0` y empezó la compilación de la release; justo después se decidió añadir funciones a esa versión.
 - **Solución:** cancelar el workflow (`gh run cancel <id>`), borrar la etiqueta en GitHub y en local. No llegó a crearse el borrador.
 - **Lección:** cerrar el alcance de la versión antes de etiquetar; una etiqueta es la foto final.
+
+## Error: `<select>` que no responde a las flechas (WebKitGTK)
+
+- **Síntoma:** con el selector de colección enfocado (atajo M), ↑/↓ no cambiaban la colección ni abrían la lista.
+- **Causa:** WebKitGTK no cambia un `<select>` cerrado con las flechas, a diferencia de Chrome.
+- **Solución:** `onCollectionKey` en `Organizer.svelte` maneja ↑/↓ y llama a `set_collection`.
+- **Lección:** todo lo de teclado se prueba en la ventana real; Chromium no lo habría detectado.
+
+## Error: `autofocus` que solo funciona la primera vez
+
+- **Síntoma:** el campo "Nueva colección" se enfocaba la primera vez; la segunda aparecía sin foco y lo tecleado actuaba como atajos.
+- **Causa:** `autofocus` es para la carga de la página, no para elementos que aparecen después.
+- **Solución:** acción `use:focusOnMount` que llama a `focus()` y `select()` al montar el campo.
+
+## Error: letras cambiadas al automatizar la ventana
+
+- **Síntoma:** al probar con `xdotool type`, "uno" llegaba como "UNOAlñ" o con letras de otro texto.
+- **Causa:** `xdotool type` reasigna teclas al vuelo y choca con la distribución española. No era un fallo de Mirlo: se comprobó tecleando lo mismo en el campo de búsqueda.
+- **Solución:** enviar cada carácter como `xdotool key --clearmodifiers <tecla>`.
+- **Lección:** antes de culpar al código, repetir la prueba en un sitio que ya funcionaba (prueba de control).
+
+## Error: el editor de color se salía del sidebar
+
+- **Síntoma:** al abrir la rueda, el editor desbordaba el sidebar por la derecha.
+- **Causa:** el `<input type="range">` nativo exige unos 130 px de ancho mínimo.
+- **Solución:** `width: 0; flex: 1` en el deslizador y `min-width: 0` en el editor.

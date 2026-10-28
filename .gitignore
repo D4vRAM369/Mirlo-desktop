@@ -11,3 +11,6 @@ docs/SPEC.md
 docs/HANDOFF.md
 docs/BACKPORT-THREADSVAULT.md
 .claude/
+
+# Transcripts de sesiones (rutas y datos privados)
+docs/transcripts/

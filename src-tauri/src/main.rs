@@ -2,6 +2,7 @@
 
 mod db;
 mod error;
+mod organize;
 mod parser;
 mod sources;
 mod vault;
@@ -72,6 +73,105 @@ fn facets(app: State<'_, App>) -> Result<db::Facets, String> {
     db::facets(&*app.db()?).map_err(db_err)
 }
 
+// ---- organizar: cada cambio va a la BD y, después, al bloque "user" de post.json ----
+
+#[tauri::command]
+fn set_favorite(app: State<'_, App>, id: String, value: bool) -> Result<(), String> {
+    let conn = app.db()?;
+    organize::set_favorite(&conn, &id, value)?;
+    sync_user(&app, &conn, &[id])
+}
+
+#[tauri::command]
+fn set_note(app: State<'_, App>, id: String, note: String) -> Result<(), String> {
+    let conn = app.db()?;
+    organize::set_note(&conn, &id, &note)?;
+    sync_user(&app, &conn, &[id])
+}
+
+#[tauri::command]
+fn set_collection(app: State<'_, App>, id: String, collection_id: Option<i64>) -> Result<(), String> {
+    let conn = app.db()?;
+    organize::set_collection(&conn, &id, collection_id)?;
+    sync_user(&app, &conn, &[id])
+}
+
+#[tauri::command]
+fn add_tag(app: State<'_, App>, id: String, name: String) -> Result<organize::Tag, String> {
+    let conn = app.db()?;
+    let tag = organize::add_tag(&conn, &id, &name)?;
+    sync_user(&app, &conn, &[id])?;
+    Ok(tag)
+}
+
+#[tauri::command]
+fn remove_tag(app: State<'_, App>, id: String, tag_id: i64) -> Result<(), String> {
+    let conn = app.db()?;
+    organize::remove_tag(&conn, &id, tag_id)?;
+    sync_user(&app, &conn, &[id])
+}
+
+#[tauri::command]
+fn create_collection(app: State<'_, App>, name: String) -> Result<organize::Collection, String> {
+    organize::create_collection(&*app.db()?, &name)
+}
+
+#[tauri::command]
+fn rename_collection(app: State<'_, App>, id: i64, name: String) -> Result<(), String> {
+    let conn = app.db()?;
+    let touched = organize::rename_collection(&conn, id, &name)?;
+    sync_user(&app, &conn, &touched)
+}
+
+#[tauri::command]
+fn delete_collection(app: State<'_, App>, id: i64) -> Result<(), String> {
+    let conn = app.db()?;
+    let touched = organize::delete_collection(&conn, id)?;
+    sync_user(&app, &conn, &touched)
+}
+
+#[tauri::command]
+fn move_collection(app: State<'_, App>, id: i64, position: usize) -> Result<(), String> {
+    organize::move_collection(&*app.db()?, id, position)
+}
+
+#[tauri::command]
+fn rename_tag(app: State<'_, App>, id: i64, name: String) -> Result<(), String> {
+    let conn = app.db()?;
+    let touched = organize::rename_tag(&conn, id, &name)?;
+    sync_user(&app, &conn, &touched)
+}
+
+/// El color no va a post.json: es cosa de cómo se ve la etiqueta en esta bóveda, no del post.
+#[tauri::command]
+fn set_tag_color(app: State<'_, App>, id: i64, color: Option<String>) -> Result<(), String> {
+    organize::set_tag_color(&*app.db()?, id, color.as_deref())
+}
+
+#[tauri::command]
+fn delete_tag(app: State<'_, App>, id: i64) -> Result<(), String> {
+    let conn = app.db()?;
+    let touched = organize::delete_tag(&conn, id)?;
+    sync_user(&app, &conn, &touched)
+}
+
+/// Copia a disco los datos de la persona de cada post. La verdad sigue en disco: si la BD se
+/// pierde, una importación los recupera de post.json.
+/// ponytail: BD y disco no van en la misma transacción; si falla el disco, la BD queda por delante
+/// hasta el siguiente cambio de ese post (el error se muestra).
+fn sync_user(app: &App, conn: &rusqlite::Connection, ids: &[String]) -> Result<(), String> {
+    for id in ids {
+        let Some(dir) = db::get(conn, id).map_err(db_err)?.and_then(|d| d.post.dir).map(PathBuf::from) else {
+            continue; // post que nunca llegó a guardarse: no tiene post.json
+        };
+        if !dir.starts_with(&app.root) {
+            return Err(fail("outside_vault"));
+        }
+        vault::write_user(&dir, &organize::user_data(conn, id)?)?;
+    }
+    Ok(())
+}
+
 /// Abre la carpeta del post en el explorador de archivos del sistema.
 #[tauri::command]
 fn open_folder(app: State<'_, App>, id: String) -> Result<(), String> {
@@ -128,7 +228,9 @@ fn main() {
             Ok(())
         })
         .invoke_handler(tauri::generate_handler![
-            save_post, retry_post, list_posts, get_post, facets, open_folder, open_on_x, read_media
+            save_post, retry_post, list_posts, get_post, facets, open_folder, open_on_x, read_media,
+            set_favorite, set_note, set_collection, add_tag, remove_tag, create_collection, rename_collection,
+            delete_collection, move_collection, rename_tag, set_tag_color, delete_tag
         ])
         .run(tauri::generate_context!())
         .expect("error al iniciar Mirlo");

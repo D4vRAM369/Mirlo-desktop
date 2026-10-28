@@ -4,6 +4,7 @@
 //! siempre está completo, aunque se corte la luz a mitad de descarga.
 
 use crate::error::{fail, fail_with};
+use crate::organize::UserData;
 use crate::parser::{self, MediaKind, Post};
 use crate::sources::{self, Extracted};
 use serde::Serialize;
@@ -110,6 +111,8 @@ pub async fn save(root: &Path, ex: Extracted, max_doc: u64, lang: &str) -> Resul
 
     let status = if ex.partial || files.iter().any(|f| f.status == "error") { "partial" } else { "ok" };
     let raw: serde_json::Value = serde_json::from_str(&ex.raw_json).unwrap_or(serde_json::Value::Null);
+    // lo que añadió la persona (colección, etiquetas…) es suyo, no de X: un re-guardado lo conserva
+    let user = read_json(&dir).ok().and_then(|mut j| j.get_mut("user").map(serde_json::Value::take));
     let now = std::time::SystemTime::now().duration_since(std::time::UNIX_EPOCH).map(|d| d.as_secs()).unwrap_or(0);
     let json = serde_json::json!({
         "mirlo": 1,
@@ -119,12 +122,27 @@ pub async fn save(root: &Path, ex: Extracted, max_doc: u64, lang: &str) -> Resul
         "post": &ex.post,
         "files": &files,
         "raw": raw,
+        "user": user.unwrap_or_else(|| serde_json::json!(UserData::default())),
     });
     let pretty = serde_json::to_string_pretty(&json).map_err(|e| fail_with("internal", e))?;
     write_atomic(&dir.join("post.json"), pretty.as_bytes())?;
     write_atomic(&dir.join("post.md"), render_markdown(&ex.post, &files, lang).as_bytes())?;
 
     Ok(Saved { dir, status, source: ex.source, post: ex.post, files })
+}
+
+/// Cambia solo el bloque "user" de post.json. Atómico: o queda el archivo viejo entero o el nuevo.
+pub fn write_user(dir: &Path, user: &UserData) -> Result<(), String> {
+    let mut json = read_json(dir)?;
+    json["user"] = serde_json::json!(user);
+    let pretty = serde_json::to_string_pretty(&json).map_err(|e| fail_with("internal", e))?;
+    write_atomic(&dir.join("post.json"), pretty.as_bytes())
+}
+
+fn read_json(dir: &Path) -> Result<serde_json::Value, String> {
+    let path = dir.join("post.json");
+    let bytes = std::fs::read(&path).map_err(|e| fail_with("read_file", format!("{}: {e}", path.display())))?;
+    serde_json::from_slice(&bytes).map_err(|e| fail_with("read_file", format!("{}: {e}", path.display())))
 }
 
 /// `<raíz>/<usuario>/<YYYY-MM-DD>_<id>`. El usuario se limpia: nunca puede salir de la raíz.
@@ -600,6 +618,22 @@ mod tests {
         assert!(!dest.with_extension("ytdlp.mp4").exists(), "no queda el temporal");
         let head = std::fs::read(&dest).unwrap();
         assert_eq!(&head[4..8], b"ftyp", "es un MP4");
+    }
+
+    #[test]
+    fn user_block_is_written_atomically_and_survives_saving_again() {
+        let root = tmp("user");
+        let ex = || Extracted { post: post("text_only"), source: "syndication", partial: false, raw_json: "{}".into() };
+        let read = |dir: &Path| -> serde_json::Value { serde_json::from_slice(&std::fs::read(dir.join("post.json")).unwrap()).unwrap() };
+        let first = tauri::async_runtime::block_on(save(&root, ex(), MAX_DOC_BYTES, "es")).unwrap();
+        assert_eq!(read(&first.dir)["user"], serde_json::json!({"collection": null, "tags": [], "favorite": false, "note": ""}));
+        let mine = UserData { collection: Some("Recetas".into()), tags: vec!["pan".into()], favorite: true, note: "ojo".into() };
+        write_user(&first.dir, &mine).unwrap();
+        assert!(!part_path(&first.dir.join("post.json")).exists(), "sin .part");
+        let again = tauri::async_runtime::block_on(save(&root, ex(), MAX_DOC_BYTES, "es")).unwrap();
+        let json = read(&again.dir);
+        assert_eq!(serde_json::from_value::<UserData>(json["user"].clone()).unwrap(), mine, "re-guardar no lo pisa");
+        assert_eq!(json["post"]["id"], "20", "el resto se reescribió");
     }
 
     #[test]

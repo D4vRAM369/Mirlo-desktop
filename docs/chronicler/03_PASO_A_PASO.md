@@ -193,3 +193,15 @@ npm run tauri dev               # pega un enlace de X con Ctrl+V en la ventana
 🔜 **PRÓXIMOS PASOS:** organizar (favoritos, colecciones, etiquetas, notas) → exportar/importar → release v0.1.0 (`../ROADMAP.md`).
 
 ❓ **PENDIENTES:** botón de idioma sin probar en la ventana real; Windows y macOS sin probar.
+
+## Paso 10: organizar los posts (2026-10-28)
+
+1. Esquema v1 congelado en `tests/fixtures/schema_v1.sql` y test de migración en rojo (`v1_database_migrates_to_v2_and_keeps_rows`).
+2. Esquema v2: tablas `collections`, `tags`, `post_tags`; columnas `collection_id`, `favorite`, `note`, `tags_text`; FTS rehecho con 6 columnas.
+3. `organize.rs` con los tests primero (funciones en `todo!()`): re-guardar no pisa nada, nombres únicos sin mayúsculas, errores por id desconocido, renombrar/borrar actualiza la búsqueda, orden manual de colecciones, filtros y recuentos, bloque `user` por nombre.
+4. `vault::write_user` (atómico) y `vault::save` conserva el bloque `user` del post.json anterior.
+5. 12 comandos Tauri; cada cambio va a la BD y luego a post.json (`sync_user`).
+6. Migración probada contra una **copia** de la bóveda real: `MIRLO_DB=<copia> cargo test real_db -- --ignored` (`user_version 1 → 2`, filas intactas, `integrity-check` del FTS correcto).
+7. Interfaz: sidebar (Favoritos, Colecciones, Etiquetas), panel de lectura (estrella, colección, etiquetas, nota), atajos F/T/M/N, editor en línea con doble clic o F2, Alt+↑/↓.
+8. Rueda de color HEX (9.º círculo) para colores fuera de la paleta.
+9. Verificación en la ventana real (WebKitGTK) con una bóveda de pruebas: `HOME=<carpeta de pruebas> src-tauri/target/release/mirlo`, `xdotool` para teclear y `import -window` para capturar.

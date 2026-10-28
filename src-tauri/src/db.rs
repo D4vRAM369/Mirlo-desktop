@@ -1,6 +1,7 @@
 //! Índice SQLite de la bóveda (`~/Mirlo/mirlo.db`).
 //! La verdad está en disco (post.json de cada carpeta); esto sirve para buscar y filtrar rápido.
 
+use crate::organize::{self, Collection, Counted, Tag};
 use crate::parser::MediaKind;
 use crate::vault::Saved;
 use rusqlite::{params, params_from_iter, Connection, OptionalExtension, Row};
@@ -24,7 +25,12 @@ CREATE TABLE IF NOT EXISTS posts (
     media_kinds     TEXT NOT NULL DEFAULT '',  -- 'photo,video', con comas para filtrar con LIKE
     has_attachments INTEGER NOT NULL DEFAULT 0,
     quoted_handle   TEXT,
-    quoted_text     TEXT
+    quoted_text     TEXT,
+    -- de la persona, no de X: un re-guardado nunca los toca
+    collection_id   INTEGER REFERENCES collections(id) ON DELETE SET NULL,
+    favorite        INTEGER NOT NULL DEFAULT 0,
+    note            TEXT NOT NULL DEFAULT '',
+    tags_text       TEXT NOT NULL DEFAULT ''
 );
 CREATE TABLE IF NOT EXISTS files (
     post_id TEXT NOT NULL REFERENCES posts(id) ON DELETE CASCADE,
@@ -37,31 +43,58 @@ CREATE TABLE IF NOT EXISTS files (
     alt     TEXT,
     PRIMARY KEY (post_id, path)
 );
--- Índice de texto completo. remove_diacritics: 'cancion' encuentra 'canción'.
+CREATE TABLE IF NOT EXISTS collections (
+    id       INTEGER PRIMARY KEY,
+    name     TEXT NOT NULL UNIQUE COLLATE NOCASE,
+    position INTEGER NOT NULL
+);
+CREATE TABLE IF NOT EXISTS tags (
+    id    INTEGER PRIMARY KEY,
+    name  TEXT NOT NULL UNIQUE COLLATE NOCASE,
+    color TEXT
+);
+CREATE TABLE IF NOT EXISTS post_tags (
+    post_id TEXT NOT NULL REFERENCES posts(id) ON DELETE CASCADE,
+    tag_id  INTEGER NOT NULL REFERENCES tags(id) ON DELETE CASCADE,
+    PRIMARY KEY (post_id, tag_id)
+);
+";
+
+/// Índice de texto completo. Va aparte de SCHEMA porque la migración a v2 lo borra y lo rehace
+/// con más columnas. remove_diacritics: 'cancion' encuentra 'canción'.
+/// Triggers: el índice se actualiza solo cada vez que cambia la tabla posts.
+const FTS: &str = "
 CREATE VIRTUAL TABLE IF NOT EXISTS posts_fts USING fts5(
-    text, author_name, handle, quoted_text,
+    text, author_name, handle, quoted_text, tags_text, note,
     content = 'posts', content_rowid = 'rowid',
     tokenize = 'unicode61 remove_diacritics 2'
 );
--- Triggers: el índice se actualiza solo cada vez que cambia la tabla posts.
 CREATE TRIGGER IF NOT EXISTS posts_ai AFTER INSERT ON posts BEGIN
-    INSERT INTO posts_fts(rowid, text, author_name, handle, quoted_text)
-    VALUES (new.rowid, new.text, new.author_name, new.handle, new.quoted_text);
+    INSERT INTO posts_fts(rowid, text, author_name, handle, quoted_text, tags_text, note)
+    VALUES (new.rowid, new.text, new.author_name, new.handle, new.quoted_text, new.tags_text, new.note);
 END;
 CREATE TRIGGER IF NOT EXISTS posts_ad AFTER DELETE ON posts BEGIN
-    INSERT INTO posts_fts(posts_fts, rowid, text, author_name, handle, quoted_text)
-    VALUES ('delete', old.rowid, old.text, old.author_name, old.handle, old.quoted_text);
+    INSERT INTO posts_fts(posts_fts, rowid, text, author_name, handle, quoted_text, tags_text, note)
+    VALUES ('delete', old.rowid, old.text, old.author_name, old.handle, old.quoted_text, old.tags_text, old.note);
 END;
 CREATE TRIGGER IF NOT EXISTS posts_au AFTER UPDATE ON posts BEGIN
-    INSERT INTO posts_fts(posts_fts, rowid, text, author_name, handle, quoted_text)
-    VALUES ('delete', old.rowid, old.text, old.author_name, old.handle, old.quoted_text);
-    INSERT INTO posts_fts(rowid, text, author_name, handle, quoted_text)
-    VALUES (new.rowid, new.text, new.author_name, new.handle, new.quoted_text);
+    INSERT INTO posts_fts(posts_fts, rowid, text, author_name, handle, quoted_text, tags_text, note)
+    VALUES ('delete', old.rowid, old.text, old.author_name, old.handle, old.quoted_text, old.tags_text, old.note);
+    INSERT INTO posts_fts(rowid, text, author_name, handle, quoted_text, tags_text, note)
+    VALUES (new.rowid, new.text, new.author_name, new.handle, new.quoted_text, new.tags_text, new.note);
 END;
 ";
 
+/// Columnas de la persona (v2). Las BD nuevas ya las traen por SCHEMA; las v1 las ganan en `migrate`.
+const USER_COLUMNS: [(&str, &str); 4] = [
+    ("collection_id", "INTEGER REFERENCES collections(id) ON DELETE SET NULL"),
+    ("favorite", "INTEGER NOT NULL DEFAULT 0"),
+    ("note", "TEXT NOT NULL DEFAULT ''"),
+    ("tags_text", "TEXT NOT NULL DEFAULT ''"), // nombres de las etiquetas, para la búsqueda; lo mantiene organize.rs
+];
+
 const COLUMNS: &str = "id, url, handle, author_name, created_at, saved_at, text, source, status, error, dir, \
-                       media_kinds, has_attachments, quoted_handle, quoted_text";
+                       media_kinds, has_attachments, quoted_handle, quoted_text, collection_id, favorite, note";
 
 #[derive(Debug, Clone, PartialEq, Serialize)]
 pub struct PostRow {
@@ -82,6 +115,9 @@ pub struct PostRow {
     pub has_attachments: bool,
     pub quoted_handle: Option<String>,
     pub quoted_text: Option<String>,
+    pub collection_id: Option<i64>,
+    pub favorite: bool,
+    pub note: String,
 }
 
 #[derive(Debug, Serialize)]
@@ -99,6 +135,7 @@ pub struct FileRow {
 pub struct Detail {
     pub post: PostRow,
     pub files: Vec<FileRow>,
+    pub tags: Vec<Tag>,
 }
 
 #[derive(Debug, Default, Deserialize)]
@@ -111,6 +148,10 @@ pub struct Filter {
     /// YYYY-MM-DD, sobre la fecha del post
     pub from: Option<String>,
     pub to: Option<String>,
+    pub collection_id: Option<i64>,
+    pub tag_id: Option<i64>,
+    /// Some(true): solo favoritos
+    pub favorite: Option<bool>,
 }
 
 #[derive(Debug, Serialize, PartialEq)]
@@ -126,13 +167,21 @@ pub struct Facets {
     pub ok: u32,
     pub partial: u32,
     pub error: u32,
+    pub favorites: u32,
+    pub collections: Vec<Counted<Collection>>,
+    pub tags: Vec<Counted<Tag>>,
 }
 
 pub fn open(path: &Path) -> rusqlite::Result<Connection> {
     let conn = Connection::open(path)?;
-    conn.execute_batch(SCHEMA)?;
-    migrate(&conn)?;
+    init(&conn)?;
     Ok(conn)
+}
+
+fn init(conn: &Connection) -> rusqlite::Result<()> {
+    conn.execute_batch(SCHEMA)?;
+    migrate(conn)?;
+    conn.execute_batch(FTS)
 }
 
 /// Cambios de esquema para BD creadas por versiones anteriores. `user_version` dice cuáles ya se aplicaron.
@@ -144,6 +193,22 @@ fn migrate(conn: &Connection) -> rusqlite::Result<()> {
             conn.execute_batch("ALTER TABLE files ADD COLUMN alt TEXT")?;
         }
         conn.pragma_update(None, "user_version", 1)?;
+    }
+    if version < 2 {
+        // organizar: colecciones, etiquetas, favorito y nota. Todo o nada, en una transacción.
+        let tx = conn.unchecked_transaction()?;
+        for (col, def) in USER_COLUMNS {
+            if tx.prepare(&format!("SELECT {col} FROM posts LIMIT 0")).is_err() {
+                tx.execute_batch(&format!("ALTER TABLE posts ADD COLUMN {col} {def}"))?;
+            }
+        }
+        // el índice viejo no tiene las columnas nuevas: se tira y se rehace desde la tabla posts
+        tx.execute_batch("DROP TRIGGER IF EXISTS posts_ai; DROP TRIGGER IF EXISTS posts_ad; DROP TRIGGER IF EXISTS posts_au;
+                          DROP TABLE IF EXISTS posts_fts;")?;
+        tx.execute_batch(FTS)?;
+        tx.execute_batch("INSERT INTO posts_fts(posts_fts) VALUES('rebuild')")?;
+        tx.pragma_update(None, "user_version", 2)?;
+        tx.commit()?;
     }
     Ok(())
 }
@@ -222,7 +287,7 @@ pub fn get(conn: &Connection, id: &str) -> rusqlite::Result<Option<Detail>> {
             Ok(FileRow { path: r.get(0)?, url: r.get(1)?, status: r.get(2)?, size: r.get::<_, i64>(3)? as u64, sha256: r.get(4)?, error: r.get(5)?, alt: r.get(6)? })
         })?
         .collect::<rusqlite::Result<_>>()?;
-    Ok(Some(Detail { post, files }))
+    Ok(Some(Detail { post, files, tags: organize::tags_of(conn, id)? }))
 }
 
 pub fn list(conn: &Connection, f: &Filter) -> rusqlite::Result<Vec<PostRow>> {
@@ -254,6 +319,16 @@ pub fn list(conn: &Connection, f: &Filter) -> rusqlite::Result<Vec<PostRow>> {
     if let Some(d) = f.to.as_deref().filter(|d| !d.is_empty()) {
         push(&mut sql, &mut args, " AND substr(created_at, 1, 10) <= ?", d.to_string());
     }
+    // ids numéricos: van en el SQL tal cual, sin riesgo de inyección
+    if let Some(c) = f.collection_id {
+        sql += &format!(" AND collection_id = {c}");
+    }
+    if let Some(t) = f.tag_id {
+        sql += &format!(" AND id IN (SELECT post_id FROM post_tags WHERE tag_id = {t})");
+    }
+    if f.favorite == Some(true) {
+        sql += " AND favorite = 1";
+    }
     // ponytail: tope de 500 filas; paginar cuando una bóveda real lo pida
     sql += " ORDER BY saved_at DESC, rowid DESC LIMIT 500";
     let mut stmt = conn.prepare(&sql)?;
@@ -279,6 +354,9 @@ pub fn facets(conn: &Connection) -> rusqlite::Result<Facets> {
             _ => out.error = n,
         }
     }
+    out.favorites = conn.query_row("SELECT count(*) FROM posts WHERE favorite = 1", [], |r| r.get(0))?;
+    out.collections = organize::collections(conn)?;
+    out.tags = organize::tags(conn)?;
     Ok(out)
 }
 
@@ -307,23 +385,26 @@ fn to_row(r: &Row) -> rusqlite::Result<PostRow> {
         has_attachments: r.get(12)?,
         quoted_handle: r.get(13)?,
         quoted_text: r.get(14)?,
+        collection_id: r.get(15)?,
+        favorite: r.get(16)?,
+        note: r.get(17)?,
     })
 }
 
 #[cfg(test)]
-mod tests {
+pub(crate) mod tests {
     use super::*;
     use crate::parser;
     use crate::vault::SavedFile;
     use std::path::PathBuf;
 
-    fn db() -> Connection {
+    pub(crate) fn db() -> Connection {
         let conn = Connection::open_in_memory().unwrap();
-        conn.execute_batch(SCHEMA).unwrap();
+        init(&conn).unwrap();
         conn
     }
 
-    fn saved(fixture: &str, status: &'static str, files: &[&str]) -> Saved {
+    pub(crate) fn saved(fixture: &str, status: &'static str, files: &[&str]) -> Saved {
         let path = format!("{}/../tests/fixtures/{fixture}.json", env!("CARGO_MANIFEST_DIR"));
         let post = parser::parse_tweet(&std::fs::read_to_string(path).unwrap()).unwrap();
         let files = files
@@ -425,6 +506,52 @@ mod tests {
         let d = get(&conn, "2051361508181856362").unwrap().unwrap();
         assert_eq!(d.files[0].alt.as_deref(), Some("alt media/01.jpg"));
         assert_eq!(get(&conn, "20").unwrap().unwrap().files[0].alt, None, "fila antigua intacta");
+    }
+
+    #[test]
+    fn v1_database_migrates_to_v2_and_keeps_rows() {
+        let conn = Connection::open_in_memory().unwrap();
+        let v1 = format!("{}/../tests/fixtures/schema_v1.sql", env!("CARGO_MANIFEST_DIR"));
+        conn.execute_batch(&std::fs::read_to_string(v1).unwrap()).unwrap();
+        conn.execute("INSERT INTO posts (id, url, handle, text, status) VALUES ('20', 'u', 'jack', 'Una canción', 'ok')", []).unwrap();
+        conn.execute("INSERT INTO files (post_id, path, url, status, size, sha256) VALUES ('20', 'media/01.jpg', 'u', 'ok', 1, 'x')", []).unwrap();
+        conn.pragma_update(None, "user_version", 1).unwrap();
+        init(&conn).unwrap();
+        init(&conn).unwrap(); // dos veces: no falla
+        let version: i32 = conn.pragma_query_value(None, "user_version", |r| r.get(0)).unwrap();
+        assert_eq!(version, 2);
+        let d = get(&conn, "20").unwrap().unwrap();
+        assert_eq!((d.post.favorite, d.post.collection_id, d.post.note.as_str()), (false, None, ""));
+        assert_eq!(d.files.len(), 1, "los archivos siguen");
+        assert_eq!(ids(&conn, q("cancion")), ["20"], "el índice se reconstruyó con las filas viejas");
+        conn.execute("UPDATE posts SET note = 'receta de pan', tags_text = 'cocina' WHERE id = '20'", []).unwrap();
+        assert_eq!(ids(&conn, q("pan")), ["20"], "la nota entra en la búsqueda");
+        assert_eq!(ids(&conn, q("cocina")), ["20"], "las etiquetas también");
+    }
+
+    /// Contra una COPIA de una bóveda real, nunca el original:
+    /// `cp ~/Mirlo/mirlo.db <copia> && MIRLO_DB=<copia> cargo test real_db -- --ignored --nocapture`
+    #[test]
+    #[ignore]
+    fn real_db_copy_migrates_and_keeps_everything() {
+        let path = std::env::var("MIRLO_DB").expect("MIRLO_DB = ruta de la copia");
+        let count = |conn: &Connection, table: &str| conn.query_row(&format!("SELECT count(*) FROM {table}"), [], |r| r.get::<_, i64>(0)).unwrap();
+        let old = Connection::open(&path).unwrap();
+        let (posts, files) = (count(&old, "posts"), count(&old, "files"));
+        let before: i32 = old.pragma_query_value(None, "user_version", |r| r.get(0)).unwrap();
+        drop(old);
+        let conn = open(Path::new(&path)).unwrap();
+        let after: i32 = conn.pragma_query_value(None, "user_version", |r| r.get(0)).unwrap();
+        println!("user_version {before} → {after}; posts {posts}; files {files}");
+        assert_eq!(after, 2);
+        assert_eq!((count(&conn, "posts"), count(&conn, "files")), (posts, files));
+        for p in list(&conn, &Filter::default()).unwrap() {
+            assert!(!p.favorite && p.note.is_empty() && p.collection_id.is_none());
+            if !p.handle.is_empty() {
+                assert!(ids(&conn, q(&p.handle)).contains(&p.id), "{} sigue en la búsqueda", p.id);
+            }
+        }
+        conn.execute_batch("INSERT INTO posts_fts(posts_fts) VALUES('integrity-check')").unwrap();
     }
 
     fn upsert_without_alt(conn: &Connection) {

@@ -4,12 +4,14 @@
   import * as api from './lib/api'
   import type { Detail, Facets, Filter, Kind, PostRow, Status } from './lib/api'
   import Gallery from './lib/Gallery.svelte'
+  import NameEditor from './lib/NameEditor.svelte'
+  import Organizer from './lib/Organizer.svelte'
   import { errorParts, errorText, formatDate, formatSize, i18n, setLang, t, withKeys } from './lib/i18n.svelte'
 
   let input = $state('')
   let filter = $state<Filter>({})
   let posts = $state<PostRow[]>([])
-  let counts = $state<Facets>({ authors: [], ok: 0, partial: 0, error: 0 })
+  let counts = $state<Facets>({ authors: [], ok: 0, partial: 0, error: 0, favorites: 0, collections: [], tags: [] })
   let selectedId = $state<string | null>(null)
   let detail = $state<Detail | null>(null)
   let saving = $state<string[]>([]) // enlaces en cola de guardado
@@ -17,6 +19,10 @@
   let theme = $state(readTheme())
 
   let field: HTMLInputElement
+  let organizer = $state<ReturnType<typeof Organizer>>()
+  // sidebar: qué colección o etiqueta se está editando, y el campo de "nueva colección"
+  let editing = $state<{ kind: 'collection' | 'tag'; id: number } | null>(null)
+  let newCollection = $state<string | null>(null)
   const rows: Record<string, HTMLElement> = {}
 
   const KINDS: Kind[] = ['video', 'photo', 'gif', 'document', 'text']
@@ -24,7 +30,10 @@
   const total = $derived(counts.ok + counts.partial + counts.error)
   const media = $derived(detail?.files.filter((f) => f.status === 'ok' && f.path.startsWith('media/')) ?? [])
   const title = $derived(
-    filter.status === 'partial' ? t('side.partial')
+    filter.favorite ? t('side.favorites')
+    : filter.collection_id != null ? (counts.collections.find((c) => c.id === filter.collection_id)?.name ?? '')
+    : filter.tag_id != null ? `#${counts.tags.find((tag) => tag.id === filter.tag_id)?.name ?? ''}`
+    : filter.status === 'partial' ? t('side.partial')
     : filter.status === 'error' ? t('side.error')
     : filter.kind ? t(`kind.${filter.kind}`)
     : filter.handle ? `@${filter.handle}`
@@ -74,6 +83,67 @@
       if (selectedId === id) detail = d
     })
   })
+
+  // ---- organizar ----
+  async function reload() {
+    await refresh()
+    if (selectedId) detail = await api.getPost(selectedId)
+  }
+
+  /** Cambio de organización desde el sidebar: si va bien, cierra el editor y recarga. */
+  async function organize(action: Promise<unknown>) {
+    try {
+      await action
+      editing = null
+      await reload()
+    } catch (e) {
+      message = errorText(e)
+    }
+  }
+
+  // `autofocus` solo vale al cargar la página: un campo que aparece después se enfoca a mano
+  const focusOnMount = (node: HTMLInputElement) => {
+    node.focus()
+    node.select()
+  }
+
+  async function addCollection(e: KeyboardEvent) {
+    if (e.key === 'Escape') return void (newCollection = null)
+    if (e.key !== 'Enter') return
+    e.preventDefault()
+    try {
+      const c = await api.createCollection(newCollection ?? '')
+      newCollection = null
+      await refresh()
+      setFilter({ collection_id: c.id })
+    } catch (err) {
+      message = errorText(err)
+    }
+  }
+
+  async function removeCollection(id: number) {
+    if (filter.collection_id === id) setFilter({})
+    await organize(api.deleteCollection(id))
+  }
+
+  async function removeTag(id: number) {
+    if (filter.tag_id === id) setFilter({})
+    await organize(api.deleteTag(id))
+  }
+
+  // Alt+↑/↓ mueve la colección enfocada; F2 la edita (igual en etiquetas)
+  function onSideKey(e: KeyboardEvent, kind: 'collection' | 'tag', id: number) {
+    if (e.key === 'F2') {
+      e.preventDefault()
+      editing = { kind, id }
+    } else if (kind === 'collection' && e.altKey && (e.key === 'ArrowUp' || e.key === 'ArrowDown')) {
+      e.preventDefault()
+      const i = counts.collections.findIndex((c) => c.id === id)
+      const to = i + (e.key === 'ArrowUp' ? -1 : 1)
+      if (to < 0 || to >= counts.collections.length) return
+      organize(api.moveCollection(id, to)).then(() => document.getElementById(`collection-${id}`)?.focus())
+    }
+  }
 
   async function save(url: string) {
     saving = [...saving, url]
@@ -157,6 +227,10 @@
       '/': () => field.focus(),
       o: () => selectedId && api.openFolder(selectedId).catch((err) => (message = errorText(err))),
       r: () => selectedId && detail?.post.status !== 'ok' && retry(selectedId),
+      f: () => organizer?.toggleFavorite(),
+      t: () => organizer?.focusTags(),
+      m: () => organizer?.focusCollection(),
+      n: () => organizer?.focusNote(),
     }
     const action = actions[e.key]
     if (action) {
@@ -204,8 +278,11 @@
 
   <div class="panes">
     <nav class="side" aria-label={t('side.label')}>
-      <button aria-pressed={!filter.status && !filter.kind && !filter.handle} onclick={() => setFilter({})}>
+      <button aria-pressed={!filter.status && !filter.kind && !filter.handle && !filter.favorite && filter.collection_id == null && filter.tag_id == null} onclick={() => setFilter({})}>
         {t('side.all')} <span>{total}</span>
+      </button>
+      <button aria-pressed={!!filter.favorite} onclick={() => setFilter({ favorite: true })}>
+        ★ {t('side.favorites')} <span>{counts.favorites}</span>
       </button>
       <button aria-pressed={filter.status === 'partial'} onclick={() => setFilter({ status: 'partial' })}>
         {t('side.partial')} <span>{counts.partial}</span>
@@ -213,6 +290,66 @@
       <button aria-pressed={filter.status === 'error'} onclick={() => setFilter({ status: 'error' })}>
         {t('side.error')} <span>{counts.error}</span>
       </button>
+      <div class="side-head">
+        <h2>{t('side.collections')}</h2>
+        <button class="add" aria-label={t('side.new_collection')} title={t('side.new_collection')} onclick={() => (newCollection = '')}>+</button>
+      </div>
+      {#if newCollection !== null}
+        <input class="new" use:focusOnMount bind:value={newCollection} onkeydown={addCollection} onblur={() => (newCollection = null)} placeholder={t('side.new_collection')} aria-label={t('side.new_collection')} />
+      {/if}
+      {#each counts.collections as c (c.id)}
+        {#if editing?.kind === 'collection' && editing.id === c.id}
+          <NameEditor
+            name={c.name}
+            deleteHint={t('edit.delete_collection_hint')}
+            onrename={(name) => organize(api.renameCollection(c.id, name))}
+            ondelete={() => removeCollection(c.id)}
+            onclose={() => (editing = null)}
+          />
+        {:else}
+          <button
+            id="collection-{c.id}"
+            aria-pressed={filter.collection_id === c.id}
+            title={t('side.edit_hint').replace(/[[\]]/g, '')}
+            onclick={() => setFilter({ collection_id: c.id })}
+            ondblclick={() => (editing = { kind: 'collection', id: c.id })}
+            onkeydown={(e) => onSideKey(e, 'collection', c.id)}
+          >
+            <span class="name">{c.name}</span> <span>{c.count}</span>
+          </button>
+        {/if}
+      {/each}
+      <h2>{t('side.tags')}</h2>
+      {#if counts.tags.length}
+        <div class="tag-list">
+          {#each counts.tags as tag (tag.id)}
+            {#if editing?.kind === 'tag' && editing.id === tag.id}
+              <NameEditor
+                name={tag.name}
+                color={tag.color}
+                deleteHint={t('edit.delete_tag_hint')}
+                onrename={(name) => organize(api.renameTag(tag.id, name))}
+                oncolor={(color) => organize(api.setTagColor(tag.id, color)).then(() => (editing = { kind: 'tag', id: tag.id }))}
+                ondelete={() => removeTag(tag.id)}
+                onclose={() => (editing = null)}
+              />
+            {:else}
+              <button
+                class="tag"
+                aria-pressed={filter.tag_id === tag.id}
+                title={t('side.edit_hint_tag').replace(/[[\]]/g, '')}
+                onclick={() => setFilter({ tag_id: tag.id })}
+                ondblclick={() => (editing = { kind: 'tag', id: tag.id })}
+                onkeydown={(e) => onSideKey(e, 'tag', tag.id)}
+              >
+                <i class="tag-dot" style:background={api.tagColor(tag.color)} aria-hidden="true"></i>{tag.name} <span>{tag.count}</span>
+              </button>
+            {/if}
+          {/each}
+        </div>
+      {:else}
+        <p class="hint">{@render keyed(t('side.no_tags'))}</p>
+      {/if}
       <h2>{t('side.by_type')}</h2>
       {#each KINDS as kind}
         <button aria-pressed={filter.kind === kind} onclick={() => setFilter({ kind })}>{t(`kind.${kind}`)}</button>
@@ -257,11 +394,13 @@
           >
             <span class="who">{p.handle ? `@${p.handle}` : t('list.post_id', { id: p.id })}</span><time>{formatDate(p.created_at)}</time>
             <p>{p.text || errorParts(p.error).text}</p>
-            <div class="meta"><span>{mediaLabel(p)}</span><span class="st {p.status}">{status(p.status)}</span></div>
+            <div class="meta">{#if p.favorite}<span class="fav" aria-label={t('org.favorite')}>★</span>{/if}<span>{mediaLabel(p)}</span><span class="st {p.status}">{status(p.status)}</span></div>
           </div>
         {:else}
           <p class="empty">
-            {#if filter.q || filter.kind || filter.handle || filter.status || filter.from || filter.to}
+            {#if filter.collection_id != null && !filter.q}
+              {@render keyed(t('list.empty_collection'))}
+            {:else if filter.q || filter.kind || filter.handle || filter.status || filter.from || filter.to || filter.favorite || filter.tag_id != null}
               {t('list.no_match')}
             {:else}
               {@render keyed(t('list.empty'))}
@@ -286,6 +425,9 @@
             <button class="btn" onclick={() => api.openOnX(p.id).catch((e) => (message = errorText(e)))}>{t('read.view_on_x')}</button>
           </div>
         </header>
+        {#if p.status !== 'error' || p.dir}
+          <Organizer bind:this={organizer} {detail} collections={counts.collections} allTags={counts.tags} onchange={reload} onerror={(m) => (message = m)} />
+        {/if}
         {#if p.error}
           {@const err = errorParts(p.error)}
           <div class="alert" role="alert">
@@ -334,6 +476,10 @@
     <span><kbd>Ctrl</kbd> <kbd>V</kbd> {t('keys.save')}</span>
     <span><kbd>O</kbd> {t('keys.open')}</span>
     <span><kbd>R</kbd> {t('keys.retry')}</span>
+    <span><kbd>F</kbd> {t('keys.favorite')}</span>
+    <span><kbd>T</kbd> {t('keys.tags')}</span>
+    <span><kbd>M</kbd> {t('keys.collection')}</span>
+    <span><kbd>N</kbd> {t('keys.note')}</span>
     <span class="msg" role="status" aria-live="polite">{message}</span>
   </footer>
 </div>
@@ -355,6 +501,18 @@
   .side > button:hover { background: var(--paper); }
   .side > button[aria-pressed='true'] { background: var(--accent-soft); color: var(--accent); font-weight: 700; }
   .side > button > span:last-child { color: var(--muted); font-variant-numeric: tabular-nums; }
+  .side-head { display: flex; justify-content: space-between; align-items: center; margin-right: 4px; }
+  .side-head .add { border: 1px solid var(--line); background: var(--paper); border-radius: 6px; width: 24px; height: 24px; line-height: 1; cursor: pointer; margin-top: 10px; }
+  .side .new { display: block; width: 100%; margin: 2px 0 6px; background: var(--paper); border: 1px solid var(--accent); border-radius: 6px; padding: 4px 8px; }
+  .side .name { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .tag-list { display: flex; flex-wrap: wrap; gap: 5px; padding: 0 4px; }
+  .tag-list :global(.editor) { flex-basis: 100%; }
+  .side { min-width: 0; }
+  .tag { display: inline-flex; align-items: center; gap: 5px; border: 1px solid var(--line); background: var(--paper); border-radius: 999px; padding: 2px 9px; font-size: 14px; cursor: pointer; }
+  .tag span { color: var(--muted); font-variant-numeric: tabular-nums; }
+  .tag[aria-pressed='true'] { border-color: var(--accent); background: var(--accent-soft); color: var(--accent); font-weight: 700; }
+  .hint { color: var(--muted); font-size: 13px; margin: 0 8px; }
+  .fav { color: var(--warn); }
   .handle { display: flex; gap: 8px; align-items: center; min-width: 0; }
   .handle .name { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
   .side details { margin: 14px 8px 0; font-size: 14px; }

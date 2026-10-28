@@ -125,3 +125,18 @@ Flujo: `pegar URL → x_url::status_id → sources::extract → parser::parse_* 
 - **Teclas dentro de frases** (`[Ctrl] [V]`) se pintan como `<kbd>` con un snippet, sin `{@html}`: los textos llevan datos del post y `{@html}` permitiría inyectar HTML.
 - **Idioma inicial:** el del sistema (`es*` → español, el resto → inglés); se recuerda en `localStorage`. `post.md` se escribe en el idioma de la app al guardar.
 - **Por qué antes de publicar:** después habría mensajes en español guardados en la BD de cada usuario.
+
+## Decisión 14: organizar (favoritos, colecciones, etiquetas y notas) (2026-10-28)
+
+| Tema | Elegido | Por qué |
+|---|---|---|
+| Colección | 0 o 1 por post, como una carpeta, con orden manual | Es lo que se espera de "mover a…"; para clasificar en varios ejes ya están las etiquetas |
+| Etiquetas | Muchas por post, nombre único sin distinguir mayúsculas | `Rust` y `rust` son la misma; añadir una que existe la reutiliza |
+| Color de etiqueta | 8 tonos de la paleta (cambian con el tema) **o** un `#rrggbb` propio desde una rueda | La paleta asegura contraste en claro y oscuro; la rueda da libertad. Rust solo acepta esas dos formas: el valor acaba en el CSS de la página |
+| Búsqueda | `tags_text` (nombres desnormalizados) y `note` entran en el FTS | El índice FTS5 solo lee columnas de `posts`; Rust rehace `tags_text` en la misma transacción que el cambio de etiquetas |
+| Dónde vive | Columnas que `db::upsert` no toca + bloque `"user"` en `post.json` | Son datos de la persona, no de X: ni re-guardar ni reintentar los pisa. En disco van por **nombre** (los ids cambian de una bóveda a otra) para que importar no pierda nada |
+| Migración | `user_version = 2` en una transacción: columnas nuevas, se tira el índice viejo y se rehace (`rebuild`) | Si falla a mitad, la BD sigue en v1. Probado contra una copia de una bóveda real antes de abrir la app |
+| Borrar | Dos pulsaciones ("Borrar" → "Sí, borrar") | No hay papelera; borrar una colección no borra posts (`ON DELETE SET NULL`) |
+
+**Descartado:** colecciones anidadas (más complejidad que valor por ahora) y arrastrar filas a una colección (opcional en la SPEC; el `M` + flechas cubre el caso).
+**Código:** `src-tauri/src/organize.rs` (lógica y tests), `db.rs` (esquema y migración), `vault::write_user`, `src/lib/Organizer.svelte`, `NameEditor.svelte`, `ColorWheel.svelte`.

@@ -20,6 +20,9 @@ export interface PostRow {
   has_attachments: boolean
   quoted_handle: string | null
   quoted_text: string | null
+  collection_id: number | null
+  favorite: boolean
+  note: string
 }
 
 export interface FileRow {
@@ -32,9 +35,28 @@ export interface FileRow {
   alt: string | null
 }
 
+/** Misma paleta que organize::COLORS; cada nombre es un token --tag-<color> de app.css. */
+export const TAG_COLORS = ['red', 'orange', 'yellow', 'green', 'teal', 'blue', 'purple', 'pink'] as const
+
+export interface Tag {
+  id: number
+  name: string
+  /** nombre de la paleta o `#rrggbb` propio (Rust valida que sea uno de los dos) */
+  color: string | null
+}
+
+/** Valor CSS de un color de etiqueta: los de la paleta cambian con el tema; un HEX propio, no. */
+export const tagColor = (c: string | null) => (!c ? 'transparent' : c.startsWith('#') ? c : `var(--tag-${c})`)
+
+export interface Collection {
+  id: number
+  name: string
+}
+
 export interface Detail {
   post: PostRow
   files: FileRow[]
+  tags: Tag[]
 }
 
 export interface Filter {
@@ -44,6 +66,9 @@ export interface Filter {
   status?: Status
   from?: string
   to?: string
+  collection_id?: number
+  tag_id?: number
+  favorite?: boolean
 }
 
 export interface Facets {
@@ -51,6 +76,9 @@ export interface Facets {
   ok: number
   partial: number
   error: number
+  favorites: number
+  collections: (Collection & { count: number })[]
+  tags: (Tag & { count: number })[]
 }
 
 /** `lang`: idioma de la app, para los títulos de post.md */
@@ -74,3 +102,18 @@ export async function videoUrl(id: string, path: string) {
   const bytes = await invoke<ArrayBuffer>('read_media', { id, path })
   return URL.createObjectURL(new Blob([bytes], { type: 'video/mp4' }))
 }
+
+// ---- organizar (los nombres de los argumentos van en camelCase: así los espera Tauri) ----
+export const setFavorite = (id: string, value: boolean) => invoke<void>('set_favorite', { id, value })
+export const setNote = (id: string, note: string) => invoke<void>('set_note', { id, note })
+export const setCollection = (id: string, collectionId: number | null) => invoke<void>('set_collection', { id, collectionId })
+/** Crea la etiqueta si no existe (sin distinguir mayúsculas). */
+export const addTag = (id: string, name: string) => invoke<Tag>('add_tag', { id, name })
+export const removeTag = (id: string, tagId: number) => invoke<void>('remove_tag', { id, tagId })
+export const createCollection = (name: string) => invoke<Collection>('create_collection', { name })
+export const renameCollection = (id: number, name: string) => invoke<void>('rename_collection', { id, name })
+export const deleteCollection = (id: number) => invoke<void>('delete_collection', { id })
+export const moveCollection = (id: number, position: number) => invoke<void>('move_collection', { id, position })
+export const renameTag = (id: number, name: string) => invoke<void>('rename_tag', { id, name })
+export const setTagColor = (id: number, color: string | null) => invoke<void>('set_tag_color', { id, color })
+export const deleteTag = (id: number) => invoke<void>('delete_tag', { id })
