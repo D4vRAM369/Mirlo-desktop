@@ -66,3 +66,9 @@ export const fileUrl = (dir: string, path: string) => convertFileSrc(`${dir}/${p
 export const looksLikePostUrl = (s: string) =>
   /^https?:\/\/(www\.|mobile\.)?(x|twitter)\.com\/.+\/status(es)?\/\d+/i.test(s.trim())
 export const openOnX = (id: string) => invoke<void>('open_on_x', { id })
+
+/** Vídeo como URL blob: (WebKitGTK no reproduce vídeos por el protocolo asset:). Libérala con URL.revokeObjectURL. */
+export async function videoUrl(id: string, path: string) {
+  const bytes = await invoke<ArrayBuffer>('read_media', { id, path })
+  return URL.createObjectURL(new Blob([bytes], { type: 'video/mp4' }))
+}

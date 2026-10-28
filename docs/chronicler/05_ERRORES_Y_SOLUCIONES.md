@@ -97,3 +97,13 @@ Resuelto con FxTwitter como fuente extra solo del texto (Decisión 6). Si FxTwit
 - **Causa:** Tauri en Linux usa WebKitGTK (el motor de Safari). WebKit no dispara el evento `paste` si no hay un elemento editable enfocado; Chrome sí. El backend nunca recibió nada.
 - **Solución:** en `keydown` con Ctrl+V se enfoca el campo de enlace antes de que el navegador pegue; `onInput` detecta `inputType === 'insertFromPaste'` y guarda si es un enlace de X.
 - **Lección:** los eventos del portapapeles se prueban en el motor real de la app, no en Chrome.
+
+## Error: los vídeos guardados no se reproducían en la ventana (WebKitGTK)
+
+- **Síntoma:** el post se guardaba bien (`media/01.mp4` en disco, estado `ok`), pero en el panel de lectura el vídeo no se reproducía. Las fotos sí se veían.
+- **Diagnóstico:** el archivo era un MP4 válido (H.264 740x720, comprobado con `ffprobe`) y GStreamer tenía los códecs (`avdec_h264`, `avdec_aac`). El fallo no estaba ni en la descarga ni en el sistema.
+- **Causa:** Tauri en Linux usa WebKitGTK, que reproduce los vídeos con GStreamer. GStreamer no sabe leer el esquema propio `asset:` con el que Tauri sirve archivos locales; las imágenes no pasan por GStreamer y por eso sí funcionaban.
+- **Solución:** comando `read_media` en Rust que lee el vídeo y lo devuelve como bytes (`tauri::ipc::Response`). El frontend crea una URL `blob:` con `api.videoUrl` y la libera con `URL.revokeObjectURL` al cambiar de post. Seguridad: solo entrega archivos que estén en la tabla `files` de ese post y dentro de `~/XVault`.
+- **Límite conocido:** el vídeo entero pasa a memoria (comentario `ponytail:` en `main.rs`). Con vídeos de cientos de MB habría que servirlo por rangos.
+- **Verificación:** confirmado en la ventana real el 2026-10-28.
+- **Lección:** "se guarda" y "se ve" son dos pruebas distintas. Las fotos funcionando no demostraban que el vídeo funcionase: cada tipo de medio usa un camino distinto dentro del motor.

@@ -50,6 +50,30 @@
     })
   })
 
+  // Vídeos del post abierto como blob: (ver api.videoUrl). Se liberan al cambiar de post.
+  let videos = $state<Record<string, string>>({})
+  $effect(() => {
+    const d = detail
+    const urls: string[] = []
+    let alive = true
+    videos = {}
+    for (const f of media.filter((f) => f.path.endsWith('.mp4'))) {
+      if (!d) break
+      api
+        .videoUrl(d.post.id, f.path)
+        .then((u) => {
+          urls.push(u)
+          if (alive) videos = { ...videos, [f.path]: u }
+          else URL.revokeObjectURL(u)
+        })
+        .catch((e) => (message = String(e)))
+    }
+    return () => {
+      alive = false
+      urls.forEach((u) => URL.revokeObjectURL(u))
+    }
+  })
+
   async function save(url: string) {
     saving = [...saving, url]
     message = ''
@@ -240,7 +264,11 @@
               {#if f.path.endsWith('.mp4')}
                 <!-- X no da subtítulos de sus vídeos: una <track> vacía solo engañaría al lector de pantalla -->
                 <!-- svelte-ignore a11y_media_has_caption -->
-                <video class="w-full rounded" controls preload="metadata" src={api.fileUrl(p.dir, f.path)}></video>
+                {#if videos[f.path]}
+                  <video class="w-full rounded" controls preload="metadata" src={videos[f.path]}></video>
+                {:else}
+                  <p class="rounded bg-slate-100 p-4 text-sm">Cargando vídeo…</p>
+                {/if}
               {:else}
                 <img class="w-full rounded" loading="lazy" alt="Foto {i + 1} de {media.length}" src={api.fileUrl(p.dir, f.path)} />
               {/if}

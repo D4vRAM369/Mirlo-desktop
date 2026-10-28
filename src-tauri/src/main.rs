@@ -81,6 +81,23 @@ fn open_folder(app: State<'_, App>, id: String) -> Result<(), String> {
     open_with_system(dir.as_os_str())
 }
 
+/// Bytes de un vídeo guardado. WebKitGTK (Linux) no reproduce `<video>` servido por el protocolo
+/// `asset:`, así que el frontend lo pide aquí y lo reproduce como `blob:`.
+/// ponytail: el vídeo entero pasa a memoria; con vídeos de varios cientos de MB, servir por rangos.
+#[tauri::command]
+fn read_media(app: State<'_, App>, id: String, path: String) -> Result<tauri::ipc::Response, String> {
+    let detail = db::get(&*app.db()?, &id).map_err(|e| e.to_string())?.ok_or("Post no encontrado")?;
+    // solo archivos que XVault apuntó para ese post: nada de rutas que lleguen del frontend
+    if !detail.files.iter().any(|f| f.path == path && f.status == "ok") {
+        return Err("Archivo desconocido".into());
+    }
+    let file = PathBuf::from(detail.post.dir.ok_or("Post sin carpeta")?).join(&path);
+    if !file.starts_with(&app.root) {
+        return Err("Ruta fuera de la bóveda".into());
+    }
+    std::fs::read(&file).map(tauri::ipc::Response::new).map_err(|e| format!("No se pudo leer {path}: {e}"))
+}
+
 /// Abre el post original en el navegador. La URL sale de la BD y se vuelve a validar.
 #[tauri::command]
 fn open_on_x(app: State<'_, App>, id: String) -> Result<(), String> {
@@ -104,7 +121,7 @@ fn main() {
             Ok(())
         })
         .invoke_handler(tauri::generate_handler![
-            save_post, retry_post, list_posts, get_post, facets, open_folder, open_on_x
+            save_post, retry_post, list_posts, get_post, facets, open_folder, open_on_x, read_media
         ])
         .run(tauri::generate_context!())
         .expect("error al iniciar XVault");
