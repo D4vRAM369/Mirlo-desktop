@@ -1,0 +1,50 @@
+# Aviso semanal: si yt-dlp publicó una versión más nueva que la fijada en scripts/fetch-yt-dlp.mjs,
+# abre una PR que la sube, sube el parche de Mirlo y añade la línea al CHANGELOG (scripts/bump-yt-dlp.sh).
+# No publica nada: merge, `git tag vX.Y.Z && git push --tags` y publicar el borrador siguen siendo a mano.
+# Requiere en Settings → Actions → General: "Allow GitHub Actions to create and approve pull requests".
+name: yt-dlp update check
+
+on:
+  schedule:
+    - cron: '0 8 * * 1' # lunes 08:00 UTC
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Comparar versiones y abrir PR
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          pinned=$(grep -oP "^const VERSION = '\K[^']+" scripts/fetch-yt-dlp.mjs)
+          latest=$(gh api repos/yt-dlp/yt-dlp/releases/latest --jq .tag_name)
+          echo "fijada: $pinned · última: $latest"
+          [ "$pinned" = "$latest" ] && exit 0
+
+          # una rama por versión: si ya existe (PR abierta o cerrada sin borrar), no repetir
+          branch="yt-dlp-$latest"
+          if git ls-remote --exit-code --heads origin "$branch" >/dev/null; then
+            echo "Ya existe la rama $branch"
+            exit 0
+          fi
+
+          git switch -c "$branch"
+          summary=$(bash scripts/bump-yt-dlp.sh "$latest")
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git commit -am "chore: yt-dlp $latest"
+          git push origin "$branch"
+          gh pr create --head "$branch" --title "chore: yt-dlp $latest" --body "$summary · [notas de yt-dlp](https://github.com/yt-dlp/yt-dlp/releases/tag/$latest)
+
+          El CI no corre en PRs creadas por el bot: ciérrala y reábrela para lanzarlo, o confía en el CI del push tras el merge.
+
+          Después del merge:
+          1. \`git pull && git tag v<nueva> && git push --tags\`
+          2. Revisa el borrador de Release y publícalo."

@@ -23,7 +23,7 @@
 - Enlaces del texto del post clicables (abrir en el navegador del sistema con validación).
 
 ## 💡 Más adelante (sin compromiso)
-- Hilos completos.
+- Hilos completos, también el del post citado (hoy de una cita solo se guarda ese post, un nivel). Pregunta recibida en Bluesky.
 - Posts protegidos con `--cookies-from-browser` de yt-dlp (opcional, desactivado por defecto).
 - Exportar una colección a HTML estático para compartirla.
 - Servir vídeos grandes por rangos en lugar de cargarlos enteros en memoria (`read_media`).
