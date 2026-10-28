@@ -105,3 +105,12 @@ Flujo: `pegar URL → x_url::status_id → sources::extract → parser::parse_* 
 - **Proceso:** generado con GPT en cuatro iteraciones (genérico → fichero → pájaro fotográfico → pájaro de juguete → punto intermedio satinado). Esquinas recortadas a transparente y bordes limpiados con ImageMagick; `npx tauri icon app-icon.png` genera todos los tamaños.
 - **Fuente:** `app-icon.png` (1024×1024) en la raíz del proyecto.
 - **Límite conocido:** a 16 px solo se lee "cajón azul con algo encima". Si molesta, versión simplificada solo para 16 y 32 px.
+
+## Decisión 12: la app se llama Mirlo (2026-10-29)
+
+- **Por qué no XVault:** "X" + "vault" puede leerse como contenido +18 ("XXX"). "TwitterVault" usa una marca registrada de X Corp.
+- **Por qué Mirlo:** es el protagonista del icono, corto, en español y sin connotaciones. Guiña al pájaro de Twitter sin usar su marca.
+- **La compatibilidad con X va en el subtítulo y la descripción** ("Tu bóveda local de posts de X"): uso descriptivo, como "compatible con iPhone".
+- **Qué cambió:** nombre del paquete y del binario (`mirlo`), `productName`, identificador `com.mirlo.desktop`, carpeta `~/Mirlo`, base de datos `mirlo.db`, sidecar `mirlo-yt-dlp`, marca `"mirlo": 1` en `post.json`. Los documentos históricos de Chronicler y los mockups conservan "XVault".
+- **Migración de datos (una sola vez, a mano):** `mv ~/XVault ~/Mirlo`, `xvault.db` → `mirlo.db`, `UPDATE posts SET dir = …` para las rutas absolutas y la marca de `post.json`. No se dejó código de migración en la app: solo había una bóveda, la del autor.
+- **Banner del README:** compuesto en HTML (`docs/assets/banner.html`) con el icono real y la tipografía de la app, exportado con Chromium a 2560×800. Así el texto sale perfecto, cosa que un generador de imágenes no garantiza.

@@ -1,7 +1,7 @@
 [package]
-name = "xvault"
+name = "mirlo"
 version = "0.1.0"
-description = "XVault desktop"
+description = "Mirlo desktop"
 edition = "2021"
 build = "build.rs"
 

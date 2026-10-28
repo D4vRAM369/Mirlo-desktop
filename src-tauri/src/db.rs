@@ -1,4 +1,4 @@
-//! Índice SQLite de la bóveda (`~/XVault/xvault.db`).
+//! Índice SQLite de la bóveda (`~/Mirlo/mirlo.db`).
 //! La verdad está en disco (post.json de cada carpeta); esto sirve para buscar y filtrar rápido.
 
 use crate::parser::MediaKind;

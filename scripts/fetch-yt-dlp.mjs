@@ -1,6 +1,6 @@
 // Descarga yt-dlp para empaquetarlo como sidecar de Tauri (bundle.externalBin) y comprueba su SHA-256.
-// Tauri exige el nombre `xvault-yt-dlp-<target-triple>` y al empaquetar lo deja junto al ejecutable como
-// `xvault-yt-dlp`, que es donde lo busca `sources::ytdlp_binary()`. El prefijo evita chocar con el paquete
+// Tauri exige el nombre `mirlo-yt-dlp-<target-triple>` y al empaquetar lo deja junto al ejecutable como
+// `mirlo-yt-dlp`, que es donde lo busca `sources::ytdlp_binary()`. El prefijo evita chocar con el paquete
 // `yt-dlp` del sistema, que ya es dueño de /usr/bin/yt-dlp (el .deb no se podría instalar).
 // Uso: `npm run sidecar`. Si el archivo ya está y su hash cuadra, no descarga nada.
 import { createHash } from 'node:crypto'
@@ -19,7 +19,7 @@ const asset = windows
     : triple.startsWith('aarch64')
       ? 'yt-dlp_linux_aarch64'
       : 'yt-dlp_linux'
-const dest = `src-tauri/binaries/xvault-yt-dlp-${triple}${windows ? '.exe' : ''}`
+const dest = `src-tauri/binaries/mirlo-yt-dlp-${triple}${windows ? '.exe' : ''}`
 const base = `https://github.com/yt-dlp/yt-dlp/releases/download/${VERSION}/`
 const sha256 = (bytes) => createHash('sha256').update(bytes).digest('hex')
 

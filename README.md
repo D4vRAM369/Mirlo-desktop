@@ -1,17 +1,15 @@
 <p align="center">
-  <img src="app-icon.png" width="128" height="128" alt="Icono de XVault: un cajón de fichero azul con un post en modo oscuro y un mirlo posado encima">
+  <img src="docs/assets/banner.png" width="900" alt="Mirlo: tu bóveda local de posts de X. Icono de un cajón de fichero azul con un post en modo oscuro y un mirlo posado encima.">
 </p>
 
-# XVault
-
-Bóveda local para posts de X (Twitter). Pegas el enlace de un post y XVault guarda en tu disco el texto, el autor, la fecha y todos sus archivos: fotos a resolución original, vídeos, GIF (como MP4) y documentos enlazados (PDF, DOCX…).
+Bóveda local para posts de X (Twitter). Pegas el enlace de un post y Mirlo guarda en tu disco el texto, el autor, la fecha y todos sus archivos: fotos a resolución original, vídeos, GIF (como MP4) y documentos enlazados (PDF, DOCX…).
 
 Sin cuenta, sin nube y sin telemetría.
 
 ## Cómo se usa
 
 1. Copia el enlace de un post en X.
-2. Pulsa <kbd>Ctrl</kbd>+<kbd>V</kbd> en cualquier parte de la ventana de XVault.
+2. Pulsa <kbd>Ctrl</kbd>+<kbd>V</kbd> en cualquier parte de la ventana de Mirlo.
 3. El post aparece en la lista. Si algo no se pudo bajar, se marca como **◐ Parcial** o **✕ Error** y puedes reintentarlo con <kbd>R</kbd>.
 
 | Atajo | Acción |
@@ -25,8 +23,8 @@ Sin cuenta, sin nube y sin telemetría.
 ## Dónde se guarda
 
 ```
-~/XVault/
-├── xvault.db                         índice para buscar y filtrar
+~/Mirlo/
+├── mirlo.db                          índice para buscar y filtrar
 └── <usuario>/<YYYY-MM-DD>_<id>/
     ├── post.json                     post, archivos con su SHA-256 y la respuesta original
     ├── post.md                       el post en texto legible
@@ -34,18 +32,18 @@ Sin cuenta, sin nube y sin telemetría.
     └── attachments/                  documentos enlazados
 ```
 
-Las carpetas son la copia de verdad: puedes copiarlas, leerlas sin XVault o hacer copia de seguridad de `~/XVault` entera.
+Las carpetas son la copia de verdad: puedes copiarlas, leerlas sin Mirlo o hacer copia de seguridad de `~/Mirlo` entera.
 
 ## Qué sale de tu equipo
 
-XVault solo hace estas peticiones, y solo cuando guardas o reintentas un post:
+Mirlo solo hace estas peticiones, y solo cuando guardas o reintentas un post:
 
 - **X** (`cdn.syndication.twimg.com`, `publish.x.com`, `pbs.twimg.com`, `video.twimg.com`): el post y sus archivos.
 - **yt-dlp** (incluido en la app): pide el post a X cuando la vía anterior falla.
 - **FxTwitter** (`api.fxtwitter.com`): **solo** para posts de más de 280 caracteres, porque X los entrega cortados. Recibe el número del post.
-- **Los sitios enlazados en el post**: XVault mira si el enlace es un documento (por su `Content-Type`) y, si lo es y pesa menos de 50 MB, lo descarga. Nunca toca direcciones de tu red local.
+- **Los sitios enlazados en el post**: Mirlo mira si el enlace es un documento (por su `Content-Type`) y, si lo es y pesa menos de 50 MB, lo descarga. Nunca toca direcciones de tu red local.
 
-La tipografía va dentro de la app: abrir XVault no llama a nadie.
+La tipografía va dentro de la app: abrir Mirlo no llama a nadie.
 
 ## Limitaciones
 

@@ -1,4 +1,4 @@
-# Al subir una etiqueta v* (git tag v0.1.0 && git push --tags) compila XVault en Linux, Windows y macOS
+# Al subir una etiqueta v* (git tag v0.1.0 && git push --tags) compila Mirlo en Linux, Windows y macOS
 # y deja los instaladores en un borrador de Release. Se publica a mano tras revisarlo.
 # `beforeBuildCommand` (npm run sidecar && npm run build) descarga el yt-dlp de cada plataforma y verifica su SHA-256.
 name: Release
@@ -44,6 +44,6 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           tagName: ${{ github.ref_name }}
-          releaseName: XVault ${{ github.ref_name }}
+          releaseName: Mirlo ${{ github.ref_name }}
           releaseBody: Instaladores para Linux (.deb, .rpm, .AppImage), Windows (.msi, .exe) y macOS (.dmg). Incluyen yt-dlp.
           releaseDraft: true

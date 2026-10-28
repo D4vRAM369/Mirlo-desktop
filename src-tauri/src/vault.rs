@@ -110,7 +110,7 @@ pub async fn save(root: &Path, ex: Extracted, max_doc: u64) -> Result<Saved, Str
     let raw: serde_json::Value = serde_json::from_str(&ex.raw_json).unwrap_or(serde_json::Value::Null);
     let now = std::time::SystemTime::now().duration_since(std::time::UNIX_EPOCH).map(|d| d.as_secs()).unwrap_or(0);
     let json = serde_json::json!({
-        "xvault": 1,
+        "mirlo": 1,
         "saved_at": parser::iso_from_unix(now as i64),
         "source": ex.source,
         "status": status,

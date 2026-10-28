@@ -18,7 +18,7 @@ struct App {
 
 impl App {
     fn db(&self) -> Result<std::sync::MutexGuard<'_, rusqlite::Connection>, String> {
-        self.db.lock().map_err(|_| "la base de datos quedó bloqueada; reinicia XVault".to_string())
+        self.db.lock().map_err(|_| "la base de datos quedó bloqueada; reinicia Mirlo".to_string())
     }
 }
 
@@ -87,7 +87,7 @@ fn open_folder(app: State<'_, App>, id: String) -> Result<(), String> {
 #[tauri::command]
 fn read_media(app: State<'_, App>, id: String, path: String) -> Result<tauri::ipc::Response, String> {
     let detail = db::get(&*app.db()?, &id).map_err(|e| e.to_string())?.ok_or("Post no encontrado")?;
-    // solo archivos que XVault apuntó para ese post: nada de rutas que lleguen del frontend
+    // solo archivos que Mirlo apuntó para ese post: nada de rutas que lleguen del frontend
     if !detail.files.iter().any(|f| f.path == path && f.status == "ok") {
         return Err("Archivo desconocido".into());
     }
@@ -114,9 +114,9 @@ fn open_with_system(target: &std::ffi::OsStr) -> Result<(), String> {
 fn main() {
     tauri::Builder::default()
         .setup(|app| {
-            let root = app.path().home_dir()?.join("XVault");
+            let root = app.path().home_dir()?.join("Mirlo");
             std::fs::create_dir_all(&root)?;
-            let conn = db::open(&root.join("xvault.db"))?;
+            let conn = db::open(&root.join("mirlo.db"))?;
             app.manage(App { root, db: Mutex::new(conn) });
             Ok(())
         })
@@ -124,5 +124,5 @@ fn main() {
             save_post, retry_post, list_posts, get_post, facets, open_folder, open_on_x, read_media
         ])
         .run(tauri::generate_context!())
-        .expect("error al iniciar XVault");
+        .expect("error al iniciar Mirlo");
 }
