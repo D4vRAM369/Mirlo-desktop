@@ -23,6 +23,26 @@ Sin cuenta, sin nube y sin telemetría.
 | <kbd>Ctrl</kbd>+<kbd>V</kbd> | Guardar el enlace copiado |
 | <kbd>O</kbd> | Abrir la carpeta del post |
 | <kbd>R</kbd> | Reintentar un post parcial o con error |
+| <kbd>F</kbd> | Marcar o quitar favorito |
+| <kbd>T</kbd> / <kbd>M</kbd> / <kbd>N</kbd> | Etiquetas, colección y nota del post |
+
+## Organizar
+
+- **Favoritos** (★) para lo que quieres tener a mano.
+- **Colecciones**, como carpetas: cada post va en una o en ninguna. Se crean con **+** en la barra lateral, se renombran o borran con doble clic (o <kbd>F2</kbd>) y se reordenan con <kbd>Alt</kbd>+<kbd>↑</kbd>/<kbd>↓</kbd>.
+- **Etiquetas**, todas las que quieras por post, con un color de la paleta o cualquier otro desde la rueda de color.
+- **Notas** personales en cada post.
+
+Las notas y las etiquetas entran en la búsqueda. Volver a guardar o reintentar un post nunca borra lo que añadiste: va en la BD y en el bloque `user` de su `post.json`.
+
+## Copias de seguridad
+
+En **Copia de seguridad** (barra superior):
+
+- **Exportar bóveda…** crea un `.zip` con todo. Desmarca *Incluir fotos, vídeos y documentos* para una copia ligera con solo el texto.
+- **Importar copia…** lo trae de vuelta, en este equipo o en otro. **Fusiona, nunca sobrescribe:** los posts que ya tienes no cambian, se suman etiquetas y favoritos, y tus notas y colecciones se quedan. Cada archivo se comprueba con su huella SHA-256, y una copia con rutas sospechosas se rechaza entera.
+
+Si la copia era ligera, los posts importados quedan como parciales: <kbd>R</kbd> baja lo que falta.
 
 ## Dónde se guarda
 
@@ -36,7 +56,7 @@ Sin cuenta, sin nube y sin telemetría.
     └── attachments/                  documentos enlazados
 ```
 
-Las carpetas son la copia de verdad: puedes copiarlas, leerlas sin Mirlo o hacer copia de seguridad de `~/Mirlo` entera.
+Las carpetas son la copia de verdad: puedes copiarlas o leerlas sin Mirlo.
 
 ## Qué sale de tu equipo
 

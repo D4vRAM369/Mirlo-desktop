@@ -23,6 +23,26 @@ No account, no cloud, no telemetry.
 | <kbd>Ctrl</kbd>+<kbd>V</kbd> | Save the copied link |
 | <kbd>O</kbd> | Open the post's folder |
 | <kbd>R</kbd> | Retry a partial or failed post |
+| <kbd>F</kbd> | Mark or unmark as favorite |
+| <kbd>T</kbd> / <kbd>M</kbd> / <kbd>N</kbd> | The post's tags, collection and note |
+
+## Organizing
+
+- **Favorites** (★) for what you want close at hand.
+- **Collections**, like folders: each post goes in one or none. Create them with **+** in the sidebar, rename or delete them with a double click (or <kbd>F2</kbd>) and reorder them with <kbd>Alt</kbd>+<kbd>↑</kbd>/<kbd>↓</kbd>.
+- **Tags**, as many as you like per post, with a palette color or any other from the color wheel.
+- Personal **notes** on each post.
+
+Notes and tags are searchable. Saving or retrying a post again never erases what you added: it lives in the database and in the `user` block of its `post.json`.
+
+## Backups
+
+Under **Backup** (top bar):
+
+- **Export vault…** creates a `.zip` with everything. Untick *Include photos, videos and documents* for a light copy with text only.
+- **Import backup…** brings it back, on this computer or another. **It merges and never overwrites:** posts you already have do not change, tags and favorites are added, and your notes and collections stay. Every file is checked against its SHA-256 fingerprint, and a backup with suspicious paths is rejected as a whole.
+
+If the backup was light, imported posts are marked partial: <kbd>R</kbd> downloads what is missing.
 
 ## Where it is saved
 
@@ -36,7 +56,7 @@ No account, no cloud, no telemetry.
     └── attachments/                  linked documents
 ```
 
-The folders are the real copy: you can copy them, read them without Mirlo, or back up the whole `~/Mirlo` folder.
+The folders are the real copy: you can copy them or read them without Mirlo.
 
 ## What leaves your computer
 
