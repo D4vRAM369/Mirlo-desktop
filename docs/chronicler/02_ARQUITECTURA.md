@@ -97,3 +97,11 @@ Flujo: `pegar URL → x_url::status_id → sources::extract → parser::parse_* 
 - **Versión fijada** (`VERSION` en el script). Subirla cuando X rompa yt-dlp.
 - **Límite conocido:** la lista de hashes viene de la misma release; protege de descargas corruptas, no de una release comprometida.
 - **Sin ffmpeg:** se pide `best[ext=mp4]`, un único archivo con vídeo y audio.
+
+## Decisión 11: icono propio (2026-10-29)
+
+- **Concepto:** un cajón de fichero de biblioteca (archivo) con un post en modo oscuro siendo fichado y un mirlo azul posado encima.
+- **Conexión con X sin copiar marcas:** la tarjeta oscura con la fila de acciones (responder, repostear, me gusta) y una "X" con serifa clásica en la etiqueta de latón, inicial del nombre de la app. Ni el logo de X ni el pájaro de Twitter (marcas registradas de X Corp): el mirlo tiene proporciones de mirlo real, cola larga y pico naranja.
+- **Proceso:** generado con GPT en cuatro iteraciones (genérico → fichero → pájaro fotográfico → pájaro de juguete → punto intermedio satinado). Esquinas recortadas a transparente y bordes limpiados con ImageMagick; `npx tauri icon app-icon.png` genera todos los tamaños.
+- **Fuente:** `app-icon.png` (1024×1024) en la raíz del proyecto.
+- **Límite conocido:** a 16 px solo se lee "cajón azul con algo encima". Si molesta, versión simplificada solo para 16 y 32 px.
