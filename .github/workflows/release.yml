@@ -45,5 +45,12 @@ jobs:
         with:
           tagName: ${{ github.ref_name }}
           releaseName: Mirlo ${{ github.ref_name }}
-          releaseBody: Instaladores para Linux (.deb, .rpm, .AppImage), Windows (.msi, .exe) y macOS (.dmg). Incluyen yt-dlp.
+          releaseBody: |
+            Instaladores para Linux (.deb, .rpm, .AppImage), Windows (.msi, .exe) y macOS (.dmg). Incluyen yt-dlp.
+            *Installers for Linux, Windows and macOS. yt-dlp included.*
+
+            Novedades y limitaciones: [CHANGELOG.md](https://github.com/${{ github.repository }}/blob/${{ github.ref_name }}/CHANGELOG.md)
+
+            > ⚠️ Solo Linux está probado. Los instaladores de Windows y macOS no están firmados: el sistema mostrará un aviso de seguridad.
+            > *Only Linux is tested. Windows and macOS installers are unsigned: the OS will show a security warning.*
           releaseDraft: true

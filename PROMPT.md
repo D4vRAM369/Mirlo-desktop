@@ -5,7 +5,7 @@
 ---
 
 Vamos a construir **XVault**: la versión para X/Twitter de mi app **ThreadsVault-desktop**
-(`ThreadsVault-desktop`). Bóveda local: pego la URL de un post de X,
+(mi repo `ThreadsVault-desktop`). Bóveda local: pego la URL de un post de X,
 la app guarda texto, autor, fecha y **todos los archivos (fotos, vídeos, GIFs, documentos enlazados) en disco**.
 Sin nube, sin telemetría, sin cuenta obligatoria.
 

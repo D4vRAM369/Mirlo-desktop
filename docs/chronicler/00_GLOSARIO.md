@@ -166,3 +166,28 @@ Términos técnicos del proyecto. Si un término no se entiende en otro archivo,
 
 **Definición simple:** "Internationalization" (i + 18 letras + n). Preparar la app para mostrarse en varios idiomas sin tocar el código de cada pantalla.
 **En este proyecto:** `t('clave')` busca el texto en el diccionario del idioma activo (`src/lib/i18n.svelte.ts`).
+
+## WebKitGTK
+
+**Definición simple:** El "navegador sin barra de direcciones" que Tauri usa en Linux para pintar la interfaz de la app. Es WebKit (el motor de Safari) adaptado al escritorio GTK de Linux.
+**Por qué importa:** Tauri no lleva un navegador propio dentro (por eso los paquetes pesan ~45 MB y no 150 MB como una app Electron): usa el que ya trae cada sistema. En Windows es WebView2 (motor de Edge/Chrome), en macOS WKWebView (Safari) y en Linux WebKitGTK. Mismo HTML, **tres motores distintos**: lo que funciona en uno puede fallar en otro.
+**En este proyecto:** tres errores salieron de aquí, y en Chrome no se ven:
+- `paste` no se dispara sin un campo de texto enfocado → Ctrl+V global ([05](05_ERRORES_Y_SOLUCIONES.md)).
+- `<video>` no reproduce archivos servidos por `asset:` → los vídeos van como `blob:`.
+- El icono de ventana de 512 px se descarta en X11 → se usa el de 256 px.
+**Lección:** probar en la ventana real de la app, no solo en el navegador de desarrollo.
+
+## GStreamer
+
+**Definición simple:** La biblioteca de Linux que reproduce audio y vídeo. WebKitGTK le pasa cada `<video>` para que lo decodifique.
+**En este proyecto:** GStreamer no sabe abrir el esquema `asset:` de Tauri; por eso Mirlo lee el vídeo en Rust y se lo entrega como `blob:`.
+
+## URL blob: (object URL)
+
+**Definición simple:** Una dirección inventada (`blob:…`) que apunta a datos que ya están en la memoria de la página, no a un archivo ni a un servidor.
+**En este proyecto:** `api.videoUrl` convierte los bytes del vídeo en un `Blob` y crea su URL con `URL.createObjectURL`; al cambiar de post se libera con `URL.revokeObjectURL` para no acumular memoria.
+
+## X11
+
+**Definición simple:** El sistema clásico de ventanas de Linux: dibuja las ventanas y comunica a las apps con el escritorio. Su sucesor es Wayland.
+**En este proyecto:** el icono de la ventana viaja como píxeles sin comprimir en la propiedad `_NET_WM_ICON`; uno de 512 px (1 MB) no cabe y GTK lo descarta.
