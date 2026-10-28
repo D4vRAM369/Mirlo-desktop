@@ -95,3 +95,7 @@ npm run tauri build                             # .deb, .rpm and AppImage packag
 The development notes in `docs/chronicler/` (decisions, errors and fixes, step by step) are in Spanish.
 
 What comes next (Spanish): [`docs/ROADMAP.md`](docs/ROADMAP.md). Changes per version: [`CHANGELOG.md`](CHANGELOG.md).
+
+## License
+
+[GPL-3.0 or later](LICENSE). You may use, study, change and share Mirlo; if you distribute a modified version, its source code must also be free under this same license.

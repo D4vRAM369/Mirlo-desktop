@@ -17,6 +17,7 @@ Primera versión pública. · *First public release.*
 - Copias de seguridad: exporta la bóveda a un `.zip` (con o sin fotos y vídeos) e impórtala en otro equipo. Importar fusiona y nunca sobrescribe: suma etiquetas y favoritos, conserva tus notas y colecciones, y comprueba la huella de cada archivo.
 - Interfaz en español e inglés, tema claro y oscuro, manejo completo con teclado.
 - yt-dlp incluido.
+- Licencia GPL-3.0 o posterior.
 
 ### English
 
@@ -29,6 +30,7 @@ Primera versión pública. · *First public release.*
 - Backups: export the vault to a `.zip` (with or without photos and videos) and import it on another computer. Importing merges and never overwrites: it adds tags and favorites, keeps your notes and collections, and checks the fingerprint of every file.
 - Spanish and English interface, light and dark themes, full keyboard control.
 - yt-dlp bundled.
+- Licensed under GPL-3.0 or later.
 
 ### Limitaciones conocidas · *Known limitations*
 

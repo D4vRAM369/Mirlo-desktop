@@ -95,3 +95,7 @@ npm run tauri build                             # paquetes .deb, .rpm y AppImage
 La documentación del proceso está en `docs/chronicler/` (decisiones, errores y soluciones, paso a paso).
 
 Qué viene después: [`docs/ROADMAP.md`](docs/ROADMAP.md). Cambios por versión: [`CHANGELOG.md`](CHANGELOG.md).
+
+## Licencia
+
+[GPL-3.0 o posterior](LICENSE). Puedes usar, estudiar, cambiar y compartir Mirlo; si distribuyes una versión modificada, su código tiene que ser también libre con esta misma licencia.
