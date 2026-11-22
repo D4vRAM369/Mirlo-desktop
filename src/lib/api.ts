@@ -1,5 +1,6 @@
 // Comandos de Rust con sus tipos. El frontend no toca red ni disco: todo pasa por aquí.
 import { invoke, convertFileSrc } from '@tauri-apps/api/core'
+import { listen } from '@tauri-apps/api/event'
 
 export type Status = 'ok' | 'partial' | 'error'
 export type Kind = 'photo' | 'video' | 'gif' | 'document' | 'text'
@@ -83,6 +84,10 @@ export interface Facets {
 
 /** `lang`: idioma de la app, para los títulos de post.md */
 export const savePost = (url: string, lang: string) => invoke<PostRow>('save_post', { url, lang })
+/** Enlaces llegados por mirlo://, ya validados en Rust. Al leerlos, la cola se vacía. */
+export const takeIncoming = () => invoke<string[]>('take_incoming')
+export const showWindow = () => invoke<void>('show_window')
+export const onIncoming = (handler: () => void) => listen('incoming', handler)
 export const retryPost = (id: string, lang: string) => invoke<PostRow>('retry_post', { id, lang })
 export const listPosts = (filter: Filter) => invoke<PostRow[]>('list_posts', { filter })
 export const getPost = (id: string) => invoke<Detail | null>('get_post', { id })

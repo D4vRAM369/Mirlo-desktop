@@ -12,7 +12,16 @@ mod x_url;
 use error::{fail, fail_with};
 use std::path::{Path, PathBuf};
 use std::sync::Mutex;
-use tauri::{Manager, State};
+use tauri::{Emitter, Manager, State};
+use tauri_plugin_deep_link::DeepLinkExt;
+
+/// Tope de envíos en espera: una web no puede llenar la memoria abriendo mirlo:// en bucle.
+const MAX_INCOMING: usize = 20;
+
+/// IDs llegados por mirlo://. Esperan aquí porque en un arranque en frío el enlace llega antes
+/// que la interfaz, y un evento emitido sin nadie escuchando se pierde.
+#[derive(Default)]
+struct Incoming(Mutex<Vec<String>>);
 
 /// Estado compartido por todos los comandos: la raíz de la bóveda y la conexión a SQLite.
 struct App {
@@ -24,6 +33,33 @@ impl App {
     fn db(&self) -> Result<std::sync::MutexGuard<'_, rusqlite::Connection>, String> {
         self.db.lock().map_err(|_| fail("db_locked"))
     }
+}
+
+/// La interfaz recoge lo pendiente al arrancar y con cada aviso "incoming". Guarda ella porque
+/// es quien sabe el idioma y quien enseña la cola y los errores.
+#[tauri::command]
+fn take_incoming(incoming: State<'_, Incoming>) -> Result<Vec<String>, String> {
+    let ids = std::mem::take(&mut *incoming.0.lock().map_err(|e| fail_with("internal", e))?);
+    Ok(ids.into_iter().map(|id| format!("https://x.com/i/status/{id}")).collect())
+}
+
+/// Un envío que sale bien no roba el foco al navegador; uno que falla sí se enseña.
+#[tauri::command]
+fn show_window(app: tauri::AppHandle) {
+    show_main(&app);
+}
+
+fn receive(app: &tauri::AppHandle, links: &[impl AsRef<str>]) {
+    let incoming = app.state::<Incoming>();
+    let Ok(mut queue) = incoming.0.lock() else { return };
+    for link in links {
+        let Ok(id) = x_url::deep_link_id(link.as_ref()) else { continue };
+        if queue.len() < MAX_INCOMING && !queue.contains(&id) {
+            queue.push(id);
+        }
+    }
+    drop(queue);
+    let _ = app.emit("incoming", ());
 }
 
 /// Pegar enlace → leer → descargar → indexar. Si falla, queda apuntado como error para reintentar.
@@ -278,12 +314,26 @@ fn show_main(app: &tauri::AppHandle) {
 
 fn main() {
     tauri::Builder::default()
+        // el primero: una segunda copia entrega su enlace y sale antes de tocar la BD
+        .plugin(tauri_plugin_single_instance::init(|app, args, _cwd| {
+            // sin argumentos = la persona ha abierto Mirlo desde el menú: se le enseña la ventana
+            if args.len() <= 1 {
+                show_main(app);
+            }
+        }))
+        .plugin(tauri_plugin_deep_link::init())
         .plugin(tauri_plugin_dialog::init())
         .setup(|app| {
             let root = app.path().home_dir()?.join("Mirlo");
             std::fs::create_dir_all(&root)?;
             let conn = db::open(&root.join("mirlo.db"))?;
             app.manage(App { root, db: Mutex::new(conn) });
+            app.manage(Incoming::default());
+            let handle = app.handle().clone();
+            app.deep_link().on_open_url(move |event| receive(&handle, &event.urls()));
+            if let Some(urls) = app.deep_link().get_current()? {
+                receive(app.handle(), &urls); // arranque en frío
+            }
             tray(app)?;
             Ok(())
         })
@@ -296,7 +346,7 @@ fn main() {
             }
         })
         .invoke_handler(tauri::generate_handler![
-            save_post, retry_post, list_posts, get_post, facets, open_folder, open_on_x, read_media,
+            save_post, retry_post, take_incoming, show_window, list_posts, get_post, facets, open_folder, open_on_x, read_media,
             set_favorite, set_note, set_collection, add_tag, remove_tag, create_collection, rename_collection,
             delete_collection, move_collection, rename_tag, set_tag_color, delete_tag, export_vault, import_vault
         ])

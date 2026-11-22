@@ -24,6 +24,16 @@ pub fn status_id(input: &str) -> Result<String, String> {
         .find(|w| w[0] == "status" || w[0] == "statuses")
         .map(|w| w[1])
         .ok_or_else(|| fail("not_a_post"))?;
+    post_id(id)
+}
+
+/// `mirlo://save/<ID>`: lo que manda el userscript. Cualquier web puede abrir este enlace, por eso
+/// no transporta una URL ni opciones: solo un número, y cualquier otra forma se rechaza.
+pub fn deep_link_id(input: &str) -> Result<String, String> {
+    post_id(input.strip_prefix("mirlo://save/").ok_or_else(|| fail("invalid_link"))?)
+}
+
+fn post_id(id: &str) -> Result<String, String> {
     if id.is_empty() || id.len() > 20 || !id.bytes().all(|b| b.is_ascii_digit()) {
         return Err(fail("invalid_post_id"));
     }
@@ -32,7 +42,32 @@ pub fn status_id(input: &str) -> Result<String, String> {
 
 #[cfg(test)]
 mod tests {
-    use super::status_id;
+    use super::{deep_link_id, status_id};
+
+    #[test]
+    fn deep_link_accepts_only_save_with_an_id() {
+        assert_eq!(deep_link_id("mirlo://save/20").as_deref(), Ok("20"));
+        assert_eq!(deep_link_id("mirlo://save/2051361508181856362").as_deref(), Ok("2051361508181856362"));
+        // cualquier web puede abrir mirlo://, así que aquí no se perdona nada
+        for input in [
+            "mirlo://save/",
+            "mirlo://save/12ab",
+            "mirlo://save/123456789012345678901",
+            "mirlo://save/20/extra",
+            "mirlo://save/20?url=https://evil.com",
+            "mirlo://save/20#x",
+            "mirlo://save/../20",
+            "mirlo://save/%32%30",
+            "mirlo://save/٢٠",
+            "mirlo://save/20\n",
+            "mirlo://delete/20",
+            "mirlo://user@save/20",
+            "https://x.com/jack/status/20",
+            "--mirlo://save/20",
+        ] {
+            assert!(deep_link_id(input).is_err(), "{input}");
+        }
+    }
 
     #[test]
     fn accepts_post_urls() {

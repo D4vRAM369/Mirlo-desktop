@@ -1,6 +1,7 @@
 <script lang="ts">
   // Bandeja: comando arriba, filtros a la izquierda, lista en el centro, lectura a la derecha.
   // Todo se maneja con teclado; los atajos están siempre a la vista en el pie.
+  import { onMount } from 'svelte'
   import * as api from './lib/api'
   import type { Detail, Facets, Filter, Kind, PostRow, Status } from './lib/api'
   import Backup from './lib/Backup.svelte'
@@ -146,20 +147,38 @@
     }
   }
 
-  async function save(url: string) {
+  /** `external`: viene de mirlo://. No cambia el post abierto: podrías estar escribiendo su nota. */
+  async function save(url: string, external = false) {
     saving = [...saving, url]
     message = ''
     try {
       const row = await api.savePost(url, i18n.lang)
-      selectedId = row.id
+      if (!external || !selectedId) selectedId = row.id
       message = t(row.status === 'ok' ? 'msg.saved' : 'msg.saved_partial', { user: row.handle })
     } catch (e) {
       message = t('msg.save_failed', { error: errorParts(e).text })
+      if (external) await api.showWindow()
     } finally {
       saving = saving.filter((u) => u !== url)
       await refresh()
     }
   }
+
+  // ---- envíos desde el navegador: de uno en uno, para que dos del mismo post no pisen su .part ----
+  let queue = Promise.resolve()
+  function drainIncoming() {
+    queue = queue
+      .then(async () => {
+        for (const url of await api.takeIncoming()) await save(url, true)
+      })
+      .catch((e) => void (message = errorText(e)))
+  }
+  onMount(() => {
+    // primero escuchar y después vaciar: lo que llegue entre medias no se pierde
+    const listening = api.onIncoming(drainIncoming)
+    listening.then(drainIncoming, (e) => (message = errorText(e)))
+    return () => void listening.then((stop) => stop())
+  })
 
   async function retry(id: string) {
     message = t('msg.retrying')

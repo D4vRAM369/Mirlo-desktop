@@ -1,14 +1,14 @@
 {
   "name": "mirlo",
   "private": true,
-  "version": "0.1.0",
+  "version": "0.2.0",
   "license": "GPL-3.0-or-later",
   "description": "Bóveda local para posts de X: texto, fotos, vídeos y documentos en tu disco.",
   "type": "module",
   "scripts": {
     "dev": "vite",
     "build": "vite build",
-    "check": "svelte-check --tsconfig ./tsconfig.app.json && tsc -p tsconfig.node.json && node scripts/check-i18n.mjs",
+    "check": "svelte-check --tsconfig ./tsconfig.app.json && tsc -p tsconfig.node.json && node scripts/check-i18n.mjs && node scripts/check-userscript.mjs",
     "tauri": "tauri",
     "sidecar": "node scripts/fetch-yt-dlp.mjs"
   },
