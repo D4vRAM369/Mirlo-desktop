@@ -123,6 +123,21 @@ export const renameTag = (id: number, name: string) => invoke<void>('rename_tag'
 export const setTagColor = (id: number, color: string | null) => invoke<void>('set_tag_color', { id, color })
 export const deleteTag = (id: number) => invoke<void>('delete_tag', { id })
 
+// ---- integrar con X ----
+export type Browser = 'firefox' | 'chromium'
+/** `links`: qué copia abre los enlaces mirlo:// */
+export type XStatus = { links: 'here' | 'other' | 'nobody' | 'unknown'; can_register: boolean }
+export const xStatus = () => invoke<XStatus>('x_status')
+export const xRegister = () => invoke<XStatus>('x_register')
+/** Abre el instalador del script en el navegador y devuelve su dirección. */
+export const xInstall = () => invoke<string>('x_install')
+export const xScript = () => invoke<string>('x_script')
+export const xOpenManager = (browser: Browser) => invoke<void>('x_open_manager', { browser })
+/** Abre X con el código del saludo y devuelve esa dirección. */
+export const xCheck = () => invoke<string>('x_check')
+export const xTakeConnected = () => invoke<boolean>('x_take_connected')
+export const onXConnected = (handler: () => void) => listen('x-connected', handler)
+
 // ---- copias de seguridad ----
 export type ExportSummary = { posts: number; files: number }
 export type ImportSummary = { added: number; merged: number; bad_hash: string[]; errors: string[] }

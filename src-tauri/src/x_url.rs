@@ -27,10 +27,23 @@ pub fn status_id(input: &str) -> Result<String, String> {
     post_id(id)
 }
 
-/// `mirlo://save/<ID>`: lo que manda el userscript. Cualquier web puede abrir este enlace, por eso
-/// no transporta una URL ni opciones: solo un número, y cualquier otra forma se rechaza.
-pub fn deep_link_id(input: &str) -> Result<String, String> {
-    post_id(input.strip_prefix("mirlo://save/").ok_or_else(|| fail("invalid_link"))?)
+#[derive(Debug, PartialEq)]
+pub enum Link {
+    /// `mirlo://save/<ID>`: guardar ese post.
+    Save(String),
+    /// `mirlo://hello/<código>`: el saludo del script al pulsar "Conectar con Mirlo".
+    Hello(String),
+}
+
+/// Lo que manda el userscript. Cualquier web puede abrir estos enlaces, por eso no transportan
+/// una URL ni opciones: solo un número, y cualquier otra forma se rechaza.
+pub fn deep_link(input: &str) -> Result<Link, String> {
+    if let Some(id) = input.strip_prefix("mirlo://save/") {
+        return post_id(id).map(Link::Save);
+    }
+    // el código del saludo tiene la misma forma que un ID: hasta 20 cifras
+    let code = input.strip_prefix("mirlo://hello/").ok_or_else(|| fail("invalid_link"))?;
+    post_id(code).map(Link::Hello)
 }
 
 fn post_id(id: &str) -> Result<String, String> {
@@ -42,12 +55,13 @@ fn post_id(id: &str) -> Result<String, String> {
 
 #[cfg(test)]
 mod tests {
-    use super::{deep_link_id, status_id};
+    use super::{deep_link, status_id, Link};
 
     #[test]
-    fn deep_link_accepts_only_save_with_an_id() {
-        assert_eq!(deep_link_id("mirlo://save/20").as_deref(), Ok("20"));
-        assert_eq!(deep_link_id("mirlo://save/2051361508181856362").as_deref(), Ok("2051361508181856362"));
+    fn deep_link_accepts_only_save_or_hello_with_digits() {
+        assert_eq!(deep_link("mirlo://save/20"), Ok(Link::Save("20".into())));
+        assert_eq!(deep_link("mirlo://save/2051361508181856362"), Ok(Link::Save("2051361508181856362".into())));
+        assert_eq!(deep_link("mirlo://hello/18446744073709551615"), Ok(Link::Hello("18446744073709551615".into())));
         // cualquier web puede abrir mirlo://, así que aquí no se perdona nada
         for input in [
             "mirlo://save/",
@@ -61,11 +75,18 @@ mod tests {
             "mirlo://save/٢٠",
             "mirlo://save/20\n",
             "mirlo://delete/20",
+            "mirlo://hello/",
+            "mirlo://hello/123456789012345678901",
+            "mirlo://hello/20/extra",
+            "mirlo://hello/20?next=save",
+            "mirlo://hello/abc",
+            "mirlo://HELLO/20",
+            "mirlo://save/hello/20",
             "mirlo://user@save/20",
             "https://x.com/jack/status/20",
             "--mirlo://save/20",
         ] {
-            assert!(deep_link_id(input).is_err(), "{input}");
+            assert!(deep_link(input).is_err(), "{input}");
         }
     }
 

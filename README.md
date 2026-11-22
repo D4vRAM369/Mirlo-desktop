@@ -38,14 +38,26 @@ Guarda un post con **Compartir → Enviar a Mirlo**, esté Mirlo abierto, oculto
 
 Con X en español el botón dice «Enviar a Mirlo»; en cualquier otro idioma, «Send to Mirlo».
 
-1. Instala **Mirlo 0.2.0 o posterior** con un [instalador](https://github.com/D4vRAM369/Mirlo-desktop/releases/latest). Si ya lo tenías abierto, sal desde el icono de la bandeja antes de actualizar.
-2. Instala un gestor de userscripts (una extensión que añade pequeños programas a las webs): [Violentmonkey](https://violentmonkey.github.io/) en Firefox o [Tampermonkey](https://www.tampermonkey.net/) en Chrome, Chromium, Brave y Edge. En los navegadores Chromium, activa «Permitir secuencias de comandos del usuario» en los detalles de la extensión.
+En las versiones posteriores a la 0.2.0, Mirlo te guía: lo ofrece la primera vez y lo tienes siempre en **Integrar con X**, en la barra superior.
+
+1. Elige tu navegador e instala el gestor de userscripts que te indica (una extensión que añade pequeños programas a las webs): Violentmonkey en Firefox o Tampermonkey en Chrome, Edge, Brave y Chromium.
+2. Solo en los navegadores Chromium: activa «Permitir secuencias de comandos del usuario» en los detalles de la extensión.
+3. Pulsa **Instalar script** y confírmalo en el navegador. El script va dentro de Mirlo; también puedes copiarlo.
+4. Pulsa **Comprobar** y, en X, **Conectar con Mirlo**. Cuando Mirlo recibe el saludo muestra «✓ Conectado con X».
+
+Con la AppImage, el asistente te pide antes permiso para registrar los enlaces `mirlo://` con el botón **Permitir enlaces de Mirlo**. Si la mueves de carpeta, vuelve a pulsarlo.
+
+<details>
+<summary>Instalarlo a mano (o con la 0.2.0, que no trae asistente)</summary>
+
+1. Instala Mirlo con un [instalador](https://github.com/D4vRAM369/Mirlo-desktop/releases/latest): la AppImage de la 0.2.0 no registra los enlaces `mirlo://`.
+2. Instala [Violentmonkey](https://violentmonkey.github.io/) en Firefox o [Tampermonkey](https://www.tampermonkey.net/) en Chromium, con «Permitir secuencias de comandos del usuario» activado.
 3. Abre **[mirlo-x.user.js](https://github.com/D4vRAM369/Mirlo-desktop/raw/master/userscript/mirlo-x.user.js)** y confirma la instalación.
-4. Recarga X. En cualquier post: **Compartir → Enviar a Mirlo**. La primera vez el navegador pregunta si puede abrir Mirlo.
+4. Recarga X y usa **Compartir → Enviar a Mirlo**.
 
-Si sale bien, Mirlo guarda sin quitarte el foco. Si falla, muestra su ventana con el error.
+</details>
 
-> En Linux usa el `.deb` o el `.rpm`: la AppImage todavía no registra los enlaces `mirlo://`.
+La primera vez el navegador pregunta si puede abrir Mirlo. Si un envío sale bien, Mirlo guarda sin quitarte el foco. Si falla, muestra su ventana con el error.
 
 ## Organizar
 
@@ -88,14 +100,18 @@ Mirlo solo hace estas peticiones, y solo cuando guardas o reintentas un post:
 - **FxTwitter** (`api.fxtwitter.com`): **solo** para posts de más de 280 caracteres, porque X los entrega cortados. Recibe el número del post.
 - **Los sitios enlazados en el post**: Mirlo mira si el enlace es un documento (por su `Content-Type`) y, si lo es y pesa menos de 50 MB, lo descarga. Nunca toca direcciones de tu red local.
 
-El userscript no hace peticiones ni lee cookies: solo pasa a Mirlo el número del post. Cualquier web podría intentar abrir un enlace `mirlo://`, por eso el navegador pide permiso y Mirlo solo acepta un número de post. Si marcas «permitir siempre», hazlo solo para x.com.
+El userscript no hace peticiones ni lee cookies: solo pasa a Mirlo el número del post o, al comprobar la conexión, el código de un solo uso que creó Mirlo. Cualquier web podría intentar abrir un enlace `mirlo://`, por eso el navegador pide permiso y Mirlo solo acepta esas dos formas, y el saludo solo con su código. Si marcas «permitir siempre», hazlo solo para x.com.
+
+El asistente solo actúa cuando pulsas sus botones: abre en tu navegador la tienda de extensiones o X, y para **Instalar script** escucha hasta 10 minutos en una dirección de tu propio equipo (`127.0.0.1`) que únicamente entrega ese script.
 
 La tipografía va dentro de la app: abrir Mirlo no llama a nadie.
 
 ## Limitaciones
 
 - No guarda hilos completos ni posts protegidos o que requieren iniciar sesión.
-- «Enviar a Mirlo» depende de la página de X y puede dejar de salir cuando X la cambie. Se ha probado en Linux con Chromium y X sin iniciar sesión; faltan por probar la sesión iniciada, los gestores de userscripts, Firefox, Windows y macOS.
+- «Enviar a Mirlo» depende de la página de X y puede dejar de salir cuando X la cambie. Se ha probado en Linux con X sin iniciar sesión: de principio a fin en Firefox con Violentmonkey; en Chromium, la pantalla de instalación de Tampermonkey y la comprobación cargando el script a mano. Faltan por probar la sesión iniciada, Tampermonkey con su permiso activado, Windows y macOS.
+- Con la AppImage en una ruta con espacios, algunos escritorios sin GNOME ni KDE no abren los enlaces `mirlo://`: muévela a una ruta sin espacios.
+- La comprobación necesita Mirlo abierto: si lo cerraste, pulsa **Comprobar** otra vez.
 - Si FxTwitter no responde, un post largo queda como parcial (texto cortado por X).
 
 ## Desarrollo

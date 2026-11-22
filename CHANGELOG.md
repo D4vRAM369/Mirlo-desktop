@@ -2,6 +2,33 @@
 
 Formato: [Keep a Changelog](https://keepachangelog.com/es-ES/1.1.0/) · Versiones: [SemVer](https://semver.org/lang/es/).
 
+## [Sin publicar] · *[Unreleased]*
+
+Integrar con X. · *Integrate with X.*
+
+### Español
+
+- **Integrar con X**: Mirlo lo ofrece una vez y queda siempre en la barra superior. Guía la instalación del gestor y del script en cada navegador.
+- El userscript va dentro de la app: se instala desde una dirección local y temporal o se copia.
+- **Comprobar**: «Conectado con X» solo aparece cuando llega el saludo del script, con un código de un solo uso.
+- La AppImage puede registrar los enlaces `mirlo://`, pidiendo permiso antes.
+- Userscript 0.2.0, con el saludo. Si tienes el 0.1.0, reinstálalo con **Instalar script**: se actualiza.
+
+### English
+
+- **Integrate with X**: Mirlo offers it once and it always stays in the top bar. It guides you through installing the manager and the script in each browser.
+- The userscript ships inside the app: install it from a temporary local address or copy it.
+- **Check**: "Connected to X" only appears when the script's greeting arrives, with a single-use code.
+- The AppImage can register `mirlo://` links, asking for permission first.
+- Userscript 0.2.0, with the greeting. If you have 0.1.0, reinstall it with **Install script**: it gets updated.
+
+### Limitaciones conocidas · *Known limitations*
+
+- Probado en Linux (`.deb` y AppImage) con X sin iniciar sesión: de principio a fin en Firefox con Violentmonkey; en Chromium, la pantalla de instalación de Tampermonkey y la comprobación cargando el script a mano. · *Tested on Linux (`.deb` and AppImage) with X signed out: end to end on Firefox with Violentmonkey; on Chromium, Tampermonkey's install screen and the check with the script loaded by hand.*
+- Sin probar: X con sesión iniciada, Tampermonkey con su permiso activado, `.rpm`, Windows y macOS. · *Untested: signed-in X, Tampermonkey with its permission turned on, `.rpm`, Windows and macOS.*
+- Con la AppImage en una ruta con espacios, algunos escritorios sin GNOME ni KDE no abren `mirlo://`. · *With the AppImage in a path with spaces, some desktops other than GNOME and KDE do not open `mirlo://`.*
+- La comprobación necesita Mirlo abierto, y al terminar algunos escritorios solo lo resaltan en la barra en vez de traerlo al frente. · *The check needs Mirlo running, and when it finishes some desktops only highlight it in the taskbar instead of bringing it to the front.*
+
 ## [0.2.0] — 2026-11-22
 
 Enviar desde X. · *Send from X.*

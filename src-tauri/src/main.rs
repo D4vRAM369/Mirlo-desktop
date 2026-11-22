@@ -3,6 +3,7 @@
 mod backup;
 mod db;
 mod error;
+mod integration;
 mod organize;
 mod parser;
 mod sources;
@@ -12,11 +13,15 @@ mod x_url;
 use error::{fail, fail_with};
 use std::path::{Path, PathBuf};
 use std::sync::Mutex;
+use std::time::Duration;
 use tauri::{Emitter, Manager, State};
 use tauri_plugin_deep_link::DeepLinkExt;
 
 /// Tope de envíos en espera: una web no puede llenar la memoria abriendo mirlo:// en bucle.
 const MAX_INCOMING: usize = 20;
+
+/// Lo que dura la dirección local desde la que se instala el script.
+const DELIVERY_TTL: Duration = Duration::from_secs(10 * 60);
 
 /// IDs llegados por mirlo://. Esperan aquí porque en un arranque en frío el enlace llega antes
 /// que la interfaz, y un evento emitido sin nadie escuchando se pierde.
@@ -52,14 +57,21 @@ fn show_window(app: tauri::AppHandle) {
 fn receive(app: &tauri::AppHandle, links: &[impl AsRef<str>]) {
     let incoming = app.state::<Incoming>();
     let Ok(mut queue) = incoming.0.lock() else { return };
+    let mut greeted = false;
     for link in links {
-        let Ok(id) = x_url::deep_link_id(link.as_ref()) else { continue };
-        if queue.len() < MAX_INCOMING && !queue.contains(&id) {
-            queue.push(id);
+        match x_url::deep_link(link.as_ref()) {
+            Ok(x_url::Link::Save(id)) if queue.len() < MAX_INCOMING && !queue.contains(&id) => queue.push(id),
+            Ok(x_url::Link::Hello(code)) => greeted |= app.state::<integration::Hello>().accept(&code),
+            _ => {}
         }
     }
     drop(queue);
     let _ = app.emit("incoming", ());
+    if greeted {
+        // aquí sí se roba el foco: la persona acaba de pulsar "Conectar con Mirlo" y espera la respuesta
+        show_main(app);
+        let _ = app.emit("x-connected", ());
+    }
 }
 
 /// Pegar enlace → leer → descargar → indexar. Si falla, queda apuntado como error para reintentar.
@@ -265,9 +277,110 @@ fn open_on_x(app: State<'_, App>, id: String) -> Result<(), String> {
     open_with_system(post.url.as_ref())
 }
 
+// ---- integrar con X (src/integration.rs) ----
+
+#[derive(serde::Serialize)]
+struct XStatus {
+    links: integration::Owner,
+    can_register: bool,
+}
+
+#[tauri::command]
+async fn x_status(app: tauri::AppHandle) -> Result<XStatus, String> {
+    blocking(move || read_x_status(&app)).await
+}
+
+fn read_x_status(app: &tauri::AppHandle) -> Result<XStatus, String> {
+    #[cfg(target_os = "linux")]
+    let (links, can_register) = {
+        let data = app.path().data_dir().map_err(|e| fail_with("internal", e))?;
+        (integration::linux::links(&data), integration::linux::appimage().is_some())
+    };
+    #[cfg(windows)]
+    let (links, can_register) = match app.deep_link().is_registered("mirlo") {
+        Ok(true) => (integration::Owner::Here, false),
+        Ok(false) => (integration::Owner::Nobody, false), // lo registra el instalador
+        Err(_) => (integration::Owner::Unknown, false),
+    };
+    #[cfg(not(any(windows, target_os = "linux")))]
+    let (links, can_register) = {
+        let _ = app;
+        (integration::Owner::Unknown, false) // el plugin no sabe mirarlo en macOS
+    };
+    Ok(XStatus { links, can_register })
+}
+
+/// Solo con el botón "Permitir enlaces de Mirlo", y solo en AppImage: el resto trae instalador.
+#[tauri::command]
+async fn x_register(app: tauri::AppHandle) -> Result<XStatus, String> {
+    blocking(move || {
+        #[cfg(target_os = "linux")]
+        if let Some((file, _)) = integration::linux::appimage() {
+            app.deep_link().register("mirlo").map_err(|e| fail_with("register_failed", e))?;
+            // el nombre lo pone el plugin: <binario>-handler.desktop
+            let exe = std::env::current_exe().map_err(|e| fail_with("register_failed", e))?;
+            let name = format!("{}-handler.desktop", exe.file_name().unwrap_or_default().to_string_lossy());
+            let entry = app.path().data_dir().map_err(|e| fail_with("internal", e))?.join("applications").join(name);
+            let text = std::fs::read_to_string(&entry).map_err(|e| fail_with("register_failed", e))?;
+            let plain = integration::linux::plain_exec(&text, &file.to_string_lossy());
+            if plain != text {
+                std::fs::write(&entry, plain).map_err(|e| fail_with("register_failed", e))?;
+            }
+            return read_x_status(&app);
+        }
+        let _ = &app;
+        Err(fail("register_failed"))
+    })
+    .await
+}
+
+/// Abre el script en el navegador por una dirección local (la confirmación la pide el gestor) y
+/// la devuelve, para pegarla si el navegador elegido no es el predeterminado.
+#[tauri::command]
+fn x_install(delivery: State<'_, integration::Delivery>) -> Result<String, String> {
+    let url = delivery.url(DELIVERY_TTL).map_err(|e| fail_with("delivery_failed", e))?;
+    open_with_system(url.as_ref())?;
+    Ok(url)
+}
+
+#[tauri::command]
+fn x_script() -> &'static str {
+    integration::SCRIPT
+}
+
+/// Del frontend llega una clave; las direcciones están escritas aquí.
+#[tauri::command]
+fn x_open_manager(browser: String) -> Result<(), String> {
+    let url = match browser.as_str() {
+        "firefox" => "https://addons.mozilla.org/firefox/addon/violentmonkey/",
+        "chromium" => "https://chromewebstore.google.com/detail/tampermonkey/dhdgffkkebhmkfjojejmpbldmpobfkfo",
+        _ => return Err(fail("invalid_link")),
+    };
+    open_with_system(url.as_ref())
+}
+
+/// El código va tras `#`: esa parte de la dirección no viaja al servidor de X. A /home y no a /:
+/// con la sesión iniciada X cambia de / a /home y el código se podría perder por el camino.
+/// Con guion y no con `=`, que el explorer de Windows toma por separador de argumentos.
+#[tauri::command]
+fn x_check(hello: State<'_, integration::Hello>) -> Result<String, String> {
+    let url = format!("https://x.com/home#mirlo-hello-{}", hello.begin());
+    open_with_system(url.as_ref())?;
+    Ok(url) // también para pegarla, si el script está en otro navegador
+}
+
+#[tauri::command]
+fn x_take_connected(hello: State<'_, integration::Hello>) -> bool {
+    hello.take_connected()
+}
+
 fn open_with_system(target: &std::ffi::OsStr) -> Result<(), String> {
     let opener = if cfg!(windows) { "explorer" } else if cfg!(target_os = "macos") { "open" } else { "xdg-open" };
-    std::process::Command::new(opener).arg(target).spawn().map(|_| ()).map_err(|e| fail_with("open_failed", e))
+    #[cfg(target_os = "linux")]
+    let mut command = integration::linux::system_command(opener);
+    #[cfg(not(target_os = "linux"))]
+    let mut command = std::process::Command::new(opener);
+    command.arg(target).spawn().map(|_| ()).map_err(|e| fail_with("open_failed", e))
 }
 
 fn db_err(e: rusqlite::Error) -> String {
@@ -329,6 +442,8 @@ fn main() {
             let conn = db::open(&root.join("mirlo.db"))?;
             app.manage(App { root, db: Mutex::new(conn) });
             app.manage(Incoming::default());
+            app.manage(integration::Hello::default());
+            app.manage(integration::Delivery::default());
             let handle = app.handle().clone();
             app.deep_link().on_open_url(move |event| receive(&handle, &event.urls()));
             if let Some(urls) = app.deep_link().get_current()? {
@@ -348,7 +463,8 @@ fn main() {
         .invoke_handler(tauri::generate_handler![
             save_post, retry_post, take_incoming, show_window, list_posts, get_post, facets, open_folder, open_on_x, read_media,
             set_favorite, set_note, set_collection, add_tag, remove_tag, create_collection, rename_collection,
-            delete_collection, move_collection, rename_tag, set_tag_color, delete_tag, export_vault, import_vault
+            delete_collection, move_collection, rename_tag, set_tag_color, delete_tag, export_vault, import_vault,
+            x_status, x_register, x_install, x_script, x_open_manager, x_check, x_take_connected
         ])
         .run(tauri::generate_context!())
         .expect("error al iniciar Mirlo");

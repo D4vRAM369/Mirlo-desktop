@@ -2,7 +2,7 @@
 // @name         Enviar a Mirlo
 // @name:en      Send to Mirlo
 // @namespace    https://github.com/D4vRAM369/Mirlo-desktop
-// @version      0.1.0
+// @version      0.2.0
 // @description  Añade «Enviar a Mirlo» al menú Compartir de X.
 // @description:en Adds "Send to Mirlo" to the Share menu on X.
 // @author       D4vRAM369
@@ -17,7 +17,8 @@
 // @run-at       document-idle
 // ==/UserScript==
 
-// No lee cookies ni hace peticiones: solo saca el número del post y abre mirlo://save/<número>.
+// No lee cookies ni hace peticiones: solo abre mirlo://save/<número del post> y, al comprobar
+// la conexión desde Mirlo, mirlo://hello/<código que puso Mirlo>. Siempre tras un clic real.
 ;(() => {
   'use strict'
 
@@ -46,13 +47,19 @@
     return null
   }
 
-  // `npm run check` carga este archivo en Node, donde no hay página: solo prueba postId.
+  /** El código que deja Mirlo en la dirección al pulsar Comprobar. */
+  const helloCode = (hash) => hash.match(/^#mirlo-hello-(\d{1,20})$/)?.[1] ?? null
+  /** La página puede fabricar clics, pero no que parezcan de la persona. */
+  const helloLink = (event, code) => (event.isTrusted ? `mirlo://hello/${code}` : null)
+
+  // `npm run check` carga este archivo en Node, donde no hay página: solo prueba estas funciones.
   if (typeof document === 'undefined') {
-    module.exports = { postId }
+    module.exports = { postId, helloCode, helloLink }
     return
   }
 
   const ITEM = 'data-mirlo-send'
+  const text = (es, en) => (document.documentElement.lang.startsWith('es') ? es : en)
   const BIRD = 'M2 14c4 0 6-2 7-5a5 5 0 0 1 9-2l4 1-3 2c0 6-4 10-10 10H5l3-3c-3 0-5-1-6-3z'
 
   function send(item) {
@@ -69,7 +76,7 @@
     item.setAttribute('tabindex', '0')
     item.setAttribute('data-highlighted', '') // el hover de X solo se pinta con este atributo
 
-    const label = document.documentElement.lang.startsWith('es') ? 'Enviar a Mirlo' : 'Send to Mirlo'
+    const label = text('Enviar a Mirlo', 'Send to Mirlo')
     const texts = []
     const walker = document.createTreeWalker(item, NodeFilter.SHOW_TEXT)
     while (walker.nextNode()) if (walker.currentNode.data.trim()) texts.push(walker.currentNode)
@@ -131,6 +138,28 @@
     if (next) next.focus()
     else send(item)
   }, true)
+
+  function offerHello(code) {
+    const button = document.createElement('button')
+    button.type = 'button'
+    button.textContent = text('Conectar con Mirlo', 'Connect to Mirlo')
+    // por propiedades: la CSP de X no deja añadir hojas de estilo
+    Object.assign(button.style, {
+      position: 'fixed', top: '16px', left: '50%', transform: 'translateX(-50%)', zIndex: '2147483647',
+      pointerEvents: 'auto', padding: '12px 24px', border: '2px solid #fff', borderRadius: '999px',
+      background: '#2446c7', color: '#fff', font: '700 16px system-ui, sans-serif', cursor: 'pointer',
+    })
+    button.addEventListener('click', (e) => {
+      const link = helloLink(e, code)
+      if (!link) return
+      button.remove()
+      location.href = link
+    })
+    // fuera del body: X lo vuelve a pintar entero
+    document.documentElement.append(button)
+  }
+  const code = helloCode(location.hash)
+  if (code) offerHello(code)
 
   new MutationObserver(sync).observe(document.body, {
     childList: true,

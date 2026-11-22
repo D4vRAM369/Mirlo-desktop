@@ -6,6 +6,7 @@
   import type { Detail, Facets, Filter, Kind, PostRow, Status } from './lib/api'
   import Backup from './lib/Backup.svelte'
   import Gallery from './lib/Gallery.svelte'
+  import Integration from './lib/Integration.svelte'
   import NameEditor from './lib/NameEditor.svelte'
   import Organizer from './lib/Organizer.svelte'
   import { errorParts, errorText, formatDate, formatSize, i18n, setLang, t, withKeys } from './lib/i18n.svelte'
@@ -22,6 +23,8 @@
 
   let field: HTMLInputElement
   let organizer = $state<ReturnType<typeof Organizer>>()
+  let integration = $state<ReturnType<typeof Integration>>()
+  let xConnected = $state(false)
   // sidebar: qué colección o etiqueta se está editando, y el campo de "nueva colección"
   let editing = $state<{ kind: 'collection' | 'tag'; id: number } | null>(null)
   let newCollection = $state<string | null>(null)
@@ -280,6 +283,7 @@
 {/snippet}
 
 <div class="app">
+  <div class="top">
   <form class="cmd" onsubmit={onSubmit}>
     <label class="field">
       <input
@@ -292,10 +296,13 @@
       <kbd>/</kbd>
     </label>
     <button class="btn primary" disabled={!api.looksLikePostUrl(input)}>{t('cmd.save')}</button>
+    <button type="button" class="btn" onclick={() => integration?.show()}>{xConnected ? t('x.connected') : t('x.menu')}</button>
     <Backup onmessage={(m) => (message = m)} ondone={reload} />
     <button type="button" class="btn" onclick={toggleTheme}>{isDark ? t('cmd.theme_light') : t('cmd.theme_dark')}</button>
     <button type="button" class="btn" lang={i18n.lang === 'es' ? 'en' : 'es'} onclick={() => setLang(i18n.lang === 'es' ? 'en' : 'es')}>{t('cmd.other_lang')}</button>
   </form>
+  <Integration bind:this={integration} bind:connected={xConnected} onmessage={(m) => (message = m)} />
+  </div>
 
   <div class="panes">
     <nav class="side" aria-label={t('side.label')}>

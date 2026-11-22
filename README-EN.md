@@ -38,14 +38,26 @@ Save a post with **Share → Send to Mirlo**, whether Mirlo is open, hidden or c
 
 With X in Spanish the button says "Enviar a Mirlo"; in any other language, "Send to Mirlo".
 
-1. Install **Mirlo 0.2.0 or later** with an [installer](https://github.com/D4vRAM369/Mirlo-desktop/releases/latest). If it was already running, quit it from the tray icon before updating.
-2. Install a userscript manager (an extension that adds small programs to websites): [Violentmonkey](https://violentmonkey.github.io/) on Firefox or [Tampermonkey](https://www.tampermonkey.net/) on Chrome, Chromium, Brave and Edge. On Chromium browsers, turn on "Allow User Scripts" in the extension's details.
+In versions after 0.2.0, Mirlo guides you: it offers this the first time, and it is always under **Integrate with X** in the top bar.
+
+1. Pick your browser and install the userscript manager it points to (an extension that adds small programs to websites): Violentmonkey on Firefox or Tampermonkey on Chrome, Edge, Brave and Chromium.
+2. On Chromium browsers only: turn on "Allow User Scripts" in the extension's details.
+3. Click **Install script** and confirm it in the browser. The script ships inside Mirlo; you can copy it too.
+4. Click **Check** and then, on X, **Connect to Mirlo**. When Mirlo receives the greeting it shows "✓ Connected to X".
+
+With the AppImage, the guide first asks permission to register `mirlo://` links with the **Allow Mirlo links** button. If you move the file to another folder, click it again.
+
+<details>
+<summary>Install it by hand (or with 0.2.0, which has no guide)</summary>
+
+1. Install Mirlo with an [installer](https://github.com/D4vRAM369/Mirlo-desktop/releases/latest): the 0.2.0 AppImage does not register `mirlo://` links.
+2. Install [Violentmonkey](https://violentmonkey.github.io/) on Firefox or [Tampermonkey](https://www.tampermonkey.net/) on Chromium, with "Allow User Scripts" turned on.
 3. Open **[mirlo-x.user.js](https://github.com/D4vRAM369/Mirlo-desktop/raw/master/userscript/mirlo-x.user.js)** and confirm the installation.
-4. Reload X. On any post: **Share → Send to Mirlo**. The first time, the browser asks whether it may open Mirlo.
+4. Reload X and use **Share → Send to Mirlo**.
 
-When it works, Mirlo saves without stealing focus. When it fails, it shows its window with the error.
+</details>
 
-> On Linux use the `.deb` or `.rpm`: the AppImage does not register `mirlo://` links yet.
+The first time, the browser asks whether it may open Mirlo. When a send works, Mirlo saves without stealing focus. When it fails, it shows its window with the error.
 
 ## Organizing
 
@@ -88,14 +100,18 @@ Mirlo only makes these requests, and only when you save or retry a post:
 - **FxTwitter** (`api.fxtwitter.com`): **only** for posts longer than 280 characters, because X delivers them cut short. It receives the post's number.
 - **Sites linked in the post**: Mirlo checks whether a link is a document (by its `Content-Type`) and, if it is and weighs less than 50 MB, downloads it. It never touches addresses on your local network.
 
-The userscript makes no requests and reads no cookies: it only hands the post's number to Mirlo. Any website could try to open a `mirlo://` link, which is why the browser asks first and Mirlo accepts nothing but a post number. If you choose "always allow", do it only for x.com.
+The userscript makes no requests and reads no cookies: it only hands Mirlo the post's number or, when checking the connection, the single-use code Mirlo created. Any website could try to open a `mirlo://` link, which is why the browser asks first and Mirlo accepts only those two forms, the greeting only with its code. If you choose "always allow", do it only for x.com.
+
+The guide only acts when you click its buttons: it opens the extension store or X in your browser, and for **Install script** it listens for up to 10 minutes on an address on your own computer (`127.0.0.1`) that serves nothing but that script.
 
 The font ships inside the app: opening Mirlo contacts no one.
 
 ## Limitations
 
 - It does not save full threads, or protected posts that require signing in.
-- "Send to Mirlo" depends on X's page and may disappear when X changes it. It was tested on Linux with Chromium and X signed out; signed-in X, userscript managers, Firefox, Windows and macOS are still untested.
+- "Send to Mirlo" depends on X's page and may disappear when X changes it. It was tested on Linux with X signed out: end to end on Firefox with Violentmonkey; on Chromium, Tampermonkey's install screen and the check with the script loaded by hand. Signed-in X, Tampermonkey with its permission turned on, Windows and macOS are still untested.
+- With the AppImage in a path with spaces, some desktops other than GNOME and KDE do not open `mirlo://` links: move it to a path without spaces.
+- The check needs Mirlo running: if you quit it, click **Check** again.
 - If FxTwitter does not respond, a long post stays partial (text cut short by X).
 
 ## Development

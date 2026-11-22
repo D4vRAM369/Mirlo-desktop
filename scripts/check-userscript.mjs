@@ -1,4 +1,4 @@
-// De qué post es cada botón Compartir: si esto falla, se guarda el post equivocado sin avisar.
+// De qué post es cada botón Compartir (si falla, se guarda otro post sin avisar) y cuándo saluda a Mirlo.
 // Estructuras copiadas del DOM de x.com (2026-11-22) y del DOM clásico (data-testid).
 import assert from 'node:assert/strict'
 import { readFileSync } from 'node:fs'
@@ -7,7 +7,7 @@ import { runInNewContext } from 'node:vm'
 // node:vm y no import: con "type": "module" Node trataría el .user.js como ESM, y no lo es
 const sandbox = { module: { exports: {} } }
 runInNewContext(readFileSync(new URL('../userscript/mirlo-x.user.js', import.meta.url), 'utf8'), sandbox)
-const { postId } = sandbox.module.exports
+const { postId, helloCode, helloLink } = sandbox.module.exports
 
 /** Enlace mínimo: solo lo que el script consulta de un <a>. */
 const link = (href, { date = true, time = false, nested = false, frame = false } = {}) => (article) => ({
@@ -40,3 +40,17 @@ const cases = [
 ]
 for (const [name, trigger, path, expected] of cases) assert.equal(postId(trigger, path), expected, name)
 console.log(`userscript: ${cases.length} casos de identificación del post, correctos`)
+
+const greetings = [
+  ['#mirlo-hello-18446744073709551615', '18446744073709551615'],
+  ['', null],
+  ['#mirlo-hello-', null],
+  ['#mirlo-hello-12ab', null],
+  ['#mirlo-hello-123456789012345678901', null],
+  ['#mirlo-hello-12/../../save/20', null],
+  ['#x-mirlo-hello-12', null],
+]
+for (const [hash, expected] of greetings) assert.equal(helloCode(hash), expected, `saludo: ${hash}`)
+assert.equal(helloLink({ isTrusted: true }, '42'), 'mirlo://hello/42', 'un clic real saluda')
+assert.equal(helloLink({ isTrusted: false }, '42'), null, 'un clic fabricado por la web no saluda')
+console.log(`userscript: ${greetings.length + 2} casos del saludo, correctos`)
