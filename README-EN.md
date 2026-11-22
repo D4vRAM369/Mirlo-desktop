@@ -33,10 +33,10 @@ No account, no cloud, no telemetry.
 Save a post with **Share → Send to Mirlo**, whether Mirlo is open, hidden or closed.
 
 <p align="center">
-  <img src="assets/share-menu-es.png" width="248" alt="X's Share menu in Spanish, with Enviar a Mirlo (Send to Mirlo) as the first option.">
+  <img src="assets/share-menu-en.png" width="290" alt="X's Share menu with three options: Send via Chat, Copy link and Send to Mirlo.">
 </p>
 
-The screenshot shows X in Spanish. In any other language, the button says "Send to Mirlo".
+With X in Spanish the button says "Enviar a Mirlo"; in any other language, "Send to Mirlo".
 
 1. Install **Mirlo 0.2.0 or later** with an [installer](https://github.com/D4vRAM369/Mirlo-desktop/releases/latest). If it was already running, quit it from the tray icon before updating.
 2. Install a userscript manager (an extension that adds small programs to websites): [Violentmonkey](https://violentmonkey.github.io/) on Firefox or [Tampermonkey](https://www.tampermonkey.net/) on Chrome, Chromium, Brave and Edge. On Chromium browsers, turn on "Allow User Scripts" in the extension's details.
