@@ -36,6 +36,7 @@ jobs:
 
       - run: npm ci
       - run: npm run check
+      - run: node scripts/release-notes.mjs --test
       # tauri-build exige que existan el frontend compilado (dist/) y el sidecar al compilar Rust
       - run: npm run build
       - run: npm run sidecar

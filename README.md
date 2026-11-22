@@ -32,6 +32,12 @@ Sin cuenta, sin nube y sin telemetría.
 
 Guarda un post con **Compartir → Enviar a Mirlo**, esté Mirlo abierto, oculto o cerrado.
 
+<p align="center">
+  <img src="assets/share-menu-es.png" width="248" alt="Menú Compartir de X con tres opciones: Enviar a Mirlo, Enviar vía Chat y Copiar vínculo.">
+</p>
+
+Con X en español el botón dice «Enviar a Mirlo»; en cualquier otro idioma, «Send to Mirlo».
+
 1. Instala **Mirlo 0.2.0 o posterior** con un [instalador](https://github.com/D4vRAM369/Mirlo-desktop/releases/latest). Si ya lo tenías abierto, sal desde el icono de la bandeja antes de actualizar.
 2. Instala un gestor de userscripts (una extensión que añade pequeños programas a las webs): [Violentmonkey](https://violentmonkey.github.io/) en Firefox o [Tampermonkey](https://www.tampermonkey.net/) en Chrome, Chromium, Brave y Edge. En los navegadores Chromium, activa «Permitir secuencias de comandos del usuario» en los detalles de la extensión.
 3. Abre **[mirlo-x.user.js](https://github.com/D4vRAM369/Mirlo-desktop/raw/master/userscript/mirlo-x.user.js)** y confirma la instalación.

@@ -1,5 +1,6 @@
 # Al subir una etiqueta v* (git tag v0.1.0 && git push --tags) compila Mirlo en Linux, Windows y macOS
 # y deja los instaladores en un borrador de Release. Se publica a mano tras revisarlo.
+# La descripción sale de CHANGELOG.md en inglés y español (scripts/release-notes.mjs).
 # `beforeBuildCommand` (npm run sidecar && npm run build) descarga el yt-dlp de cada plataforma y verifica su SHA-256.
 name: Release
 
@@ -31,6 +32,11 @@ jobs:
           node-version: 20
           cache: npm
 
+      # Antes de compilar: si al changelog le falta un idioma, falla en segundos
+      - name: Descripción bilingüe de la release
+        id: notes
+        run: node scripts/release-notes.mjs
+
       - uses: dtolnay/rust-toolchain@stable
 
       - uses: Swatinem/rust-cache@v2
@@ -45,12 +51,5 @@ jobs:
         with:
           tagName: ${{ github.ref_name }}
           releaseName: Mirlo ${{ github.ref_name }}
-          releaseBody: |
-            Instaladores para Linux (.deb, .rpm, .AppImage), Windows (.msi, .exe) y macOS (.dmg). Incluyen yt-dlp.
-            *Installers for Linux, Windows and macOS. yt-dlp included.*
-
-            Novedades y limitaciones: [CHANGELOG.md](https://github.com/${{ github.repository }}/blob/${{ github.ref_name }}/CHANGELOG.md)
-
-            > ⚠️ Solo Linux está probado. Los instaladores de Windows y macOS no están firmados: el sistema mostrará un aviso de seguridad.
-            > *Only Linux is tested. Windows and macOS installers are unsigned: the OS will show a security warning.*
+          releaseBody: ${{ steps.notes.outputs.body }}
           releaseDraft: true
