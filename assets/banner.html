@@ -1,15 +1,15 @@
 <!doctype html>
 <!-- Fuente del banner del README. Regenerar desde la raíz del proyecto con:
      chromium --headless=new --hide-scrollbars --window-size=1280,400 --force-device-scale-factor=2 \
-       --default-background-color=00000000 --screenshot=docs/assets/banner.png docs/assets/banner.html
-     Inglés: misma orden con --screenshot=docs/assets/banner-en.png y "file://$PWD/docs/assets/banner.html?lang=en" -->
+       --default-background-color=00000000 --screenshot=assets/banner.png assets/banner.html
+     Inglés: misma orden con --screenshot=assets/banner-en.png y "file://$PWD/assets/banner.html?lang=en" -->
 <html lang="es">
 <head>
 <meta charset="utf-8">
 <style>
   @font-face {
     font-family: 'Atkinson';
-    src: url('../../node_modules/@fontsource-variable/atkinson-hyperlegible-next/files/atkinson-hyperlegible-next-latin-wght-normal.woff2') format('woff2');
+    src: url('../node_modules/@fontsource-variable/atkinson-hyperlegible-next/files/atkinson-hyperlegible-next-latin-wght-normal.woff2') format('woff2');
     font-weight: 200 800;
   }
   html, body { margin: 0; background: transparent; }
@@ -36,7 +36,7 @@
 </head>
 <body>
   <div class="banner">
-    <img src="../../app-icon.png" alt="">
+    <img src="../app-icon.png" alt="">
     <div>
       <h1>Mirlo</h1>
       <p class="tagline" data-en="Your local vault for X posts">Tu bóveda local de posts de X</p>

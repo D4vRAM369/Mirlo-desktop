@@ -2,6 +2,37 @@
 
 Formato: [Keep a Changelog](https://keepachangelog.com/es-ES/1.1.0/) · Versiones: [SemVer](https://semver.org/lang/es/).
 
+## [0.2.0] — 2026-11-22
+
+Enviar desde X. · *Send from X.*
+
+### Español
+
+- **Enviar a Mirlo** en el menú Compartir de X, con el userscript `userscript/mirlo-x.user.js`.
+- Enlaces `mirlo://save/<id>`: guardan con Mirlo abierto, oculto o cerrado. Solo aceptan un número de post.
+- Los envíos se guardan de uno en uno, sin quitarte el foco ni cambiar el post que tienes abierto. Si uno falla, aparece la ventana con el error.
+- Una sola instancia: volver a abrir Mirlo muestra la ventana que ya había.
+- Icono en la bandeja del sistema: al minimizar, Mirlo se esconde ahí.
+- Para desarrollo: una PR semanal avisa cuando sale un yt-dlp nuevo.
+- La documentación interna (`docs/`) deja de publicarse en el repositorio.
+
+### English
+
+- **Send to Mirlo** in X's Share menu, through the `userscript/mirlo-x.user.js` userscript.
+- `mirlo://save/<id>` links: they save with Mirlo open, hidden or closed, and accept nothing but a post number.
+- Incoming posts are saved one at a time, without stealing focus or changing the post you have open. If one fails, the window appears with the error.
+- Single instance: opening Mirlo again shows the window that was already running.
+- System tray icon: minimizing hides Mirlo there.
+- For development: a weekly PR flags new yt-dlp versions.
+- Internal documentation (`docs/`) is no longer published in the repository.
+
+### Limitaciones conocidas · *Known limitations*
+
+- El userscript depende de la página de X y puede necesitar ajustes cuando X cambie. · *The userscript depends on X's page and may need fixes when X changes.*
+- Probado en Linux con Chromium y X sin iniciar sesión; sin probar con sesión iniciada, con gestores de userscripts ni en Firefox. · *Tested on Linux with Chromium and X signed out; untested while signed in, with userscript managers, or on Firefox.*
+- La AppImage todavía no registra `mirlo://`: usa `.deb` o `.rpm`. · *The AppImage does not register `mirlo://` yet: use `.deb` or `.rpm`.*
+- Windows y macOS sin probar, con instaladores sin firmar. · *Windows and macOS are untested and their installers are unsigned.*
+
 ## [0.1.0] — 2026-10-28
 
 Primera versión pública. · *First public release.*

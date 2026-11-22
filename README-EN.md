@@ -1,10 +1,12 @@
 <p align="center">
-  <img src="docs/assets/banner-en.png" width="900" alt="Mirlo: your local vault for X posts. Icon of a blue card-catalog drawer holding a dark-mode post with a blackbird perched on top.">
+  <img src="assets/banner-en.png" width="900" alt="Mirlo: your local vault for X posts. Icon of a blue card-catalog drawer holding a dark-mode post with a blackbird perched on top.">
 </p>
 
 <p align="center"><a href="README.md">Español</a> · <b>English</b></p>
 
 A local vault for X (Twitter) posts. Paste a post link and Mirlo saves the text, author, date and every file to your own disk: photos at original resolution, videos, GIFs (as MP4) and linked documents (PDF, DOCX…).
+
+You can also [send it from X's Share menu](#send-from-x), without switching windows.
 
 No account, no cloud, no telemetry.
 
@@ -25,6 +27,19 @@ No account, no cloud, no telemetry.
 | <kbd>R</kbd> | Retry a partial or failed post |
 | <kbd>F</kbd> | Mark or unmark as favorite |
 | <kbd>T</kbd> / <kbd>M</kbd> / <kbd>N</kbd> | The post's tags, collection and note |
+
+## Send from X
+
+Save a post with **Share → Send to Mirlo**, whether Mirlo is open, hidden or closed.
+
+1. Install **Mirlo 0.2.0 or later** with an [installer](https://github.com/D4vRAM369/Mirlo-desktop/releases/latest). If it was already running, quit it from the tray icon before updating.
+2. Install a userscript manager (an extension that adds small programs to websites): [Violentmonkey](https://violentmonkey.github.io/) on Firefox or [Tampermonkey](https://www.tampermonkey.net/) on Chrome, Chromium, Brave and Edge. On Chromium browsers, turn on "Allow User Scripts" in the extension's details.
+3. Open **[mirlo-x.user.js](https://github.com/D4vRAM369/Mirlo-desktop/raw/master/userscript/mirlo-x.user.js)** and confirm the installation.
+4. Reload X. On any post: **Share → Send to Mirlo**. The first time, the browser asks whether it may open Mirlo.
+
+When it works, Mirlo saves without stealing focus. When it fails, it shows its window with the error.
+
+> On Linux use the `.deb` or `.rpm`: the AppImage does not register `mirlo://` links yet.
 
 ## Organizing
 
@@ -67,11 +82,14 @@ Mirlo only makes these requests, and only when you save or retry a post:
 - **FxTwitter** (`api.fxtwitter.com`): **only** for posts longer than 280 characters, because X delivers them cut short. It receives the post's number.
 - **Sites linked in the post**: Mirlo checks whether a link is a document (by its `Content-Type`) and, if it is and weighs less than 50 MB, downloads it. It never touches addresses on your local network.
 
+The userscript makes no requests and reads no cookies: it only hands the post's number to Mirlo. Any website could try to open a `mirlo://` link, which is why the browser asks first and Mirlo accepts nothing but a post number. If you choose "always allow", do it only for x.com.
+
 The font ships inside the app: opening Mirlo contacts no one.
 
 ## Limitations
 
 - It does not save full threads, or protected posts that require signing in.
+- "Send to Mirlo" depends on X's page and may disappear when X changes it. It was tested on Linux with Chromium and X signed out; signed-in X, userscript managers, Firefox, Windows and macOS are still untested.
 - If FxTwitter does not respond, a long post stays partial (text cut short by X).
 
 ## Development
@@ -81,20 +99,18 @@ Requirements: Rust, Node 20+ and the system [dependencies for Tauri 2](https://t
 ```bash
 npm install
 npm run sidecar        # downloads yt-dlp for your platform and checks its SHA-256
-npm run tauri dev
+npm run tauri dev      # quit the installed Mirlo first: only one instance can run
 ```
 
 ```bash
-npm run check                                   # TypeScript and Svelte types
+npm run check                                   # types, translations and userscript
 cd src-tauri && cargo test                      # tests against saved real responses
 cd src-tauri && cargo test -- --ignored         # live tests against X
 cd src-tauri && cargo clippy --all-targets -- -D warnings
 npm run tauri build                             # .deb, .rpm and AppImage packages
 ```
 
-The development notes in `docs/chronicler/` (decisions, errors and fixes, step by step) are in Spanish.
-
-What comes next (Spanish): [`docs/ROADMAP.md`](docs/ROADMAP.md). Changes per version: [`CHANGELOG.md`](CHANGELOG.md).
+Changes per version: [`CHANGELOG.md`](CHANGELOG.md).
 
 ## License
 

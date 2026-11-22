@@ -7,10 +7,7 @@ src-tauri/binaries/
 
 # Documentos de trabajo personales (no son para publicar)
 PROMPT.md
-docs/SPEC.md
-docs/HANDOFF.md
-docs/BACKPORT-THREADSVAULT.md
 .claude/
 
-# Transcripts de sesiones (rutas y datos privados)
-docs/transcripts/
+# Documentación interna: la carpeta entera, transcripts incluidos
+docs/

@@ -1,10 +1,12 @@
 <p align="center">
-  <img src="docs/assets/banner.png" width="900" alt="Mirlo: tu bóveda local de posts de X. Icono de un cajón de fichero azul con un post en modo oscuro y un mirlo posado encima.">
+  <img src="assets/banner.png" width="900" alt="Mirlo: tu bóveda local de posts de X. Icono de un cajón de fichero azul con un post en modo oscuro y un mirlo posado encima.">
 </p>
 
 <p align="center"><b>Español</b> · <a href="README-EN.md">English</a></p>
 
 Bóveda local para posts de X (Twitter). Pegas el enlace de un post y Mirlo guarda en tu disco el texto, el autor, la fecha y todos sus archivos: fotos a resolución original, vídeos, GIF (como MP4) y documentos enlazados (PDF, DOCX…).
+
+También puedes [enviarlo desde el menú Compartir de X](#enviar-desde-x), sin cambiar de ventana.
 
 Sin cuenta, sin nube y sin telemetría.
 
@@ -25,6 +27,19 @@ Sin cuenta, sin nube y sin telemetría.
 | <kbd>R</kbd> | Reintentar un post parcial o con error |
 | <kbd>F</kbd> | Marcar o quitar favorito |
 | <kbd>T</kbd> / <kbd>M</kbd> / <kbd>N</kbd> | Etiquetas, colección y nota del post |
+
+## Enviar desde X
+
+Guarda un post con **Compartir → Enviar a Mirlo**, esté Mirlo abierto, oculto o cerrado.
+
+1. Instala **Mirlo 0.2.0 o posterior** con un [instalador](https://github.com/D4vRAM369/Mirlo-desktop/releases/latest). Si ya lo tenías abierto, sal desde el icono de la bandeja antes de actualizar.
+2. Instala un gestor de userscripts (una extensión que añade pequeños programas a las webs): [Violentmonkey](https://violentmonkey.github.io/) en Firefox o [Tampermonkey](https://www.tampermonkey.net/) en Chrome, Chromium, Brave y Edge. En los navegadores Chromium, activa «Permitir secuencias de comandos del usuario» en los detalles de la extensión.
+3. Abre **[mirlo-x.user.js](https://github.com/D4vRAM369/Mirlo-desktop/raw/master/userscript/mirlo-x.user.js)** y confirma la instalación.
+4. Recarga X. En cualquier post: **Compartir → Enviar a Mirlo**. La primera vez el navegador pregunta si puede abrir Mirlo.
+
+Si sale bien, Mirlo guarda sin quitarte el foco. Si falla, muestra su ventana con el error.
+
+> En Linux usa el `.deb` o el `.rpm`: la AppImage todavía no registra los enlaces `mirlo://`.
 
 ## Organizar
 
@@ -67,11 +82,14 @@ Mirlo solo hace estas peticiones, y solo cuando guardas o reintentas un post:
 - **FxTwitter** (`api.fxtwitter.com`): **solo** para posts de más de 280 caracteres, porque X los entrega cortados. Recibe el número del post.
 - **Los sitios enlazados en el post**: Mirlo mira si el enlace es un documento (por su `Content-Type`) y, si lo es y pesa menos de 50 MB, lo descarga. Nunca toca direcciones de tu red local.
 
+El userscript no hace peticiones ni lee cookies: solo pasa a Mirlo el número del post. Cualquier web podría intentar abrir un enlace `mirlo://`, por eso el navegador pide permiso y Mirlo solo acepta un número de post. Si marcas «permitir siempre», hazlo solo para x.com.
+
 La tipografía va dentro de la app: abrir Mirlo no llama a nadie.
 
 ## Limitaciones
 
 - No guarda hilos completos ni posts protegidos o que requieren iniciar sesión.
+- «Enviar a Mirlo» depende de la página de X y puede dejar de salir cuando X la cambie. Se ha probado en Linux con Chromium y X sin iniciar sesión; faltan por probar la sesión iniciada, los gestores de userscripts, Firefox, Windows y macOS.
 - Si FxTwitter no responde, un post largo queda como parcial (texto cortado por X).
 
 ## Desarrollo
@@ -81,20 +99,20 @@ Requisitos: Rust, Node 20+ y las [dependencias de Tauri 2](https://tauri.app/sta
 ```bash
 npm install
 npm run sidecar        # descarga yt-dlp para tu plataforma y comprueba su SHA-256
-npm run tauri dev
+npm run tauri dev      # sal antes del Mirlo instalado: solo puede haber una instancia
 ```
 
 ```bash
-npm run check                                   # tipos de TypeScript y Svelte
+npm run check                                   # tipos, traducciones y userscript
 cd src-tauri && cargo test                      # tests con respuestas reales guardadas
 cd src-tauri && cargo test -- --ignored         # pruebas en vivo contra X
 cd src-tauri && cargo clippy --all-targets -- -D warnings
 npm run tauri build                             # paquetes .deb, .rpm y AppImage
 ```
 
-La documentación del proceso está en `docs/chronicler/` (decisiones, errores y soluciones, paso a paso), la cual puede venir genial para estudiantes, aprendices y aquellos que quieran saber todo lo que se hizo en la construcción de Mirlo. Gran variedad de detalles, también he publicado la doc pública de la skill [ProfesorIA](https://github.com/D4vRAM369/ProfesorIA). Espero que resulte productiva y didáctica.
+También he publicado la doc pública de la skill [ProfesorIA](https://github.com/D4vRAM369/ProfesorIA). Espero que resulte productiva y didáctica.
 
-Qué viene después: [`docs/ROADMAP.md`](docs/ROADMAP.md). Cambios por versión: [`CHANGELOG.md`](CHANGELOG.md).
+Cambios por versión: [`CHANGELOG.md`](CHANGELOG.md).
 
 ## Licencia
 
