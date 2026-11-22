@@ -38,7 +38,7 @@ Save a post with **Share → Send to Mirlo**, whether Mirlo is open, hidden or c
 
 With X in Spanish the button says "Enviar a Mirlo"; in any other language, "Send to Mirlo".
 
-In versions after 0.2.0, Mirlo guides you: it offers this the first time, and it is always under **Integrate with X** in the top bar.
+Since 0.3.0, Mirlo guides you: it offers this the first time, and it is always under **Integrate with X** in the top bar.
 
 1. Pick your browser and install the userscript manager it points to (an extension that adds small programs to websites): Violentmonkey on Firefox or Tampermonkey on Chrome, Edge, Brave and Chromium.
 2. On Chromium browsers only: turn on "Allow User Scripts" in the extension's details.

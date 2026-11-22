@@ -1,6 +1,6 @@
 [package]
 name = "mirlo"
-version = "0.2.0"
+version = "0.3.0"
 license = "GPL-3.0-or-later"
 description = "Local vault for X posts: text, photos, videos and documents saved on your own disk."
 authors = ["D4vRAM369"]

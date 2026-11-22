@@ -2,9 +2,9 @@
 
 Formato: [Keep a Changelog](https://keepachangelog.com/es-ES/1.1.0/) · Versiones: [SemVer](https://semver.org/lang/es/).
 
-## [Sin publicar] · *[Unreleased]*
+## [0.3.0] — 2026-11-22
 
-Integrar con X. · *Integrate with X.*
+Mirlo trae el script de X y te guía para instalarlo, sin buscarlo en el README. · *Mirlo brings the X script and guides you through installing it, no README digging.*
 
 ### Español
 
@@ -14,6 +14,12 @@ Integrar con X. · *Integrate with X.*
 - La AppImage puede registrar los enlaces `mirlo://`, pidiendo permiso antes.
 - Userscript 0.2.0, con el saludo. Si tienes el 0.1.0, reinstálalo con **Instalar script**: se actualiza.
 
+#### Cómo empezar
+
+1. Sal de Mirlo desde el icono de la bandeja si está abierto e instala la 0.3.0. Tu bóveda sigue en `~/Mirlo`.
+2. Pulsa **Integrar con X**, elige tu navegador y sigue los pasos. Lo que se instala lo confirmas tú en el navegador.
+3. Pulsa **Comprobar** y, en X, **Conectar con Mirlo**. Después, en cualquier post: **Compartir → Enviar a Mirlo**.
+
 ### English
 
 - **Integrate with X**: Mirlo offers it once and it always stays in the top bar. It guides you through installing the manager and the script in each browser.
@@ -22,9 +28,15 @@ Integrar con X. · *Integrate with X.*
 - The AppImage can register `mirlo://` links, asking for permission first.
 - Userscript 0.2.0, with the greeting. If you have 0.1.0, reinstall it with **Install script**: it gets updated.
 
+#### Getting started
+
+1. Quit Mirlo from its tray icon if it is running, then install 0.3.0. Your vault stays in `~/Mirlo`.
+2. Click **Integrate with X**, pick your browser and follow the steps. You confirm every install in the browser.
+3. Click **Check** and, on X, **Connect to Mirlo**. Then, on any post: **Share → Send to Mirlo**.
+
 ### Limitaciones conocidas · *Known limitations*
 
-- Probado en Linux (`.deb` y AppImage) con X sin iniciar sesión: de principio a fin en Firefox con Violentmonkey; en Chromium, la pantalla de instalación de Tampermonkey y la comprobación cargando el script a mano. · *Tested on Linux (`.deb` and AppImage) with X signed out: end to end on Firefox with Violentmonkey; on Chromium, Tampermonkey's install screen and the check with the script loaded by hand.*
+- Probado en Linux con X sin iniciar sesión: el `.deb`, de principio a fin en Firefox con Violentmonkey; la AppImage, el registro de enlaces y el saludo; en Chromium, la pantalla de instalación de Tampermonkey y la comprobación cargando el script a mano. · *Tested on Linux with X signed out: the `.deb` end to end on Firefox with Violentmonkey; the AppImage, link registration and the greeting; on Chromium, Tampermonkey's install screen and the check with the script loaded by hand.*
 - Sin probar: X con sesión iniciada, Tampermonkey con su permiso activado, `.rpm`, Windows y macOS. · *Untested: signed-in X, Tampermonkey with its permission turned on, `.rpm`, Windows and macOS.*
 - Con la AppImage en una ruta con espacios, algunos escritorios sin GNOME ni KDE no abren `mirlo://`. · *With the AppImage in a path with spaces, some desktops other than GNOME and KDE do not open `mirlo://`.*
 - La comprobación necesita Mirlo abierto, y al terminar algunos escritorios solo lo resaltan en la barra en vez de traerlo al frente. · *The check needs Mirlo running, and when it finishes some desktops only highlight it in the taskbar instead of bringing it to the front.*

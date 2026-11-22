@@ -38,7 +38,7 @@ Guarda un post con **Compartir → Enviar a Mirlo**, esté Mirlo abierto, oculto
 
 Con X en español el botón dice «Enviar a Mirlo»; en cualquier otro idioma, «Send to Mirlo».
 
-En las versiones posteriores a la 0.2.0, Mirlo te guía: lo ofrece la primera vez y lo tienes siempre en **Integrar con X**, en la barra superior.
+Desde la 0.3.0, Mirlo te guía: lo ofrece la primera vez y lo tienes siempre en **Integrar con X**, en la barra superior.
 
 1. Elige tu navegador e instala el gestor de userscripts que te indica (una extensión que añade pequeños programas a las webs): Violentmonkey en Firefox o Tampermonkey en Chrome, Edge, Brave y Chromium.
 2. Solo en los navegadores Chromium: activa «Permitir secuencias de comandos del usuario» en los detalles de la extensión.

@@ -53,9 +53,9 @@ function notes(text, tag) {
     block('Español', 0, 'Cambios', 'Limitaciones conocidas'),
     [
       '> [!WARNING]',
-      '> Only Linux is tested (the `.deb`). Windows and macOS installers are unsigned, so the OS will show a security warning.',
+      '> Windows and macOS are untested and their installers are unsigned, so the OS will show a security warning.',
       '>',
-      '> Solo Linux está probado (el `.deb`). Los instaladores de Windows y macOS no están firmados: el sistema mostrará un aviso de seguridad.',
+      '> Windows y macOS no se han probado y sus instaladores no están firmados: el sistema mostrará un aviso de seguridad.',
     ].join('\n'),
     ...(previous
       ? [`**Full changelog · Cambios completos:** https://github.com/${REPO}/compare/v${version(previous)}...${tag}`]
