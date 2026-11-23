@@ -1,7 +1,7 @@
 {
   "name": "mirlo",
   "private": true,
-  "version": "0.3.0",
+  "version": "0.3.1",
   "license": "GPL-3.0-or-later",
   "description": "Bóveda local para posts de X: texto, fotos, vídeos y documentos en tu disco.",
   "type": "module",

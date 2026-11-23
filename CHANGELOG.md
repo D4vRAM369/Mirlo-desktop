@@ -2,6 +2,22 @@
 
 Formato: [Keep a Changelog](https://keepachangelog.com/es-ES/1.1.0/) · Versiones: [SemVer](https://semver.org/lang/es/).
 
+## [0.3.1] — 2026-11-23
+
+Corrección de los atajos de teclado de la barra inferior. · *Fix for the bottom-bar keyboard shortcuts.*
+
+### Español
+
+- **Atajos con mayúsculas o `Bloq Mayús`:** <kbd>J</kbd>, <kbd>K</kbd>, <kbd>O</kbd>, <kbd>R</kbd>, <kbd>F</kbd>, <kbd>T</kbd>, <kbd>M</kbd> y <kbd>N</kbd> ahora funcionan tanto en minúscula como con `Bloq Mayús` activado o pulsando `Shift`.
+- **Foco tras <kbd>Ctrl</kbd>+<kbd>V</kbd> y <kbd>/</kbd>:** guardar un enlace pegado ya suelta el foco del buscador (y limpia una búsqueda previa) para que los atajos sigan funcionando al instante. Pulsar <kbd>/</kbd> selecciona el texto anterior del buscador, y <kbd>Intro</kbd> o <kbd>Esc</kbd> sacan el foco del campo.
+- **Selector de colección (<kbd>M</kbd>):** pulsar <kbd>↑</kbd> o <kbd>↓</kbd> dentro de Colección ya no salta a otro post de la lista.
+
+### English
+
+- **Shortcuts with uppercase or Caps Lock:** <kbd>J</kbd>, <kbd>K</kbd>, <kbd>O</kbd>, <kbd>R</kbd>, <kbd>F</kbd>, <kbd>T</kbd>, <kbd>M</kbd> and <kbd>N</kbd> now work both in lowercase and with Caps Lock on or Shift held.
+- **Focus after <kbd>Ctrl</kbd>+<kbd>V</kbd> and <kbd>/</kbd>:** saving a pasted link now blurs the search bar (and clears any previous search) so shortcuts keep working immediately. Pressing <kbd>/</kbd> selects existing search text, and <kbd>Enter</kbd> or <kbd>Esc</kbd> leaves the field.
+- **Collection selector (<kbd>M</kbd>):** pressing <kbd>↑</kbd> or <kbd>↓</kbd> inside Collection no longer jumps to another post in the list.
+
 ## [0.3.0] — 2026-11-22
 
 Mirlo trae el script de X y te guía para instalarlo, sin buscarlo en el README. · *Mirlo brings the X script and guides you through installing it, no README digging.*
