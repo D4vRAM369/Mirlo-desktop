@@ -1,141 +1,151 @@
 <p align="center">
-  <img src="assets/banner.png" width="900" alt="Mirlo: tu bóveda local de posts de X. Icono de un cajón de fichero azul con un post en modo oscuro y un mirlo posado encima.">
+  <img src="assets/banner-en.png" width="900" alt="Mirlo: your local vault for X posts. Icon of a blue card-catalog drawer holding a dark-mode post with a blackbird perched on top.">
 </p>
 
-<p align="center"><b>Español</b> · <a href="README-EN.md">English</a></p>
+<p align="center"><a href="README-ES.md">Español</a> · <b>English</b></p>
 
-Bóveda local para posts de X (Twitter). Pegas el enlace de un post y Mirlo guarda en tu disco el texto, el autor, la fecha y todos sus archivos: fotos a resolución original, vídeos, GIF (como MP4) y documentos enlazados (PDF, DOCX…).
+## Demo screenshots
 
-También puedes [enviarlo desde el menú Compartir de X](#enviar-desde-x), sin cambiar de ventana.
+<table>
+<tr>
+<td width="50%"><img width="1202" height="780" alt="image" src="https://github.com/user-attachments/assets/a2d47736-9a68-490f-8771-b720f992d0fe" />
+<td width="50%"><img <img width="1203" height="890" alt="image" src="https://github.com/user-attachments/assets/8aafff9f-9bad-48cc-b374-6485fd43c056" /></td>
+</tr>
+<tr>
+<td colspan="2"><img width="1108" height="894" alt="image" src="https://github.com/user-attachments/assets/1e119367-70c5-467b-9492-34e5cc30d1bc" />
+</tr>
+</table>
 
-Sin cuenta, sin nube y sin telemetría.
+A local vault for X (Twitter) posts. Paste a post link and Mirlo saves the text, author, date and every file to your own disk: photos at original resolution, videos, GIFs (as MP4) and linked documents (PDF, DOCX…).
 
-> La interfaz está en español y en inglés. La primera vez Mirlo usa el idioma del sistema; puedes cambiarlo cuando quieras con el botón que hay junto al del tema.
+You can also [send it from X's Share menu](#send-from-x), without switching windows.
 
-## Cómo se usa
+No account, no cloud, no telemetry.
 
-1. Copia el enlace de un post en X.
-2. Pulsa <kbd>Ctrl</kbd>+<kbd>V</kbd> en cualquier parte de la ventana de Mirlo.
-3. El post aparece en la lista. Si algo no se pudo bajar, se marca como **◐ Parcial** o **✕ Error** y puedes reintentarlo con <kbd>R</kbd>.
+> The interface is available in English and Spanish. Mirlo follows your system language the first time; switch it anytime with the button next to the theme toggle.
 
-| Atajo | Acción |
+## How to use it
+
+1. Copy the link of a post on X.
+2. Press <kbd>Ctrl</kbd>+<kbd>V</kbd> anywhere in the Mirlo window.
+3. The post appears in the list. If something could not be downloaded, it is marked **◐ Partial** or **✕ Error**, and you can retry it with <kbd>R</kbd>.
+
+| Shortcut | Action |
 |---|---|
-| <kbd>J</kbd> / <kbd>K</kbd> | Siguiente y anterior |
-| <kbd>/</kbd> | Buscar (texto completo, sin distinguir acentos) |
-| <kbd>Ctrl</kbd>+<kbd>V</kbd> | Guardar el enlace copiado |
-| <kbd>O</kbd> | Abrir la carpeta del post |
-| <kbd>R</kbd> | Reintentar un post parcial o con error |
-| <kbd>F</kbd> | Marcar o quitar favorito |
-| <kbd>T</kbd> / <kbd>M</kbd> / <kbd>N</kbd> | Etiquetas, colección y nota del post |
+| <kbd>J</kbd> / <kbd>K</kbd> | Next and previous |
+| <kbd>/</kbd> | Search (full text, accent-insensitive) |
+| <kbd>Ctrl</kbd>+<kbd>V</kbd> | Save the copied link |
+| <kbd>O</kbd> | Open the post's folder |
+| <kbd>R</kbd> | Retry a partial or failed post |
+| <kbd>F</kbd> | Mark or unmark as favorite |
+| <kbd>T</kbd> / <kbd>M</kbd> / <kbd>N</kbd> | The post's tags, collection and note |
 
-## Enviar desde X
+## Send from X
 
-Guarda un post con **Compartir → Enviar a Mirlo**, esté Mirlo abierto, oculto o cerrado.
+Save a post with **Share → Send to Mirlo**, whether Mirlo is open, hidden or closed.
 
 <p align="center">
-  <img src="assets/share-menu-es.png" width="248" alt="Menú Compartir de X con tres opciones: Enviar a Mirlo, Enviar vía Chat y Copiar vínculo.">
+  <img src="assets/share-menu-en.png" width="290" alt="X's Share menu with three options: Send via Chat, Copy link and Send to Mirlo.">
 </p>
 
-Con X en español el botón dice «Enviar a Mirlo»; en cualquier otro idioma, «Send to Mirlo».
+With X in Spanish the button says "Enviar a Mirlo"; in any other language, "Send to Mirlo".
 
-Desde la 0.3.0, Mirlo te guía: lo ofrece la primera vez y lo tienes siempre en **Integrar con X**, en la barra superior.
+Since 0.3.0, Mirlo guides you: it offers this the first time, and it is always under **Integrate with X** in the top bar.
 
-1. Elige tu navegador e instala el gestor de userscripts que te indica (una extensión que añade pequeños programas a las webs): Violentmonkey en Firefox o Tampermonkey en Chrome, Edge, Brave y Chromium.
-2. Solo en los navegadores Chromium: activa «Permitir secuencias de comandos del usuario» en los detalles de la extensión.
-3. Pulsa **Instalar script** y confírmalo en el navegador. El script va dentro de Mirlo; también puedes copiarlo.
-4. Pulsa **Comprobar** y, en X, **Conectar con Mirlo**. Cuando Mirlo recibe el saludo muestra «✓ Conectado con X».
+1. Pick your browser and install the userscript manager it points to (an extension that adds small programs to websites): Violentmonkey on Firefox or Tampermonkey on Chrome, Edge, Brave and Chromium.
+2. On Chromium browsers only: turn on "Allow User Scripts" in the extension's details.
+3. Click **Install script** and confirm it in the browser. The script ships inside Mirlo; you can copy it too.
+4. Click **Check** and then, on X, **Connect to Mirlo**. When Mirlo receives the greeting it shows "✓ Connected to X".
 
-Con la AppImage, el asistente te pide antes permiso para registrar los enlaces `mirlo://` con el botón **Permitir enlaces de Mirlo**. Si la mueves de carpeta, vuelve a pulsarlo.
+With the AppImage, the guide first asks permission to register `mirlo://` links with the **Allow Mirlo links** button. If you move the file to another folder, click it again.
 
 <details>
-<summary>Instalarlo a mano (o con la 0.2.0, que no trae asistente)</summary>
+<summary>Install it by hand (or with 0.2.0, which has no guide)</summary>
 
-1. Instala Mirlo con un [instalador](https://github.com/D4vRAM369/Mirlo-desktop/releases/latest): la AppImage de la 0.2.0 no registra los enlaces `mirlo://`.
-2. Instala [Violentmonkey](https://violentmonkey.github.io/) en Firefox o [Tampermonkey](https://www.tampermonkey.net/) en Chromium, con «Permitir secuencias de comandos del usuario» activado.
-3. Abre **[mirlo-x.user.js](https://github.com/D4vRAM369/Mirlo-desktop/raw/master/userscript/mirlo-x.user.js)** y confirma la instalación.
-4. Recarga X y usa **Compartir → Enviar a Mirlo**.
+1. Install Mirlo with an [installer](https://github.com/D4vRAM369/Mirlo-desktop/releases/latest): the 0.2.0 AppImage does not register `mirlo://` links.
+2. Install [Violentmonkey](https://violentmonkey.github.io/) on Firefox or [Tampermonkey](https://www.tampermonkey.net/) on Chromium, with "Allow User Scripts" turned on.
+3. Open **[mirlo-x.user.js](https://github.com/D4vRAM369/Mirlo-desktop/raw/master/userscript/mirlo-x.user.js)** and confirm the installation.
+4. Reload X and use **Share → Send to Mirlo**.
 
 </details>
 
-La primera vez el navegador pregunta si puede abrir Mirlo. Si un envío sale bien, Mirlo guarda sin quitarte el foco. Si falla, muestra su ventana con el error.
+The first time, the browser asks whether it may open Mirlo. When a send works, Mirlo saves without stealing focus. When it fails, it shows its window with the error.
 
-## Organizar
+## Organizing
 
-- **Favoritos** (★) para lo que quieres tener a mano.
-- **Colecciones**, como carpetas: cada post va en una o en ninguna. Se crean con **+** en la barra lateral, se renombran o borran con doble clic (o <kbd>F2</kbd>) y se reordenan con <kbd>Alt</kbd>+<kbd>↑</kbd>/<kbd>↓</kbd>.
-- **Etiquetas**, todas las que quieras por post, con un color de la paleta o cualquier otro desde la rueda de color.
-- **Notas** personales en cada post.
+- **Favorites** (★) for what you want close at hand.
+- **Collections**, like folders: each post goes in one or none. Create them with **+** in the sidebar, rename or delete them with a double click (or <kbd>F2</kbd>) and reorder them with <kbd>Alt</kbd>+<kbd>↑</kbd>/<kbd>↓</kbd>.
+- **Tags**, as many as you like per post, with a palette color or any other from the color wheel.
+- Personal **notes** on each post.
 
-Las notas y las etiquetas entran en la búsqueda. Volver a guardar o reintentar un post nunca borra lo que añadiste: va en la BD y en el bloque `user` de su `post.json`.
+Notes and tags are searchable. Saving or retrying a post again never erases what you added: it lives in the database and in the `user` block of its `post.json`.
 
-## Copias de seguridad
+## Backups
 
-En **Copia de seguridad** (barra superior):
+Under **Backup** (top bar):
 
-- **Exportar bóveda…** crea un `.zip` con todo. Desmarca *Incluir fotos, vídeos y documentos* para una copia ligera con solo el texto.
-- **Importar copia…** lo trae de vuelta, en este equipo o en otro. **Fusiona, nunca sobrescribe:** los posts que ya tienes no cambian, se suman etiquetas y favoritos, y tus notas y colecciones se quedan. Cada archivo se comprueba con su huella SHA-256, y una copia con rutas sospechosas se rechaza entera.
+- **Export vault…** creates a `.zip` with everything. Untick *Include photos, videos and documents* for a light copy with text only.
+- **Import backup…** brings it back, on this computer or another. **It merges and never overwrites:** posts you already have do not change, tags and favorites are added, and your notes and collections stay. Every file is checked against its SHA-256 fingerprint, and a backup with suspicious paths is rejected as a whole.
 
-Si la copia era ligera, los posts importados quedan como parciales: <kbd>R</kbd> baja lo que falta.
+If the backup was light, imported posts are marked partial: <kbd>R</kbd> downloads what is missing.
 
-## Dónde se guarda
+## Where it is saved
 
 ```
 ~/Mirlo/
-├── mirlo.db                          índice para buscar y filtrar
-└── <usuario>/<YYYY-MM-DD>_<id>/
-    ├── post.json                     post, archivos con su SHA-256 y la respuesta original
-    ├── post.md                       el post en texto legible
-    ├── media/01.jpg, 02.mp4…         en el orden del post (q01… = post citado)
-    └── attachments/                  documentos enlazados
+├── mirlo.db                          index for search and filters
+└── <user>/<YYYY-MM-DD>_<id>/
+    ├── post.json                     post, files with their SHA-256 and the original response
+    ├── post.md                       the post as readable text
+    ├── media/01.jpg, 02.mp4…         in the post's order (q01… = quoted post)
+    └── attachments/                  linked documents
 ```
 
-Las carpetas son la copia de verdad: puedes copiarlas o leerlas sin Mirlo.
+The folders are the real copy: you can copy them or read them without Mirlo.
 
-## Qué sale de tu equipo
+## What leaves your computer
 
-Mirlo solo hace estas peticiones, y solo cuando guardas o reintentas un post:
+Mirlo only makes these requests, and only when you save or retry a post:
 
-- **X** (`cdn.syndication.twimg.com`, `publish.x.com`, `pbs.twimg.com`, `video.twimg.com`): el post y sus archivos.
-- **yt-dlp** (incluido en la app): pide el post a X cuando la vía anterior falla.
-- **FxTwitter** (`api.fxtwitter.com`): **solo** para posts de más de 280 caracteres, porque X los entrega cortados. Recibe el número del post.
-- **Los sitios enlazados en el post**: Mirlo mira si el enlace es un documento (por su `Content-Type`) y, si lo es y pesa menos de 50 MB, lo descarga. Nunca toca direcciones de tu red local.
+- **X** (`cdn.syndication.twimg.com`, `publish.x.com`, `pbs.twimg.com`, `video.twimg.com`): the post and its files.
+- **yt-dlp** (bundled with the app): asks X for the post when the route above fails.
+- **FxTwitter** (`api.fxtwitter.com`): **only** for posts longer than 280 characters, because X delivers them cut short. It receives the post's number.
+- **Sites linked in the post**: Mirlo checks whether a link is a document (by its `Content-Type`) and, if it is and weighs less than 50 MB, downloads it. It never touches addresses on your local network.
 
-El userscript no hace peticiones ni lee cookies: solo pasa a Mirlo el número del post o, al comprobar la conexión, el código de un solo uso que creó Mirlo. Cualquier web podría intentar abrir un enlace `mirlo://`, por eso el navegador pide permiso y Mirlo solo acepta esas dos formas, y el saludo solo con su código. Si marcas «permitir siempre», hazlo solo para x.com.
+The userscript makes no requests and reads no cookies: it only hands Mirlo the post's number or, when checking the connection, the single-use code Mirlo created. Any website could try to open a `mirlo://` link, which is why the browser asks first and Mirlo accepts only those two forms, the greeting only with its code. If you choose "always allow", do it only for x.com.
 
-El asistente solo actúa cuando pulsas sus botones: abre en tu navegador la tienda de extensiones o X, y para **Instalar script** escucha hasta 10 minutos en una dirección de tu propio equipo (`127.0.0.1`) que únicamente entrega ese script.
+The guide only acts when you click its buttons: it opens the extension store or X in your browser, and for **Install script** it listens for up to 10 minutes on an address on your own computer (`127.0.0.1`) that serves nothing but that script.
 
-La tipografía va dentro de la app: abrir Mirlo no llama a nadie.
+The font ships inside the app: opening Mirlo contacts no one.
 
-## Limitaciones
+## Limitations
 
-- No guarda hilos completos ni posts protegidos o que requieren iniciar sesión.
-- «Enviar a Mirlo» depende de la página de X y puede dejar de salir cuando X la cambie. Se ha probado en Linux con X sin iniciar sesión: de principio a fin en Firefox con Violentmonkey; en Chromium, la pantalla de instalación de Tampermonkey y la comprobación cargando el script a mano. Faltan por probar la sesión iniciada, Tampermonkey con su permiso activado, Windows y macOS.
-- Con la AppImage en una ruta con espacios, algunos escritorios sin GNOME ni KDE no abren los enlaces `mirlo://`: muévela a una ruta sin espacios.
-- La comprobación necesita Mirlo abierto: si lo cerraste, pulsa **Comprobar** otra vez.
-- Si FxTwitter no responde, un post largo queda como parcial (texto cortado por X).
+- It does not save full threads, or protected posts that require signing in.
+- "Send to Mirlo" depends on X's page and may disappear when X changes it. It was tested on Linux with X signed out: end to end on Firefox with Violentmonkey; on Chromium, Tampermonkey's install screen and the check with the script loaded by hand. Signed-in X, Tampermonkey with its permission turned on, Windows and macOS are still untested.
+- With the AppImage in a path with spaces, some desktops other than GNOME and KDE do not open `mirlo://` links: move it to a path without spaces.
+- The check needs Mirlo running: if you quit it, click **Check** again.
+- If FxTwitter does not respond, a long post stays partial (text cut short by X).
 
-## Desarrollo
+## Development
 
-Requisitos: Rust, Node 20+ y las [dependencias de Tauri 2](https://tauri.app/start/prerequisites/) del sistema.
+Requirements: Rust, Node 20+ and the system [dependencies for Tauri 2](https://tauri.app/start/prerequisites/).
 
 ```bash
 npm install
-npm run sidecar        # descarga yt-dlp para tu plataforma y comprueba su SHA-256
-npm run tauri dev      # sal antes del Mirlo instalado: solo puede haber una instancia
+npm run sidecar        # downloads yt-dlp for your platform and checks its SHA-256
+npm run tauri dev      # quit the installed Mirlo first: only one instance can run
 ```
 
 ```bash
-npm run check                                   # tipos, traducciones y userscript
-cd src-tauri && cargo test                      # tests con respuestas reales guardadas
-cd src-tauri && cargo test -- --ignored         # pruebas en vivo contra X
+npm run check                                   # types, translations and userscript
+cd src-tauri && cargo test                      # tests against saved real responses
+cd src-tauri && cargo test -- --ignored         # live tests against X
 cd src-tauri && cargo clippy --all-targets -- -D warnings
-npm run tauri build                             # paquetes .deb, .rpm y AppImage
+npm run tauri build                             # .deb, .rpm and AppImage packages
 ```
 
-También he publicado la doc pública de la skill [ProfesorIA](https://github.com/D4vRAM369/ProfesorIA). Espero que resulte productiva y didáctica.
+Changes per version: [`CHANGELOG.md`](CHANGELOG.md).
 
-Cambios por versión: [`CHANGELOG.md`](CHANGELOG.md).
+## License
 
-## Licencia
-
-[GPL-3.0 o posterior](LICENSE). Puedes usar, estudiar, cambiar y compartir Mirlo; si distribuyes una versión modificada, su código tiene que ser también libre con esta misma licencia.
+[GPL-3.0 or later](LICENSE). You may use, study, change and share Mirlo; if you distribute a modified version, its source code must also be free under this same license.
