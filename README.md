@@ -4,6 +4,18 @@
 
 <p align="center"><b>Español</b> · <a href="README-EN.md">English</a></p>
 
+## Capturas demo
+
+<table>
+<tr>
+<td width="50%"><img src="assets/mirlo-demo-search.jpg" width="100%" alt="Demo de Mirlo: búsqueda y filtros"></td>
+<td width="50%"><img src="assets/mirlo-demo-inbox.jpg" width="100%" alt="Demo de Mirlo: bandeja de posts guardados"></td>
+</tr>
+<tr>
+<td colspan="2"><img src="assets/mirlo-demo-history.jpg" width="100%" alt="Demo de Mirlo: historial de posts guardados"></td>
+</tr>
+</table>
+
 Bóveda local para posts de X (Twitter). Pegas el enlace de un post y Mirlo guarda en tu disco el texto, el autor, la fecha y todos sus archivos: fotos a resolución original, vídeos, GIF (como MP4) y documentos enlazados (PDF, DOCX…).
 
 También puedes [enviarlo desde el menú Compartir de X](#enviar-desde-x), sin cambiar de ventana.

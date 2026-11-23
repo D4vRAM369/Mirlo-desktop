@@ -4,6 +4,18 @@
 
 <p align="center"><a href="README.md">Español</a> · <b>English</b></p>
 
+## Demo screenshots
+
+<table>
+<tr>
+<td width="50%"><img src="assets/mirlo-demo-search.jpg" width="100%" alt="Mirlo demo: search and filters"></td>
+<td width="50%"><img src="assets/mirlo-demo-inbox.jpg" width="100%" alt="Mirlo demo: saved posts inbox"></td>
+</tr>
+<tr>
+<td colspan="2"><img src="assets/mirlo-demo-history.jpg" width="100%" alt="Mirlo demo: saved-post history"></td>
+</tr>
+</table>
+
 A local vault for X (Twitter) posts. Paste a post link and Mirlo saves the text, author, date and every file to your own disk: photos at original resolution, videos, GIFs (as MP4) and linked documents (PDF, DOCX…).
 
 You can also [send it from X's Share menu](#send-from-x), without switching windows.
