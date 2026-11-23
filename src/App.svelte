@@ -200,17 +200,22 @@
     if (!api.looksLikePostUrl(input)) {
       filter.q = input.trim() || undefined
     } else if ((e as InputEvent).inputType === 'insertFromPaste') {
+      filter.q = undefined
       save(input.trim())
       input = ''
+      // Ctrl+V enfocó el campo para que WebKitGTK pegara; al guardar devolvemos el foco fuera para no atrapar los atajos
+      field.blur()
     }
   }
 
   function onSubmit(e: SubmitEvent) {
     e.preventDefault()
     if (api.looksLikePostUrl(input)) {
+      filter.q = undefined
       save(input.trim())
       input = ''
     }
+    field.blur()
   }
 
   function setFilter(patch: Filter) {
@@ -226,17 +231,22 @@
     rows[next.id]?.scrollIntoView({ block: 'nearest' })
   }
 
-  const typing = (t: EventTarget | null) => t instanceof HTMLInputElement || t instanceof HTMLTextAreaElement
+  const typing = (t: EventTarget | null) =>
+    t instanceof HTMLInputElement ||
+    t instanceof HTMLTextAreaElement ||
+    t instanceof HTMLSelectElement ||
+    (t instanceof HTMLElement && t.isContentEditable)
   const inDialog = () => document.querySelector('dialog[open]') !== null
 
   function onKey(e: KeyboardEvent) {
+    if (e.defaultPrevented) return
     if (typing(e.target) || inDialog()) {
-      if (e.key === 'Escape' && e.target === field) field.blur()
+      if (e.key === 'Escape' && !inDialog() && e.target instanceof HTMLElement) e.target.blur()
       return
     }
     // Ctrl+V fuera de un campo: WebKitGTK no dispara `paste` sin un campo editable enfocado,
     // así que se enfoca el campo ANTES de que el navegador pegue y el texto cae ahí (ver onInput).
-    if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'v') {
+    if ((e.ctrlKey || e.metaKey) && !e.altKey && e.key.toLowerCase() === 'v') {
       field.focus()
       field.select()
       return
@@ -247,7 +257,10 @@
       ArrowDown: () => move(1),
       k: () => move(-1),
       ArrowUp: () => move(-1),
-      '/': () => field.focus(),
+      '/': () => {
+        field.focus()
+        field.select()
+      },
       o: () => selectedId && api.openFolder(selectedId).catch((err) => (message = errorText(err))),
       r: () => selectedId && detail?.post.status !== 'ok' && retry(selectedId),
       f: () => organizer?.toggleFavorite(),
@@ -255,7 +268,9 @@
       m: () => organizer?.focusCollection(),
       n: () => organizer?.focusNote(),
     }
-    const action = actions[e.key]
+    // Bloq Mayús o Shift mandan la letra en mayúscula (como se pinta en el pie); normalizamos a minúscula.
+    const key = e.key.length === 1 ? e.key.toLowerCase() : e.key
+    const action = actions[key]
     if (action) {
       e.preventDefault()
       action()

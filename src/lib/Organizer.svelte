@@ -59,9 +59,14 @@
   // WebKitGTK (Linux) no cambia un <select> cerrado con las flechas ni abre su lista con el teclado:
   // ↑/↓ se manejan aquí para que M + flechas funcione en todos los sistemas
   function onCollectionKey(e: KeyboardEvent) {
-    if (e.key === 'Escape') return collectionField.blur()
+    if (e.key === 'Escape') {
+      e.preventDefault()
+      e.stopPropagation()
+      return collectionField.blur()
+    }
     if (e.key !== 'ArrowDown' && e.key !== 'ArrowUp') return
     e.preventDefault()
+    e.stopPropagation()
     const ids = [null, ...collections.map((c) => c.id)]
     const i = ids.indexOf(post.collection_id) + (e.key === 'ArrowDown' ? 1 : -1)
     if (i >= 0 && i < ids.length) run(api.setCollection(post.id, ids[i]))
