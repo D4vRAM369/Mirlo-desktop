@@ -2,7 +2,7 @@
   <img src="assets/banner-en.png" width="900" alt="Mirlo: your local vault for X posts. Icon of a blue card-catalog drawer holding a dark-mode post with a blackbird perched on top.">
 </p>
 
-<p align="center"><a href="README.md">Español</a> · <b>English</b></p>
+<p align="center"><a href="README-ES.md">Español</a> · <b>English</b></p>
 
 ## Demo screenshots
 
