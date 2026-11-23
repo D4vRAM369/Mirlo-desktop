@@ -2,6 +2,16 @@
 
 Formato: [Keep a Changelog](https://keepachangelog.com/es-ES/1.1.0/) · Versiones: [SemVer](https://semver.org/lang/es/).
 
+## [Unreleased]
+
+### Español
+
+- **Atajos y vídeo:** pulsar <kbd>F</kbd>, <kbd>T</kbd>, <kbd>M</kbd> o <kbd>N</kbd> con un vídeo reproduciéndose ya no lo devuelve al principio ni lo pausa.
+
+### English
+
+- **Shortcuts and video:** pressing <kbd>F</kbd>, <kbd>T</kbd>, <kbd>M</kbd> or <kbd>N</kbd> while a video is playing no longer rewinds or pauses it.
+
 ## [0.3.1] — 2026-11-23
 
 Corrección de los atajos de teclado de la barra inferior. · *Fix for the bottom-bar keyboard shortcuts.*

@@ -32,17 +32,22 @@
   const alt = (f: FileRow, i: number) => f.alt || t('gallery.photo_alt', { n: i + 1, total: photos.length })
 
   // Vídeos como blob: (WebKitGTK no reproduce <video> por el protocolo asset:). Se liberan al cambiar de post.
+  // El efecto depende de un texto (id del post + rutas de los vídeos), no de `id` ni de `clips`: F, T, M o N
+  // recargan el post y crean objetos nuevos con los mismos valores; leyéndolos directamente, el efecto se
+  // repetía y el vídeo se recreaba (volvía a 0, en pausa). Un $derived de texto solo avisa si el valor cambia.
+  const clipKey = $derived([id, ...clips.map((f) => f.path)].join('\n'))
   let videos = $state<Record<string, string>>({})
   $effect(() => {
     const urls: string[] = []
     let alive = true
     videos = {}
-    for (const f of clips) {
+    const [postId, ...paths] = clipKey.split('\n')
+    for (const path of paths) {
       api
-        .videoUrl(id, f.path)
+        .videoUrl(postId, path)
         .then((u) => {
           urls.push(u)
-          if (alive) videos = { ...videos, [f.path]: u }
+          if (alive) videos = { ...videos, [path]: u }
           else URL.revokeObjectURL(u)
         })
         .catch(() => {})
