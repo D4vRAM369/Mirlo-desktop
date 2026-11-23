@@ -8,11 +8,11 @@
 
 <table>
 <tr>
-<td width="50%"><img src="assets/mirlo-demo-search.jpg" width="100%" alt="Demo de Mirlo: búsqueda y filtros"></td>
-<td width="50%"><img src="assets/mirlo-demo-inbox.jpg" width="100%" alt="Demo de Mirlo: bandeja de posts guardados"></td>
+<td width="50%"><img width="1202" height="927" alt="image" src="https://github.com/user-attachments/assets/bcef9059-2964-462a-bbfc-6a9a5c282485" /></td>
+<td width="50%"><img width="1202" height="927" alt="image" src="https://github.com/user-attachments/assets/34d5bf12-e4b2-4491-a59f-34e7a1cb4c5a" /></td>
 </tr>
 <tr>
-<td colspan="2"><img src="assets/mirlo-demo-history.jpg" width="100%" alt="Demo de Mirlo: historial de posts guardados"></td>
+<td colspan="2"><img width="2033" height="938" alt="image" src="https://github.com/user-attachments/assets/1bda21e2-8ec4-4a97-9b64-f46153d5d453" /></td>
 </tr>
 </table>
 
