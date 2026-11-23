@@ -64,7 +64,7 @@ With the AppImage, the guide first asks permission to register `mirlo://` links 
 
 1. Install Mirlo with an [installer](https://github.com/D4vRAM369/Mirlo-desktop/releases/latest): the 0.2.0 AppImage does not register `mirlo://` links.
 2. Install [Violentmonkey](https://violentmonkey.github.io/) on Firefox or [Tampermonkey](https://www.tampermonkey.net/) on Chromium, with "Allow User Scripts" turned on.
-3. Open **[mirlo-x.user.js](https://github.com/D4vRAM369/Mirlo-desktop/raw/master/userscript/mirlo-x.user.js)** and confirm the installation.
+3. Open **[mirlo-x.user.js](https://github.com/D4vRAM369/Mirlo-desktop/raw/main/userscript/mirlo-x.user.js)** and confirm the installation.
 4. Reload X and use **Share → Send to Mirlo**.
 
 </details>
