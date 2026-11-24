@@ -71,6 +71,14 @@ With the AppImage, the guide first asks permission to register `mirlo://` links 
 
 The first time, the browser asks whether it may open Mirlo. When a send works, Mirlo saves without stealing focus. When it fails, it shows its window with the error.
 
+### From the X app on Android
+
+<p align="center">
+  <img src="assets/share-sheet-android-es.png" width="540" alt="X's Share sheet on Android in dark mode: above the row Share via, Copy link, WhatsApp, Stories and Messages there is a blue circle with a white blackbird labelled Mirlo.">
+</p>
+
+The **[SendWithMirlo for X](https://github.com/D4vRAM369/sendwithmirlo-for-x-twitter)** module (LSPatch without root, LSPosed with root) adds **Mirlo** to the Share sheet of the X app. The phone leaves the post ID in a folder that [Syncthing](https://syncthing.net/) brings to `~/Mirlo/.inbox/`, and Mirlo picks it up within a second. If the computer is off, the sends wait on the phone until Syncthing sees it again.
+
 ## Organizing
 
 - **Favorites** (★) for what you want close at hand.

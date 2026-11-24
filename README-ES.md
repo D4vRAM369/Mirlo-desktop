@@ -71,6 +71,14 @@ Con la AppImage, el asistente te pide antes permiso para registrar los enlaces `
 
 La primera vez el navegador pregunta si puede abrir Mirlo. Si un envío sale bien, Mirlo guarda sin quitarte el foco. Si falla, muestra su ventana con el error.
 
+### Desde la app de X en Android
+
+<p align="center">
+  <img src="assets/share-sheet-android-es.png" width="540" alt="Hoja Compartir de X en Android en modo oscuro: encima de la fila Compartir por…, Copiar enlace, WhatsApp, Historias y Messages hay un círculo azul con un mirlo blanco y la etiqueta Mirlo.">
+</p>
+
+El módulo **[SendWithMirlo for X](https://github.com/D4vRAM369/sendwithmirlo-for-x-twitter)** (LSPatch sin root, LSPosed con root) añade **Mirlo** a la hoja Compartir de la app de X. El móvil deja el ID del post en una carpeta que [Syncthing](https://syncthing.net/) lleva a `~/Mirlo/.inbox/`, y Mirlo lo recoge en menos de un segundo. Si el ordenador está apagado, los envíos esperan en el móvil hasta que Syncthing vuelva a verlo.
+
 ## Organizar
 
 - **Favoritos** (★) para lo que quieres tener a mano.
