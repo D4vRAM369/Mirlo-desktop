@@ -2,6 +2,24 @@
 
 Formato: [Keep a Changelog](https://keepachangelog.com/es-ES/1.1.0/) · Versiones: [SemVer](https://semver.org/lang/es/).
 
+## [0.4.0] — 2026-11-24
+
+Guarda posts desde la app de X en Android con un toque. · *Save posts from the X Android app with one tap.*
+
+### Español
+
+- **Bandeja `.inbox`:** Mirlo recoge cada `<ID>.mirlo` que llega a `~/Mirlo/.inbox` (por Syncthing), guarda el post y borra el archivo. Funciona con la app abierta o en la bandeja del sistema, y al abrirla recoge lo pendiente.
+- **Conectar móvil:** prepara Syncthing por ti. Crea la carpeta en «Enviar y recibir», enseña un QR para Syncthing-Fork y acepta el móvil con un clic.
+- **Integrar con X:** elige Violentmonkey o Tampermonkey, con enlace a su web oficial (algunos navegadores restringen Violentmonkey).
+- Para el móvil: [Send with Mirlo](https://github.com/D4vRAM369/sendwithmirlo-for-x-twitter), módulo LSPatch / LSPosed que añade el botón Mirlo a la hoja Compartir de X.
+
+### English
+
+- **`.inbox` folder:** Mirlo picks up every `<ID>.mirlo` that lands in `~/Mirlo/.inbox` (via Syncthing), saves the post and deletes the file. Works with the app open or in the system tray, and catches up when you open it.
+- **Connect phone:** sets up Syncthing for you. Creates the folder as Send & Receive, shows a QR code for Syncthing-Fork and accepts the phone in one click.
+- **Integrate with X:** pick Violentmonkey or Tampermonkey, with a link to its official site (some browsers restrict Violentmonkey).
+- For the phone: [Send with Mirlo](https://github.com/D4vRAM369/sendwithmirlo-for-x-twitter), an LSPatch / LSPosed module that adds the Mirlo button to X's Share sheet.
+
 ## [0.3.1] — 2026-11-23
 
 Corrección de los atajos de teclado de la barra inferior. · *Fix for the bottom-bar keyboard shortcuts.*
