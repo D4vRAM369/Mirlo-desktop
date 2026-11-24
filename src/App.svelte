@@ -9,6 +9,7 @@
   import Integration from './lib/Integration.svelte'
   import NameEditor from './lib/NameEditor.svelte'
   import Organizer from './lib/Organizer.svelte'
+  import Phone from './lib/Phone.svelte'
   import { errorParts, errorText, formatDate, formatSize, i18n, setLang, t, withKeys } from './lib/i18n.svelte'
 
   let input = $state('')
@@ -25,6 +26,7 @@
   let organizer = $state<ReturnType<typeof Organizer>>()
   let integration = $state<ReturnType<typeof Integration>>()
   let xConnected = $state(false)
+  let phone = $state<ReturnType<typeof Phone>>()
   // sidebar: qué colección o etiqueta se está editando, y el campo de "nueva colección"
   let editing = $state<{ kind: 'collection' | 'tag'; id: number } | null>(null)
   let newCollection = $state<string | null>(null)
@@ -312,10 +314,12 @@
     </label>
     <button class="btn primary" disabled={!api.looksLikePostUrl(input)}>{t('cmd.save')}</button>
     <button type="button" class="btn" onclick={() => integration?.show()}>{xConnected ? t('x.connected') : t('x.menu')}</button>
+    <button type="button" class="btn" onclick={() => phone?.show()}>{t('phone.menu')}</button>
     <Backup onmessage={(m) => (message = m)} ondone={reload} />
     <button type="button" class="btn" onclick={toggleTheme}>{isDark ? t('cmd.theme_light') : t('cmd.theme_dark')}</button>
     <button type="button" class="btn" lang={i18n.lang === 'es' ? 'en' : 'es'} onclick={() => setLang(i18n.lang === 'es' ? 'en' : 'es')}>{t('cmd.other_lang')}</button>
   </form>
+  <Phone bind:this={phone} />
   <Integration bind:this={integration} bind:connected={xConnected} onmessage={(m) => (message = m)} />
   </div>
 

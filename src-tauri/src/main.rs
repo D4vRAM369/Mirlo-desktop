@@ -4,6 +4,7 @@ mod backup;
 mod db;
 mod error;
 mod inbox;
+mod syncthing;
 mod integration;
 mod organize;
 mod parser;
@@ -404,6 +405,24 @@ fn x_take_connected(hello: State<'_, integration::Hello>) -> bool {
     hello.take_connected()
 }
 
+/// Conectar el móvil (bandeja por Syncthing): estado para el asistente.
+#[tauri::command]
+async fn phone_status(app: State<'_, App>) -> Result<syncthing::Status, String> {
+    let (home, inbox) = phone_paths(&app);
+    syncthing::status(&home, &inbox).await
+}
+
+#[tauri::command]
+async fn phone_accept(app: State<'_, App>, id: String, name: String) -> Result<(), String> {
+    let (home, inbox) = phone_paths(&app);
+    syncthing::accept(&home, &inbox, syncthing::Device { id, name }).await
+}
+
+fn phone_paths(app: &App) -> (PathBuf, PathBuf) {
+    let home = app.root.parent().map(PathBuf::from).unwrap_or_default();
+    (home, app.root.join(inbox::DIR))
+}
+
 fn open_with_system(target: &std::ffi::OsStr) -> Result<(), String> {
     let opener = if cfg!(windows) { "explorer" } else if cfg!(target_os = "macos") { "open" } else { "xdg-open" };
     #[cfg(target_os = "linux")]
@@ -497,7 +516,8 @@ fn main() {
             save_post, retry_post, take_incoming, show_window, list_posts, get_post, facets, open_folder, open_on_x, read_media,
             set_favorite, set_note, set_collection, add_tag, remove_tag, create_collection, rename_collection,
             delete_collection, move_collection, rename_tag, set_tag_color, delete_tag, export_vault, import_vault,
-            x_status, x_register, x_install, x_script, x_open_manager, x_check, x_take_connected
+            x_status, x_register, x_install, x_script, x_open_manager, x_check, x_take_connected,
+            phone_status, phone_accept
         ])
         .run(tauri::generate_context!())
         .expect("error al iniciar Mirlo");

@@ -138,7 +138,15 @@ export const xCheck = () => invoke<string>('x_check')
 export const xTakeConnected = () => invoke<boolean>('x_take_connected')
 export const onXConnected = (handler: () => void) => listen('x-connected', handler)
 
+// ---- conectar el móvil (Syncthing) ----
+export type PhoneDevice = { id: string; name: string }
+/** `qr`: PNG del ID de este ordenador; `phones`: ya reciben la bandeja; `pending`: piden conectar */
+export type PhoneStatus = { my_id: string; qr: number[]; phones: PhoneDevice[]; pending: PhoneDevice[] }
+export const phoneStatus = () => invoke<PhoneStatus>('phone_status')
+export const phoneAccept = (id: string, name: string) => invoke<void>('phone_accept', { id, name })
+
 // ---- copias de seguridad ----
+
 export type ExportSummary = { posts: number; files: number }
 export type ImportSummary = { added: number; merged: number; bad_hash: string[]; errors: string[] }
 /** `dest`: ruta del .zip elegida en el diálogo de guardar */
