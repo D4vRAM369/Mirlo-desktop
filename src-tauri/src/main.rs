@@ -21,8 +21,9 @@ use tauri_plugin_deep_link::DeepLinkExt;
 /// Tope de envíos en espera: una web no puede llenar la memoria abriendo mirlo:// en bucle.
 const MAX_INCOMING: usize = 20;
 
-/// Cada cuánto se mira `~/Mirlo/.inbox/` por si han llegado envíos del móvil.
-const INBOX_EVERY: Duration = Duration::from_secs(5);
+/// Cada cuánto se mira `~/Mirlo/.inbox/` por si han llegado envíos del móvil. Un `read_dir` de
+/// una carpeta casi vacía: mirar cada segundo no cuesta nada y el envío se nota al instante.
+const INBOX_EVERY: Duration = Duration::from_secs(1);
 
 /// Lo que dura la dirección local desde la que se instala el script.
 const DELIVERY_TTL: Duration = Duration::from_secs(10 * 60);
