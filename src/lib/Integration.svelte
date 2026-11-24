@@ -142,8 +142,10 @@
 
   <ol>
     <li>
-      <p>{t(browser === 'firefox' ? 'x.manager_firefox' : 'x.manager_chromium')}</p>
-      <button type="button" class="btn" onclick={() => attempt(() => api.xOpenManager(browser))}>{t('x.open_page')}</button>
+      <p>{t('x.manager')}</p>
+      <p class="note">{t('x.manager_note')}</p>
+      <button type="button" class="btn" onclick={() => attempt(() => api.xOpenManager('violentmonkey'))}>Violentmonkey</button>
+      <button type="button" class="btn" onclick={() => attempt(() => api.xOpenManager('tampermonkey'))}>Tampermonkey</button>
     </li>
     {#if browser === 'chromium'}
       <li>

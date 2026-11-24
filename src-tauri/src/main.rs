@@ -381,10 +381,11 @@ fn x_script() -> &'static str {
 
 /// Del frontend llega una clave; las direcciones están escritas aquí.
 #[tauri::command]
-fn x_open_manager(browser: String) -> Result<(), String> {
-    let url = match browser.as_str() {
-        "firefox" => "https://addons.mozilla.org/firefox/addon/violentmonkey/",
-        "chromium" => "https://chromewebstore.google.com/detail/tampermonkey/dhdgffkkebhmkfjojejmpbldmpobfkfo",
+fn x_open_manager(manager: String) -> Result<(), String> {
+    // sus webs oficiales: cada una enlaza la tienda de cada navegador
+    let url = match manager.as_str() {
+        "violentmonkey" => "https://violentmonkey.github.io/get-it/",
+        "tampermonkey" => "https://www.tampermonkey.net/",
         _ => return Err(fail("invalid_link")),
     };
     open_with_system(url.as_ref())

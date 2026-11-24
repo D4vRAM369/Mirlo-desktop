@@ -132,7 +132,8 @@ export const xRegister = () => invoke<XStatus>('x_register')
 /** Abre el instalador del script en el navegador y devuelve su dirección. */
 export const xInstall = () => invoke<string>('x_install')
 export const xScript = () => invoke<string>('x_script')
-export const xOpenManager = (browser: Browser) => invoke<void>('x_open_manager', { browser })
+export type Manager = 'violentmonkey' | 'tampermonkey'
+export const xOpenManager = (manager: Manager) => invoke<void>('x_open_manager', { manager })
 /** Abre X con el código del saludo y devuelve esa dirección. */
 export const xCheck = () => invoke<string>('x_check')
 export const xTakeConnected = () => invoke<boolean>('x_take_connected')
