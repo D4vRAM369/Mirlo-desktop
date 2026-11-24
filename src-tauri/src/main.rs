@@ -3,6 +3,7 @@
 mod backup;
 mod db;
 mod error;
+mod inbox;
 mod integration;
 mod organize;
 mod parser;
@@ -19,6 +20,9 @@ use tauri_plugin_deep_link::DeepLinkExt;
 
 /// Tope de envíos en espera: una web no puede llenar la memoria abriendo mirlo:// en bucle.
 const MAX_INCOMING: usize = 20;
+
+/// Cada cuánto se mira `~/Mirlo/.inbox/` por si han llegado envíos del móvil.
+const INBOX_EVERY: Duration = Duration::from_secs(5);
 
 /// Lo que dura la dirección local desde la que se instala el script.
 const DELIVERY_TTL: Duration = Duration::from_secs(10 * 60);
@@ -72,6 +76,31 @@ fn receive(app: &tauri::AppHandle, links: &[impl AsRef<str>]) {
         show_main(app);
         let _ = app.emit("x-connected", ());
     }
+}
+
+/// Recoge los `<ID>.mirlo` de la bandeja y los mete en la misma cola que mirlo://save/. No roba
+/// el foco: igual que un envío desde el navegador, si falla ya lo enseñará la interfaz.
+fn watch_inbox(app: tauri::AppHandle, dir: PathBuf) {
+    std::thread::spawn(move || loop {
+        let incoming = app.state::<Incoming>();
+        let taken = match incoming.0.lock() {
+            Ok(mut queue) => inbox::drain(&dir, |id| {
+                if queue.iter().any(|q| q == id) {
+                    return true; // ya va a guardarse: el archivo sobra
+                }
+                if queue.len() >= MAX_INCOMING {
+                    return false; // llena: el resto espera a la siguiente pasada
+                }
+                queue.push(id.to_string());
+                true
+            }),
+            Err(_) => 0,
+        }; // aquí se suelta el candado, antes de avisar a la interfaz
+        if taken > 0 {
+            let _ = app.emit("incoming", ());
+        }
+        std::thread::sleep(INBOX_EVERY);
+    });
 }
 
 /// Pegar enlace → leer → descargar → indexar. Si falla, queda apuntado como error para reintentar.
@@ -440,6 +469,8 @@ fn main() {
             let root = app.path().home_dir()?.join("Mirlo");
             std::fs::create_dir_all(&root)?;
             let conn = db::open(&root.join("mirlo.db"))?;
+            let inbox_dir = root.join(inbox::DIR);
+            std::fs::create_dir_all(&inbox_dir)?;
             app.manage(App { root, db: Mutex::new(conn) });
             app.manage(Incoming::default());
             app.manage(integration::Hello::default());
@@ -449,6 +480,7 @@ fn main() {
             if let Some(urls) = app.deep_link().get_current()? {
                 receive(app.handle(), &urls); // arranque en frío
             }
+            watch_inbox(app.handle().clone(), inbox_dir);
             tray(app)?;
             Ok(())
         })
