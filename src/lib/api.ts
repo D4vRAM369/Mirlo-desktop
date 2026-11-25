@@ -91,6 +91,17 @@ export const onIncoming = (handler: () => void) => listen('incoming', handler)
 export const retryPost = (id: string, lang: string) => invoke<PostRow>('retry_post', { id, lang })
 export const listPosts = (filter: Filter) => invoke<PostRow[]>('list_posts', { filter })
 export const getPost = (id: string) => invoke<Detail | null>('get_post', { id })
+/** Traducción de texto y cita. `source_lang`: idioma detectado en el original (vacío si no había texto). */
+export interface Translation {
+  lang: string
+  source_lang: string
+  text: string
+  quoted_text: string | null
+}
+/** La ya guardada, sin red. */
+export const getTranslation = (id: string, lang: string) => invoke<Translation | null>('get_translation', { id, lang })
+/** Única llamada que envía el texto a Google (y solo si aún no estaba guardada). */
+export const translatePost = (id: string, lang: string) => invoke<Translation>('translate_post', { id, lang })
 export const facets = () => invoke<Facets>('facets')
 export const openFolder = (id: string) => invoke<void>('open_folder', { id })
 

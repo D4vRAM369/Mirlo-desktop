@@ -58,6 +58,15 @@ CREATE TABLE IF NOT EXISTS post_tags (
     tag_id  INTEGER NOT NULL REFERENCES tags(id) ON DELETE CASCADE,
     PRIMARY KEY (post_id, tag_id)
 );
+-- traducciones pedidas con «Traducir» (translate.rs). Aparte de posts: re-guardar no las toca y no entran en FTS.
+CREATE TABLE IF NOT EXISTS translations (
+    post_id     TEXT NOT NULL REFERENCES posts(id) ON DELETE CASCADE,
+    lang        TEXT NOT NULL,
+    source_lang TEXT NOT NULL DEFAULT '',
+    text        TEXT NOT NULL DEFAULT '',
+    quoted_text TEXT,
+    PRIMARY KEY (post_id, lang)
+);
 ";
 
 /// Índice de texto completo. Va aparte de SCHEMA porque la migración a v2 lo borra y lo rehace

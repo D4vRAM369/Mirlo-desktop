@@ -5,6 +5,7 @@ mod db;
 mod error;
 mod inbox;
 mod syncthing;
+mod translate;
 mod integration;
 mod organize;
 mod parser;
@@ -146,6 +147,38 @@ fn list_posts(app: State<'_, App>, filter: db::Filter) -> Result<Vec<db::PostRow
 #[tauri::command]
 fn get_post(app: State<'_, App>, id: String) -> Result<Option<db::Detail>, String> {
     db::get(&*app.db()?, &id).map_err(db_err)
+}
+
+/// Traducción ya guardada (sin red): se pide al abrir un post.
+#[tauri::command]
+fn get_translation(app: State<'_, App>, id: String, lang: String) -> Result<Option<translate::Translation>, String> {
+    translate::load(&*app.db()?, &id, if lang == "en" { "en" } else { "es" }).map_err(db_err)
+}
+
+/// «Traducir»: devuelve la guardada o traduce texto y cita con Google y la guarda.
+#[tauri::command]
+async fn translate_post(app: State<'_, App>, id: String, lang: String) -> Result<translate::Translation, String> {
+    let lang = if lang == "en" { "en" } else { "es" };
+    let post = {
+        let conn = app.db()?;
+        if let Some(t) = translate::load(&conn, &id, lang).map_err(db_err)? {
+            return Ok(t);
+        }
+        db::get(&conn, &id).map_err(db_err)?.ok_or_else(|| fail("not_found"))?.post
+    }; // el candado se suelta antes de esperar a la red
+    let mut t = translate::Translation { lang: lang.into(), source_lang: String::new(), text: String::new(), quoted_text: None };
+    if !post.text.trim().is_empty() {
+        (t.text, t.source_lang) = translate::translate(&post.text, lang).await?;
+    }
+    if let Some(q) = post.quoted_text.filter(|q| !q.trim().is_empty()) {
+        let (text, source) = translate::translate(&q, lang).await?;
+        t.quoted_text = Some(text);
+        if t.source_lang.is_empty() {
+            t.source_lang = source;
+        }
+    }
+    translate::store(&*app.db()?, &id, &t).map_err(db_err)?;
+    Ok(t)
 }
 
 #[tauri::command]
@@ -518,7 +551,7 @@ fn main() {
             set_favorite, set_note, set_collection, add_tag, remove_tag, create_collection, rename_collection,
             delete_collection, move_collection, rename_tag, set_tag_color, delete_tag, export_vault, import_vault,
             x_status, x_register, x_install, x_script, x_open_manager, x_check, x_take_connected,
-            phone_status, phone_accept
+            phone_status, phone_accept, get_translation, translate_post
         ])
         .run(tauri::generate_context!())
         .expect("error al iniciar Mirlo");

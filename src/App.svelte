@@ -3,7 +3,7 @@
   // Todo se maneja con teclado; los atajos están siempre a la vista en el pie.
   import { onMount } from 'svelte'
   import * as api from './lib/api'
-  import type { Detail, Facets, Filter, Kind, PostRow, Status } from './lib/api'
+  import type { Detail, Facets, Filter, Kind, PostRow, Status, Translation } from './lib/api'
   import Backup from './lib/Backup.svelte'
   import Gallery from './lib/Gallery.svelte'
   import Integration from './lib/Integration.svelte'
@@ -90,6 +90,41 @@
       if (selectedId === id) detail = d
     })
   })
+
+  // ---- traducir: la guardada se enseña sin red; «Traducir» es lo único que llama a Google ----
+  let translation = $state<Translation | null>(null)
+  let hideTranslation = $state(false)
+  let translating = $state(false)
+  $effect(() => {
+    const id = selectedId
+    const lang = i18n.lang
+    translation = null
+    hideTranslation = false
+    // una «traducción» al mismo idioma no se enseña: sería el original repetido
+    if (id) api.getTranslation(id, lang).then((tr) => selectedId === id && i18n.lang === lang && tr?.source_lang !== lang && (translation = tr))
+  })
+  const langName = (code: string) => {
+    try {
+      return new Intl.DisplayNames(i18n.lang, { type: 'language' }).of(code) ?? code
+    } catch {
+      return code
+    }
+  }
+  async function toggleTranslation(id: string) {
+    if (translation) return void (hideTranslation = !hideTranslation)
+    translating = true
+    try {
+      const tr = await api.translatePost(id, i18n.lang)
+      if (selectedId !== id) return
+      if (tr.source_lang === tr.lang) message = t('msg.already_in_lang', { lang: langName(tr.lang) })
+      else translation = tr
+    } catch (e) {
+      message = t('msg.translate_failed', { error: errorParts(e).text })
+    } finally {
+      translating = false
+    }
+  }
+  const showTr = $derived(translation && !hideTranslation ? translation : null)
 
   // ---- organizar ----
   async function reload() {
@@ -295,6 +330,13 @@
 
 <svelte:window onkeydown={onKey} />
 
+{#snippet translated(text: string, tr: Translation)}
+  <div class="translation" lang={tr.lang}>
+    <p>{text}</p>
+    <small>{t('read.translated_by', { from: langName(tr.source_lang) })}</small>
+  </div>
+{/snippet}
+
 {#snippet keyed(text: string)}
   {#each withKeys(text) as part}{#if part.key}<kbd>{part.text}</kbd>{:else}{part.text}{/if}{/each}
 {/snippet}
@@ -469,6 +511,11 @@
           <div class="btns">
             {#if p.status !== 'ok'}<button class="btn primary" onclick={() => retry(p.id)}>{t('read.retry')}</button>{/if}
             {#if p.dir}<button class="btn" onclick={() => api.openFolder(p.id).catch((e) => (message = errorText(e)))}>{t('read.open_folder')}</button>{/if}
+            {#if p.text || p.quoted_text}
+              <button class="btn" disabled={translating} onclick={() => toggleTranslation(p.id)}>
+                {translating ? t('read.translating') : showTr ? t('read.hide_translation') : t('read.translate')}
+              </button>
+            {/if}
             <button class="btn" onclick={() => api.openOnX(p.id).catch((e) => (message = errorText(e)))}>{t('read.view_on_x')}</button>
           </div>
         </header>
@@ -483,6 +530,7 @@
           </div>
         {/if}
         {#if p.text}<p class="body">{p.text}</p>{/if}
+        {#if showTr?.text}{@render translated(showTr.text, showTr)}{/if}
         {#if media.length && p.dir}
           <Gallery id={p.id} dir={p.dir} files={media} />
         {/if}
@@ -490,6 +538,7 @@
           <div class="quoted">
             <b>{t('read.quoting', { user: p.quoted_handle })}</b>
             <p>{p.quoted_text}</p>
+            {#if showTr?.quoted_text}{@render translated(showTr.quoted_text, showTr)}{/if}
           </div>
         {/if}
         {#if detail.files.length}
@@ -598,6 +647,10 @@
   .alert .detail { margin-top: 6px; font-size: 13px; color: var(--muted); overflow-wrap: anywhere; }
   .body { font-size: 18px; line-height: 1.6; max-width: 62ch; margin: 0 0 18px; white-space: pre-wrap; overflow-wrap: anywhere; }
   .quoted { border: 1px solid var(--line); border-radius: 8px; padding: 12px 14px; max-width: 620px; background: var(--paper); margin-bottom: 22px; }
+  .translation { border-left: 3px solid var(--accent); padding: 2px 0 2px 12px; margin: 0 0 18px; max-width: 62ch; }
+  .translation p { margin: 0; white-space: pre-wrap; overflow-wrap: anywhere; }
+  .translation small { color: var(--muted); font-size: 13px; }
+  .quoted .translation { margin: 10px 0 0; }
   .quoted b { font-size: 14px; }
   .quoted p { margin: 4px 0 0; color: var(--muted); white-space: pre-wrap; overflow-wrap: anywhere; }
   table { border-collapse: collapse; width: 100%; max-width: 720px; font-size: 14px; }
