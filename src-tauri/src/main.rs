@@ -152,13 +152,19 @@ fn get_post(app: State<'_, App>, id: String) -> Result<Option<db::Detail>, Strin
 /// Traducción ya guardada (sin red): se pide al abrir un post.
 #[tauri::command]
 fn get_translation(app: State<'_, App>, id: String, lang: String) -> Result<Option<translate::Translation>, String> {
-    translate::load(&*app.db()?, &id, if lang == "en" { "en" } else { "es" }).map_err(db_err)
+    translate::load(&*app.db()?, &id, translate::target_lang(&lang)).map_err(db_err)
+}
+
+/// «Traducir todos»: lo que falta por traducir; la interfaz los recorre con `translate_post`.
+#[tauri::command]
+fn untranslated_ids(app: State<'_, App>, lang: String) -> Result<Vec<String>, String> {
+    translate::untranslated(&*app.db()?, translate::target_lang(&lang)).map_err(db_err)
 }
 
 /// «Traducir»: devuelve la guardada o traduce texto y cita con Google y la guarda.
 #[tauri::command]
 async fn translate_post(app: State<'_, App>, id: String, lang: String) -> Result<translate::Translation, String> {
-    let lang = if lang == "en" { "en" } else { "es" };
+    let lang = translate::target_lang(&lang);
     let post = {
         let conn = app.db()?;
         if let Some(t) = translate::load(&conn, &id, lang).map_err(db_err)? {
@@ -551,7 +557,7 @@ fn main() {
             set_favorite, set_note, set_collection, add_tag, remove_tag, create_collection, rename_collection,
             delete_collection, move_collection, rename_tag, set_tag_color, delete_tag, export_vault, import_vault,
             x_status, x_register, x_install, x_script, x_open_manager, x_check, x_take_connected,
-            phone_status, phone_accept, get_translation, translate_post
+            phone_status, phone_accept, get_translation, translate_post, untranslated_ids
         ])
         .run(tauri::generate_context!())
         .expect("error al iniciar Mirlo");

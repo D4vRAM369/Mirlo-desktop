@@ -56,6 +56,23 @@ pub async fn translate(text: &str, lang: &str) -> Result<(String, String), Strin
     parse(&res.text().await.map_err(|e| fail_with("network", e))?)
 }
 
+/// Idioma de destino: español solo si la persona usa español; cualquier otro idioma, inglés.
+pub fn target_lang(lang: &str) -> &'static str {
+    if lang.to_ascii_lowercase().starts_with("es") { "es" } else { "en" }
+}
+
+/// Posts que «Traducir todos» aún tiene que enviar: guardados, con texto o cita y sin traducción a `lang`.
+pub fn untranslated(conn: &Connection, lang: &str) -> rusqlite::Result<Vec<String>> {
+    let mut stmt = conn.prepare(
+        "SELECT id FROM posts p
+         WHERE status != 'error' AND (trim(text) != '' OR trim(ifnull(quoted_text, '')) != '')
+           AND NOT EXISTS (SELECT 1 FROM translations t WHERE t.post_id = p.id AND t.lang = ?1)
+         ORDER BY created_at DESC",
+    )?;
+    let ids = stmt.query_map([lang], |r| r.get(0))?.collect();
+    ids
+}
+
 pub fn load(conn: &Connection, id: &str, lang: &str) -> rusqlite::Result<Option<Translation>> {
     conn.query_row(
         "SELECT lang, source_lang, text, quoted_text FROM translations WHERE post_id = ?1 AND lang = ?2",
@@ -98,6 +115,36 @@ mod tests {
         let (text, source) = tauri::async_runtime::block_on(translate("Good morning\nfriends", "es")).unwrap();
         assert_eq!(source, "en");
         assert!(text.contains('\n'), "{text}");
+    }
+
+    #[test]
+    fn target_is_spanish_only_for_spanish() {
+        for (ui, want) in [("es", "es"), ("es-ES", "es"), ("en", "en"), ("fr", "en"), ("de-DE", "en"), ("", "en")] {
+            assert_eq!(target_lang(ui), want, "{ui}");
+        }
+    }
+
+    #[test]
+    fn untranslated_skips_errors_empty_and_done() {
+        let conn = db();
+        let (text, quote) = (saved("text_only", "ok", &[]), saved("quote", "ok", &[]));
+        db::upsert(&conn, &text).unwrap();
+        db::upsert(&conn, &quote).unwrap();
+        let mut blank = saved("text_only", "ok", &[]);
+        blank.post.id = "77".into();
+        blank.post.text = "  ".into();
+        blank.post.quoted = None;
+        db::upsert(&conn, &blank).unwrap();
+        db::record_error(&conn, "99", "https://x.com/i/status/99", "network").unwrap();
+        let done = Translation { lang: "es".into(), source_lang: "en".into(), text: "hecho".into(), quoted_text: None };
+        store(&conn, &quote.post.id, &done).unwrap();
+
+        assert_eq!(untranslated(&conn, "es").unwrap(), vec![text.post.id.clone()]);
+        let mut en = untranslated(&conn, "en").unwrap();
+        en.sort();
+        let mut want = vec![text.post.id, quote.post.id];
+        want.sort();
+        assert_eq!(en, want);
     }
 
     #[test]

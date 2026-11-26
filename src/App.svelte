@@ -5,6 +5,7 @@
   import * as api from './lib/api'
   import type { Detail, Facets, Filter, Kind, PostRow, Status, Translation } from './lib/api'
   import Backup from './lib/Backup.svelte'
+  import TranslateAll from './lib/TranslateAll.svelte'
   import Gallery from './lib/Gallery.svelte'
   import Integration from './lib/Integration.svelte'
   import NameEditor from './lib/NameEditor.svelte'
@@ -95,9 +96,11 @@
   let translation = $state<Translation | null>(null)
   let hideTranslation = $state(false)
   let translating = $state(false)
+  let translationsVersion = $state(0) // «Traducir todos» lo sube al terminar: vuelve a leer la del post abierto
   $effect(() => {
     const id = selectedId
     const lang = i18n.lang
+    void translationsVersion
     translation = null
     hideTranslation = false
     // una «traducción» al mismo idioma no se enseña: sería el original repetido
@@ -357,6 +360,7 @@
     <button class="btn primary" disabled={!api.looksLikePostUrl(input)}>{t('cmd.save')}</button>
     <button type="button" class="btn" onclick={() => integration?.show()}>{xConnected ? t('x.connected') : t('x.menu')}</button>
     <button type="button" class="btn" onclick={() => phone?.show()}>{t('phone.menu')}</button>
+    <TranslateAll onmessage={(m) => (message = m)} ondone={() => translationsVersion++} />
     <Backup onmessage={(m) => (message = m)} ondone={reload} />
     <button type="button" class="btn" onclick={toggleTheme}>{isDark ? t('cmd.theme_light') : t('cmd.theme_dark')}</button>
     <button type="button" class="btn" lang={i18n.lang === 'es' ? 'en' : 'es'} onclick={() => setLang(i18n.lang === 'es' ? 'en' : 'es')}>{t('cmd.other_lang')}</button>

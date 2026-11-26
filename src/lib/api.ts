@@ -102,6 +102,8 @@ export interface Translation {
 export const getTranslation = (id: string, lang: string) => invoke<Translation | null>('get_translation', { id, lang })
 /** Única llamada que envía el texto a Google (y solo si aún no estaba guardada). */
 export const translatePost = (id: string, lang: string) => invoke<Translation>('translate_post', { id, lang })
+/** «Traducir todos»: posts guardados sin traducción a `lang`, más recientes primero. */
+export const untranslatedIds = (lang: string) => invoke<string[]>('untranslated_ids', { lang })
 export const facets = () => invoke<Facets>('facets')
 export const openFolder = (id: string) => invoke<void>('open_folder', { id })
 
