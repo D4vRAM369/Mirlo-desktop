@@ -2,6 +2,22 @@
 
 Formato: [Keep a Changelog](https://keepachangelog.com/es-ES/1.1.0/) · Versiones: [SemVer](https://semver.org/lang/es/).
 
+## [0.5.0] — 2026-11-28
+
+Traduce posts y citas sin salir de Mirlo. · *Translate posts and quotes without leaving Mirlo.*
+
+### Español
+
+- **Traducir:** un botón en cada post traduce el texto y la cita al español (o al inglés si la app no está en español), con Google Traductor. La traducción se guarda y se relee sin conexión.
+- **Traducir todos:** traduce de una vez los posts que aún no lo están, uno a uno con una pausa entre ellos. Avisa antes de enviar nada, se puede parar y, si falla, sigue después con los que faltan.
+- El texto solo sale hacia Google cuando lo pides; el README lo detalla en «Qué sale de tu equipo».
+
+### English
+
+- **Translate:** a button on each post translates its text and quote into English (or Spanish if the app is in Spanish), using Google Translate. The translation is stored and can be reread offline.
+- **Translate all:** translates every post that isn't translated yet, one by one with a pause in between. It warns before sending anything, can be stopped and, if it fails, resumes later with the rest.
+- Text only goes to Google when you ask for it; the README covers it under "What leaves your computer".
+
 ## [0.4.0] — 2026-11-24
 
 Guarda posts desde la app de X en Android con un toque. · *Save posts from the X Android app with one tap.*

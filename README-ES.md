@@ -113,12 +113,13 @@ Las carpetas son la copia de verdad: puedes copiarlas o leerlas sin Mirlo.
 
 ## Qué sale de tu equipo
 
-Mirlo solo hace estas peticiones, y solo cuando guardas o reintentas un post:
+Mirlo solo hace estas peticiones, y solo cuando guardas o reintentas un post (o pulsas **Traducir**):
 
 - **X** (`cdn.syndication.twimg.com`, `publish.x.com`, `pbs.twimg.com`, `video.twimg.com`): el post y sus archivos.
 - **yt-dlp** (incluido en la app): pide el post a X cuando la vía anterior falla.
 - **FxTwitter** (`api.fxtwitter.com`): **solo** para posts de más de 280 caracteres, porque X los entrega cortados. Recibe el número del post.
 - **Los sitios enlazados en el post**: Mirlo mira si el enlace es un documento (por su `Content-Type`) y, si lo es y pesa menos de 50 MB, lo descarga. Nunca toca direcciones de tu red local.
+- **Google Traductor** (`clients5.google.com`): **solo** cuando pulsas **Traducir** en un post o lanzas **Traducir todos**. Recibe el texto del post y su cita. La traducción se guarda en `mirlo.db`, así que nunca se envía dos veces.
 
 El userscript no hace peticiones ni lee cookies: solo pasa a Mirlo el número del post o, al comprobar la conexión, el código de un solo uso que creó Mirlo. Cualquier web podría intentar abrir un enlace `mirlo://`, por eso el navegador pide permiso y Mirlo solo acepta esas dos formas, y el saludo solo con su código. Si marcas «permitir siempre», hazlo solo para x.com.
 

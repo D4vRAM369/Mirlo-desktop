@@ -113,12 +113,13 @@ The folders are the real copy: you can copy them or read them without Mirlo.
 
 ## What leaves your computer
 
-Mirlo only makes these requests, and only when you save or retry a post:
+Mirlo only makes these requests, and only when you save or retry a post (or press **Translate**):
 
 - **X** (`cdn.syndication.twimg.com`, `publish.x.com`, `pbs.twimg.com`, `video.twimg.com`): the post and its files.
 - **yt-dlp** (bundled with the app): asks X for the post when the route above fails.
 - **FxTwitter** (`api.fxtwitter.com`): **only** for posts longer than 280 characters, because X delivers them cut short. It receives the post's number.
 - **Sites linked in the post**: Mirlo checks whether a link is a document (by its `Content-Type`) and, if it is and weighs less than 50 MB, downloads it. It never touches addresses on your local network.
+- **Google Translate** (`clients5.google.com`): **only** when you press **Translate** on a post or start **Translate all**. It receives the post's text and its quote. The translation is stored in `mirlo.db`, so it is never sent twice.
 
 The userscript makes no requests and reads no cookies: it only hands Mirlo the post's number or, when checking the connection, the single-use code Mirlo created. Any website could try to open a `mirlo://` link, which is why the browser asks first and Mirlo accepts only those two forms, the greeting only with its code. If you choose "always allow", do it only for x.com.
 
